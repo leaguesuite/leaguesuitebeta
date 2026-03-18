@@ -46,6 +46,7 @@ const App = () => (
             <Route path="/structure/locations" element={<LocationsPage />} />
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
+            <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/members/*" element={<PlaceholderPage title="Members" description="Manage league members." />} />
             <Route path="/cms/*" element={<PlaceholderPage title="Content Management" description="Manage pages, articles, and media." />} />
             <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
