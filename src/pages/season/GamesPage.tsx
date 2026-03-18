@@ -582,6 +582,36 @@ export default function GamesPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import */}
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Import Games & Schedule"
+        description="Upload a CSV file to bulk-import games into the schedule."
+        expectedColumns={["date", "time", "home", "away", "division", "field", "week", "status"]}
+        sampleRows={[
+          ["Mar 25, 2025", "6:00 PM", "Thunder Hawks", "Iron Eagles", "Men's D1", "Memorial Field 1", "11", "upcoming"],
+          ["Mar 25, 2025", "7:30 PM", "Storm Riders", "Blaze FC", "Co-Ed Open", "Central Park A", "11", "upcoming"],
+        ]}
+        onImport={(rows) => {
+          const newGames: Game[] = rows.map((r, i) => ({
+            id: games.length + i + 1,
+            date: r.date || "",
+            time: r.time || "",
+            home: r.home || "",
+            away: r.away || "",
+            homeScore: null,
+            awayScore: null,
+            status: (r.status as Game["status"]) || "upcoming",
+            division: r.division || "",
+            field: r.field || "TBD",
+            week: parseInt(r.week) || 1,
+            playerStats: [],
+          }));
+          setGames(prev => [...prev, ...newGames]);
+        }}
+      />
     </div>
   );
 }
