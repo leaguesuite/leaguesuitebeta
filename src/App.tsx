@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import GamesPage from "@/pages/season/GamesPage";
 import StandingsPage from "@/pages/season/StandingsPage";
 import TeamsRostersPage from "@/pages/season/TeamsRostersPage";
+import BracketsPage from "@/pages/season/BracketsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
