@@ -14,16 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          settings: Json | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          settings?: Json | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          settings?: Json | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_org_role: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["org_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      bracket_status: "setup" | "active" | "completed"
+      communication_channel: "email" | "sms"
+      delivery_status: "sent" | "failed" | "pending"
+      disciplinary_type: "warning" | "suspension" | "ban"
+      division_status: "setup" | "active" | "completed"
+      domain_status: "pending_dns" | "active" | "error"
+      game_status:
+        | "scheduled"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "postponed"
+      gender_type: "male" | "female" | "other"
+      match_status: "upcoming" | "in_progress" | "completed"
+      member_status: "active" | "inactive" | "pending"
+      note_category:
+        | "general"
+        | "phone_call"
+        | "meeting"
+        | "issue"
+        | "follow_up"
+      org_role: "owner" | "admin" | "manager" | "staff" | "viewer"
+      page_status: "draft" | "published" | "archived"
+      registration_status: "draft" | "open" | "closed" | "archived"
+      roster_role: "player" | "captain" | "coach"
+      season_status:
+        | "draft"
+        | "registration"
+        | "active"
+        | "completed"
+        | "archived"
+      ssl_status: "pending" | "active" | "error"
+      stat_category:
+        | "passing"
+        | "rushing"
+        | "receiving"
+        | "defense"
+        | "special_teams"
+        | "general"
+      submission_status: "pending" | "approved" | "rejected" | "waitlisted"
+      waiver_status: "signed" | "unsigned" | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +284,47 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      bracket_status: ["setup", "active", "completed"],
+      communication_channel: ["email", "sms"],
+      delivery_status: ["sent", "failed", "pending"],
+      disciplinary_type: ["warning", "suspension", "ban"],
+      division_status: ["setup", "active", "completed"],
+      domain_status: ["pending_dns", "active", "error"],
+      game_status: [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "postponed",
+      ],
+      gender_type: ["male", "female", "other"],
+      match_status: ["upcoming", "in_progress", "completed"],
+      member_status: ["active", "inactive", "pending"],
+      note_category: ["general", "phone_call", "meeting", "issue", "follow_up"],
+      org_role: ["owner", "admin", "manager", "staff", "viewer"],
+      page_status: ["draft", "published", "archived"],
+      registration_status: ["draft", "open", "closed", "archived"],
+      roster_role: ["player", "captain", "coach"],
+      season_status: [
+        "draft",
+        "registration",
+        "active",
+        "completed",
+        "archived",
+      ],
+      ssl_status: ["pending", "active", "error"],
+      stat_category: [
+        "passing",
+        "rushing",
+        "receiving",
+        "defense",
+        "special_teams",
+        "general",
+      ],
+      submission_status: ["pending", "approved", "rejected", "waitlisted"],
+      waiver_status: ["signed", "unsigned", "expired"],
+    },
   },
 } as const
