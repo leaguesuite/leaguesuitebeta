@@ -76,6 +76,7 @@ const App = () => (
             <Route path="/admin/permissions" element={<PlaceholderPage title="Permission Groups" description="Configure granular permission groups." />} />
             <Route path="/admin/access" element={<PlaceholderPage title="App Access Controls" description="Manage application-level access." />} />
             <Route path="/integrations/*" element={<PlaceholderPage title="Integrations" description="Manage third-party integrations." />} />
+            <Route path="/settings/navigation" element={<NavigationMenusPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
           </Route>
           <Route path="*" element={<NotFound />} />
