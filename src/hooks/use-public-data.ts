@@ -1,19 +1,78 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const ORG_ID = 'a0000000-0000-0000-0000-000000000001';
-
-export function useSeasons() {
+// Dynamically fetch the first organization (multi-org support can be added later)
+export function useOrganization() {
   return useQuery({
-    queryKey: ['public', 'seasons'],
+    queryKey: ['public', 'organization'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('organizations')
+        .select('*')
+        .limit(1)
+        .single();
+      return data;
+    },
+  });
+}
+
+export function useLeagues(orgId?: string) {
+  return useQuery({
+    queryKey: ['public', 'leagues', orgId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('leagues')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!orgId,
+  });
+}
+
+export function useSeasons(leagueId?: string) {
+  return useQuery({
+    queryKey: ['public', 'seasons', leagueId],
+    queryFn: async () => {
+      let q = supabase
+        .from('seasons')
+        .select('*, leagues!inner(org_id, name)')
+        .order('start_date', { ascending: false });
+      if (leagueId) q = q.eq('league_id', leagueId);
+      const { data } = await q;
+      return data ?? [];
+    },
+  });
+}
+
+// Get the current active season for an org
+export function useCurrentSeason(orgId?: string) {
+  return useQuery({
+    queryKey: ['public', 'current-season', orgId],
     queryFn: async () => {
       const { data } = await supabase
         .from('seasons')
         .select('*, leagues!inner(org_id, name)')
-        .eq('leagues.org_id', ORG_ID)
-        .order('start_date', { ascending: false });
-      return data ?? [];
+        .eq('leagues.org_id', orgId!)
+        .in('status', ['active', 'registration'])
+        .order('start_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      // Fallback to most recent season if no active one
+      if (!data) {
+        const { data: fallback } = await supabase
+          .from('seasons')
+          .select('*, leagues!inner(org_id, name)')
+          .eq('leagues.org_id', orgId!)
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        return fallback;
+      }
+      return data;
     },
+    enabled: !!orgId,
   });
 }
 
@@ -21,12 +80,11 @@ export function useDivisions(seasonId?: string) {
   return useQuery({
     queryKey: ['public', 'divisions', seasonId],
     queryFn: async () => {
-      let q = supabase
+      const { data } = await supabase
         .from('divisions')
-        .select('*, categories(name), seasons!inner(league_id, leagues!inner(org_id))')
-        .eq('seasons.leagues.org_id', ORG_ID);
-      if (seasonId) q = q.eq('season_id', seasonId);
-      const { data } = await q;
+        .select('*, categories(name)')
+        .eq('season_id', seasonId!)
+        .order('name');
       return data ?? [];
     },
     enabled: !!seasonId,
@@ -42,6 +100,21 @@ export function useTeams(divisionId?: string) {
       const { data } = await q.order('name');
       return data ?? [];
     },
+  });
+}
+
+export function useTeamsByDivisions(divisionIds?: string[]) {
+  return useQuery({
+    queryKey: ['public', 'teams-by-divisions', divisionIds],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('teams')
+        .select('*')
+        .in('division_id', divisionIds!)
+        .order('name');
+      return data ?? [];
+    },
+    enabled: !!divisionIds && divisionIds.length > 0,
   });
 }
 
@@ -118,6 +191,21 @@ export function useGames(divisionId?: string) {
   });
 }
 
+export function useGamesByDivisions(divisionIds?: string[]) {
+  return useQuery({
+    queryKey: ['public', 'games-by-divisions', divisionIds],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('games')
+        .select('*, home_team:teams!games_home_team_id_fkey(id, name, primary_color), away_team:teams!games_away_team_id_fkey(id, name, primary_color), fields(name, locations(name))')
+        .in('division_id', divisionIds!)
+        .order('scheduled_date', { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!divisionIds && divisionIds.length > 0,
+  });
+}
+
 export function useGameById(gameId?: string) {
   return useQuery({
     queryKey: ['public', 'game', gameId],
@@ -161,13 +249,18 @@ export function usePlayerStats(memberId?: string) {
   });
 }
 
-export function useAllPlayerStats() {
+export function useAllPlayerStats(divisionIds?: string[]) {
   return useQuery({
-    queryKey: ['public', 'all-player-stats'],
+    queryKey: ['public', 'all-player-stats', divisionIds],
     queryFn: async () => {
-      const { data } = await supabase
+      let q = supabase
         .from('player_game_stats')
-        .select('*, members(id, first_name, last_name), teams(id, name)');
+        .select('*, members(id, first_name, last_name), teams(id, name, division_id)');
+      // If divisionIds provided, filter by games in those divisions
+      const { data } = await q;
+      if (divisionIds && divisionIds.length > 0) {
+        return (data ?? []).filter((s: any) => divisionIds.includes(s.teams?.division_id));
+      }
       return data ?? [];
     },
   });
