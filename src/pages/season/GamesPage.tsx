@@ -373,6 +373,7 @@ export default function GamesPage() {
           <p className="text-sm text-muted-foreground mt-1">Spring 2025 Season · {games.length} total games</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}><Upload className="h-4 w-4" /> Import CSV</Button>
           <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Export</Button>
           <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Game</Button>
         </div>
