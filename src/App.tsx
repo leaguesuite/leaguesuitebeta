@@ -20,6 +20,7 @@ import StandingsRulesPage from "@/pages/structure/StandingsRulesPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
+import MembersAll from "@/pages/members/All";
 import CMSPagesPage from "@/pages/cms/CMSPagesPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
@@ -85,7 +86,7 @@ const App = () => (
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/accolades" element={<AccoladesPage />} />
-            <Route path="/members/all" element={<MembersPage />} />
+            <Route path="/members/all" element={<MembersAll />} />
             <Route path="/members/players" element={<MembersPage />} />
             <Route path="/members/coaches" element={<MembersPage />} />
             <Route path="/members/staff" element={<MembersPage />} />
