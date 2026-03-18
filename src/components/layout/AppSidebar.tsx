@@ -108,7 +108,6 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "AI Content", path: "/cms/ai-content" },
           { label: "Authors", path: "/cms/authors" },
           { label: "Media / Documents", path: "/cms/media" },
-          { label: "Navigation / Menus", path: "/cms/navigation" },
         ],
       },
       {
@@ -147,6 +146,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         label: "Settings", icon: Settings,
         children: [
           { label: "General", path: "/settings/general" },
+          { label: "Navigation & Menus", path: "/settings/navigation" },
           { label: "Branding", path: "/settings/branding" },
           { label: "Domains", path: "/settings/domains" },
           { label: "Notifications", path: "/settings/notifications" },

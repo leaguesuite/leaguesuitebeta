@@ -20,6 +20,7 @@ import CMSPagesPage from "@/pages/cms/CMSPagesPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
+import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,13 +69,14 @@ const App = () => (
             <Route path="/cms/ai-content" element={<AIContentPage />} />
             <Route path="/cms/authors" element={<PlaceholderPage title="Authors" description="Manage content authors." />} />
             <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
-            <Route path="/cms/navigation" element={<PlaceholderPage title="Navigation / Menus" description="Manage site navigation and menus." />} />
+            <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
             <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
             <Route path="/admin/users" element={<UsersPermissionsPage />} />
             <Route path="/admin/roles" element={<UsersPermissionsPage />} />
             <Route path="/admin/permissions" element={<PlaceholderPage title="Permission Groups" description="Configure granular permission groups." />} />
             <Route path="/admin/access" element={<PlaceholderPage title="App Access Controls" description="Manage application-level access." />} />
             <Route path="/integrations/*" element={<PlaceholderPage title="Integrations" description="Manage third-party integrations." />} />
+            <Route path="/settings/navigation" element={<NavigationMenusPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
           </Route>
           <Route path="*" element={<NotFound />} />
