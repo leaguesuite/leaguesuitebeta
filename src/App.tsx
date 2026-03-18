@@ -10,6 +10,7 @@ import StandingsPage from "@/pages/season/StandingsPage";
 import TeamsRostersPage from "@/pages/season/TeamsRostersPage";
 import BracketsPage from "@/pages/season/BracketsPage";
 import ReportsPage from "@/pages/season/ReportsPage";
+import StatsPage from "@/pages/season/StatsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
