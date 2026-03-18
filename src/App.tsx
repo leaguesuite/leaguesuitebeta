@@ -24,6 +24,7 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
+import DomainsPage from "@/pages/settings/DomainsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/admin/access" element={<PlaceholderPage title="App Access Controls" description="Manage application-level access." />} />
             <Route path="/integrations/*" element={<PlaceholderPage title="Integrations" description="Manage third-party integrations." />} />
             <Route path="/settings/navigation" element={<NavigationMenusPage />} />
+            <Route path="/settings/domains" element={<DomainsPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
           </Route>
           <Route path="*" element={<NotFound />} />
