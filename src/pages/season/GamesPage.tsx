@@ -14,8 +14,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, Download, Search, MapPin, Clock, ChevronLeft, ChevronRight,
-  Edit, Save, X, BarChart3, Pencil,
+  Edit, Save, X, BarChart3, Pencil, Upload,
 } from "lucide-react";
+import CsvImportDialog from "@/components/shared/CsvImportDialog";
 
 // ─── Stat Category Definitions ────────────────────────────────────────────────
 
@@ -192,7 +193,7 @@ export default function GamesPage() {
   const [editingStats, setEditingStats] = useState(false);
   const [editedStats, setEditedStats] = useState<PlayerStat[]>([]);
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
-
+  const [importOpen, setImportOpen] = useState(false);
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
@@ -372,6 +373,7 @@ export default function GamesPage() {
           <p className="text-sm text-muted-foreground mt-1">Spring 2025 Season · {games.length} total games</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}><Upload className="h-4 w-4" /> Import CSV</Button>
           <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Export</Button>
           <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Game</Button>
         </div>
@@ -580,6 +582,36 @@ export default function GamesPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import */}
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Import Games & Schedule"
+        description="Upload a CSV file to bulk-import games into the schedule."
+        expectedColumns={["date", "time", "home", "away", "division", "field", "week", "status"]}
+        sampleRows={[
+          ["Mar 25, 2025", "6:00 PM", "Thunder Hawks", "Iron Eagles", "Men's D1", "Memorial Field 1", "11", "upcoming"],
+          ["Mar 25, 2025", "7:30 PM", "Storm Riders", "Blaze FC", "Co-Ed Open", "Central Park A", "11", "upcoming"],
+        ]}
+        onImport={(rows) => {
+          const newGames: Game[] = rows.map((r, i) => ({
+            id: games.length + i + 1,
+            date: r.date || "",
+            time: r.time || "",
+            home: r.home || "",
+            away: r.away || "",
+            homeScore: null,
+            awayScore: null,
+            status: (r.status as Game["status"]) || "upcoming",
+            division: r.division || "",
+            field: r.field || "TBD",
+            week: parseInt(r.week) || 1,
+            playerStats: [],
+          }));
+          setGames(prev => [...prev, ...newGames]);
+        }}
+      />
     </div>
   );
 }

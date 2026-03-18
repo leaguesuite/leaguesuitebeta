@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Users, Edit, Plus, Trash2, Upload, Palette, Camera, UserPlus, Shield, X } from "lucide-react";
+import CsvImportDialog from "@/components/shared/CsvImportDialog";
 
 interface Team {
   id: string;
@@ -42,6 +43,7 @@ export default function TeamsRostersPage() {
   const [rosterOpen, setRosterOpen] = useState(false);
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [editForm, setEditForm] = useState<Team | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const filteredTeams = divisionFilter === "All Divisions" ? teams : teams.filter(t => t.division === divisionFilter);
 
@@ -80,6 +82,9 @@ export default function TeamsRostersPage() {
           <p className="text-sm text-muted-foreground mt-1">Manage teams, rosters, and team details for the active season.</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}>
+            <Upload className="h-4 w-4" /> Import CSV
+          </Button>
           <Select value={divisionFilter} onValueChange={setDivisionFilter}>
             <SelectTrigger className="w-44">
               <SelectValue />
@@ -436,6 +441,47 @@ export default function TeamsRostersPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import */}
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Import Teams & Rosters"
+        description="Upload a CSV to bulk-import teams and roster assignments. Each row can represent a team or a player-to-team assignment."
+        expectedColumns={["team_name", "division", "player_name", "player_email", "role"]}
+        sampleRows={[
+          ["Eagles", "Division A", "John Smith", "john@email.com", "player"],
+          ["Eagles", "Division A", "Jane Doe", "jane@email.com", "captain"],
+          ["Tigers", "Division B", "Mike Lee", "mike@email.com", "player"],
+        ]}
+        onImport={(rows) => {
+          const teamMap = new Map<string, { division: string; players: string[] }>();
+          rows.forEach(r => {
+            const key = r.team_name;
+            if (!key) return;
+            if (!teamMap.has(key)) teamMap.set(key, { division: r.division || "Division A", players: [] });
+            if (r.player_name) teamMap.get(key)!.players.push(r.player_name);
+          });
+          const newTeams: Team[] = [];
+          teamMap.forEach((val, name) => {
+            if (!teams.some(t => t.name === name)) {
+              newTeams.push({
+                id: String(Date.now()) + name,
+                name,
+                division: val.division,
+                primaryColor: "#6366f1",
+                secondaryColor: "#ffffff",
+                logoUrl: "",
+                teamPhotoUrl: "",
+                captain: "",
+                coach: "N/A",
+                record: "0-0",
+              });
+            }
+          });
+          if (newTeams.length) setTeams(prev => [...prev, ...newTeams]);
+        }}
+      />
     </div>
   );
 }
