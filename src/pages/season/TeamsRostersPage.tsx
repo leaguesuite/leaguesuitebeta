@@ -441,6 +441,47 @@ export default function TeamsRostersPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import */}
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Import Teams & Rosters"
+        description="Upload a CSV to bulk-import teams and roster assignments. Each row can represent a team or a player-to-team assignment."
+        expectedColumns={["team_name", "division", "player_name", "player_email", "role"]}
+        sampleRows={[
+          ["Eagles", "Division A", "John Smith", "john@email.com", "player"],
+          ["Eagles", "Division A", "Jane Doe", "jane@email.com", "captain"],
+          ["Tigers", "Division B", "Mike Lee", "mike@email.com", "player"],
+        ]}
+        onImport={(rows) => {
+          const teamMap = new Map<string, { division: string; players: string[] }>();
+          rows.forEach(r => {
+            const key = r.team_name;
+            if (!key) return;
+            if (!teamMap.has(key)) teamMap.set(key, { division: r.division || "Division A", players: [] });
+            if (r.player_name) teamMap.get(key)!.players.push(r.player_name);
+          });
+          const newTeams: Team[] = [];
+          teamMap.forEach((val, name) => {
+            if (!teams.some(t => t.name === name)) {
+              newTeams.push({
+                id: String(Date.now()) + name,
+                name,
+                division: val.division,
+                primaryColor: "#6366f1",
+                secondaryColor: "#ffffff",
+                logoUrl: "",
+                teamPhotoUrl: "",
+                captain: "",
+                coach: "N/A",
+                record: "0-0",
+              });
+            }
+          });
+          if (newTeams.length) setTeams(prev => [...prev, ...newTeams]);
+        }}
+      />
     </div>
   );
 }
