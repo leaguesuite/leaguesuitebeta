@@ -104,6 +104,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         children: [
           { label: "Pages", path: "/cms/pages" },
           { label: "Articles", path: "/cms/articles" },
+          { label: "AI Content", path: "/cms/ai-content" },
           { label: "Authors", path: "/cms/authors" },
           { label: "Media / Documents", path: "/cms/media" },
           { label: "Navigation / Menus", path: "/cms/navigation" },

@@ -63,6 +63,7 @@ const App = () => (
             <Route path="/members/*" element={<MembersPage />} />
             <Route path="/cms/pages" element={<CMSPagesPage />} />
             <Route path="/cms/articles" element={<PlaceholderPage title="Articles" description="Manage news articles and blog posts." />} />
+            <Route path="/cms/ai-content" element={<AIContentPage />} />
             <Route path="/cms/authors" element={<PlaceholderPage title="Authors" description="Manage content authors." />} />
             <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
             <Route path="/cms/navigation" element={<PlaceholderPage title="Navigation / Menus" description="Manage site navigation and menus." />} />
