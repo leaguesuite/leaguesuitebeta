@@ -74,6 +74,12 @@ const navSections: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: "Registration",
+    items: [
+      { label: "Registration", icon: ClipboardList, path: "/registration" },
+    ],
+  },
+  {
     title: "People",
     items: [
       {
