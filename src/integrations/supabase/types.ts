@@ -14,6 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
+      bracket_matches: {
+        Row: {
+          bracket_id: string
+          created_at: string
+          id: string
+          match_number: number
+          round_number: number
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["match_status"]
+          team1_id: string | null
+          team1_score: number | null
+          team2_id: string | null
+          team2_score: number | null
+          venue: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          bracket_id: string
+          created_at?: string
+          id?: string
+          match_number: number
+          round_number: number
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["match_status"]
+          team1_id?: string | null
+          team1_score?: number | null
+          team2_id?: string | null
+          team2_score?: number | null
+          venue?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          bracket_id?: string
+          created_at?: string
+          id?: string
+          match_number?: number
+          round_number?: number
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["match_status"]
+          team1_id?: string | null
+          team1_score?: number | null
+          team2_id?: string | null
+          team2_score?: number | null
+          venue?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bracket_matches_bracket_id_fkey"
+            columns: ["bracket_id"]
+            isOneToOne: false
+            referencedRelation: "brackets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bracket_matches_team1_id_fkey"
+            columns: ["team1_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bracket_matches_team2_id_fkey"
+            columns: ["team2_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bracket_matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brackets: {
+        Row: {
+          config: Json | null
+          created_at: string
+          division_id: string
+          id: string
+          is_reseeding: boolean
+          name: string
+          status: Database["public"]["Enums"]["bracket_status"]
+          team_count: number
+          updated_at: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          division_id: string
+          id?: string
+          is_reseeding?: boolean
+          name: string
+          status?: Database["public"]["Enums"]["bracket_status"]
+          team_count?: number
+          updated_at?: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          division_id?: string
+          id?: string
+          is_reseeding?: boolean
+          name?: string
+          status?: Database["public"]["Enums"]["bracket_status"]
+          team_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brackets_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -161,6 +282,112 @@ export type Database = {
           },
         ]
       }
+      fields: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fields_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          away_score: number | null
+          away_team_id: string | null
+          created_at: string
+          division_id: string
+          field_id: string | null
+          home_score: number | null
+          home_team_id: string | null
+          id: string
+          notes: string | null
+          scheduled_date: string | null
+          scheduled_time: string | null
+          status: Database["public"]["Enums"]["game_status"]
+          updated_at: string
+        }
+        Insert: {
+          away_score?: number | null
+          away_team_id?: string | null
+          created_at?: string
+          division_id: string
+          field_id?: string | null
+          home_score?: number | null
+          home_team_id?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          status?: Database["public"]["Enums"]["game_status"]
+          updated_at?: string
+        }
+        Update: {
+          away_score?: number | null
+          away_team_id?: string | null
+          created_at?: string
+          division_id?: string
+          field_id?: string | null
+          home_score?: number | null
+          home_team_id?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          status?: Database["public"]["Enums"]["game_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "fields"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leagues: {
         Row: {
           created_at: string
@@ -195,6 +422,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "leagues_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          address: string | null
+          created_at: string
+          google_maps_url: string | null
+          id: string
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          google_maps_url?: string | null
+          id?: string
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          google_maps_url?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -483,8 +748,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_bracket_org_id: { Args: { _bracket_id: string }; Returns: string }
       get_division_org_id: { Args: { _division_id: string }; Returns: string }
       get_league_org_id: { Args: { _league_id: string }; Returns: string }
+      get_location_org_id: { Args: { _location_id: string }; Returns: string }
       get_member_org_id: { Args: { _member_id: string }; Returns: string }
       get_org_role: {
         Args: { _org_id: string; _user_id: string }
