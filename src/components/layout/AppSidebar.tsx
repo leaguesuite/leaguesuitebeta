@@ -69,6 +69,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Locations & Fields", path: "/structure/locations" },
           { label: "Rules Settings", path: "/structure/rules" },
           { label: "Stats Tracking", path: "/structure/stats-tracking" },
+          { label: "Standings Rules", path: "/structure/standings-rules" },
         ],
       },
     ],
