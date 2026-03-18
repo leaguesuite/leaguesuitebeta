@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useGames } from '@/hooks/use-public-data';
+import { useOrganization, useCurrentSeason, useDivisions, useGames, useGamesByDivisions } from '@/hooks/use-public-data';
 import { format } from 'date-fns';
 
-const DIVISIONS = [
-  { id: '', label: 'All Divisions' },
-  { id: 'e0000000-0000-0000-0000-000000000001', label: 'Division A' },
-  { id: 'e0000000-0000-0000-0000-000000000002', label: 'Division B' },
-];
-
 export default function PublicSchedulePage() {
+  const { data: org } = useOrganization();
+  const { data: season } = useCurrentSeason(org?.id);
+  const { data: divisions } = useDivisions(season?.id);
   const [filter, setFilter] = useState('');
-  const { data: allGames } = useGames();
+
+  const divisionIds = divisions?.map(d => d.id);
+  const { data: allGames } = useGamesByDivisions(filter ? undefined : divisionIds);
   const { data: divGames } = useGames(filter || undefined);
   const games = filter ? divGames : allGames;
 
@@ -27,8 +26,16 @@ export default function PublicSchedulePage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold uppercase tracking-tight">Schedule</h1>
 
-      <div className="flex gap-2">
-        {DIVISIONS.map(d => (
+      <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={() => setFilter('')}
+          className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide transition-colors ${
+            filter === '' ? 'bg-[hsl(var(--primary))] text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+          }`}
+        >
+          All Divisions
+        </button>
+        {divisions?.map(d => (
           <button
             key={d.id}
             onClick={() => setFilter(d.id)}
@@ -36,7 +43,7 @@ export default function PublicSchedulePage() {
               filter === d.id ? 'bg-[hsl(var(--primary))] text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
             }`}
           >
-            {d.label}
+            {d.name}
           </button>
         ))}
       </div>

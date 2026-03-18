@@ -1,23 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useStandings } from '@/hooks/use-public-data';
-
-const DIVISIONS = [
-  { id: 'e0000000-0000-0000-0000-000000000001', label: 'Division A · Men\'s' },
-  { id: 'e0000000-0000-0000-0000-000000000002', label: 'Division B · Co-Ed' },
-];
+import { useOrganization, useCurrentSeason, useDivisions, useStandings } from '@/hooks/use-public-data';
 
 export default function PublicStandingsPage() {
-  const [activeDivision, setActiveDivision] = useState(DIVISIONS[0].id);
-  const { data: standings, isLoading } = useStandings(activeDivision);
+  const { data: org } = useOrganization();
+  const { data: season } = useCurrentSeason(org?.id);
+  const { data: divisions } = useDivisions(season?.id);
+  const [activeDivision, setActiveDivision] = useState<string>('');
+
+  // Set first division as active when loaded
+  useEffect(() => {
+    if (divisions && divisions.length > 0 && !activeDivision) {
+      setActiveDivision(divisions[0].id);
+    }
+  }, [divisions, activeDivision]);
+
+  const { data: standings, isLoading } = useStandings(activeDivision || undefined);
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold uppercase tracking-tight">Standings</h1>
 
       {/* Division tabs */}
-      <div className="flex gap-2">
-        {DIVISIONS.map(d => (
+      <div className="flex gap-2 flex-wrap">
+        {divisions?.map(d => (
           <button
             key={d.id}
             onClick={() => setActiveDivision(d.id)}
@@ -25,7 +31,7 @@ export default function PublicStandingsPage() {
               activeDivision === d.id ? 'bg-[hsl(var(--primary))] text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
             }`}
           >
-            {d.label}
+            {d.name}{d.categories?.name ? ` · ${d.categories.name}` : ''}
           </button>
         ))}
       </div>

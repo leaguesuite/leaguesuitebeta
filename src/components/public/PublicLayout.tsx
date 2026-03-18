@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useOrganization } from '@/hooks/use-public-data';
 
 const navItems = [
   { label: 'Home', path: '/site' },
@@ -11,6 +12,9 @@ const navItems = [
 
 export default function PublicLayout() {
   const { pathname } = useLocation();
+  const { data: org } = useOrganization();
+
+  const orgName = org?.name ?? 'League';
 
   return (
     <div className="min-h-screen bg-[hsl(220,20%,8%)] text-white">
@@ -18,8 +22,12 @@ export default function PublicLayout() {
       <header className="border-b border-white/10 bg-[hsl(220,25%,6%)] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center h-14 gap-8">
-            <Link to="/site" className="font-extrabold text-lg tracking-tight text-white shrink-0">
-              METRO <span className="text-[hsl(var(--primary))]">FLAG FOOTBALL</span>
+            <Link to="/site" className="font-extrabold text-lg tracking-tight text-white shrink-0 uppercase">
+              {orgName.split(' ').map((word, i) => (
+                <span key={i} className={i === orgName.split(' ').length - 1 ? 'text-[hsl(var(--primary))]' : ''}>
+                  {word}{' '}
+                </span>
+              ))}
             </Link>
             <nav className="flex items-center gap-1 overflow-x-auto">
               {navItems.map((item) => {
@@ -51,7 +59,7 @@ export default function PublicLayout() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 mt-12 py-8 text-center text-white/40 text-sm">
-        © 2025 Metro Flag Football League. Powered by LeagueSuite.
+        © {new Date().getFullYear()} {orgName}. Powered by LeagueSuite.
       </footer>
     </div>
   );
