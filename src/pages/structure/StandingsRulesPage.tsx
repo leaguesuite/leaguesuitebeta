@@ -59,7 +59,9 @@ const SORT_FIELD_OPTIONS = [
 
 const TIEBREAK_OPTIONS = [
   { value: "head_to_head", label: "Head-to-Head Record" },
+  { value: "common_record", label: "Record vs. Common Opponents" },
   { value: "goal_diff", label: "Goal / Point Differential" },
+  { value: "common_goal_diff", label: "Point Differential vs. Common Opponents" },
   { value: "goals_for", label: "Goals / Points For" },
   { value: "goals_against", label: "Fewest Goals / Points Against" },
   { value: "wins", label: "Most Wins" },
