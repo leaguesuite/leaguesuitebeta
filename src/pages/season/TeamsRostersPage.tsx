@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Users, Edit, Plus, Trash2, Upload, Palette, Camera, UserPlus, Shield, X } from "lucide-react";
+import CsvImportDialog from "@/components/shared/CsvImportDialog";
 
 interface Team {
   id: string;
