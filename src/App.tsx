@@ -56,7 +56,11 @@ const App = () => (
             <Route path="/members/coaches" element={<MembersPage />} />
             <Route path="/members/staff" element={<MembersPage />} />
             <Route path="/members/*" element={<MembersPage />} />
-            <Route path="/cms/*" element={<PlaceholderPage title="Content Management" description="Manage pages, articles, and media." />} />
+            <Route path="/cms/pages" element={<CMSPagesPage />} />
+            <Route path="/cms/articles" element={<PlaceholderPage title="Articles" description="Manage news articles and blog posts." />} />
+            <Route path="/cms/authors" element={<PlaceholderPage title="Authors" description="Manage content authors." />} />
+            <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
+            <Route path="/cms/navigation" element={<PlaceholderPage title="Navigation / Menus" description="Manage site navigation and menus." />} />
             <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
             <Route path="/admin/users" element={<UsersPermissionsPage />} />
             <Route path="/admin/roles" element={<UsersPermissionsPage />} />
