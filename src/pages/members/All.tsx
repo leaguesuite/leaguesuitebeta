@@ -89,7 +89,7 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
       </h3>
       <p className="text-sm text-muted-foreground mt-1 max-w-sm">
         {hasFilters
-          ? 'Try adjusting your search or filters to find what you're looking for.'
+          ? "Try adjusting your search or filters to find what you're looking for."
           : 'Add your first member to get started building your league roster.'}
       </p>
     </div>
