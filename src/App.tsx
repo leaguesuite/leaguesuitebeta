@@ -20,6 +20,7 @@ import CMSPagesPage from "@/pages/cms/CMSPagesPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
+import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
