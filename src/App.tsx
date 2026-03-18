@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import GamesPage from "@/pages/season/GamesPage";
 import StandingsPage from "@/pages/season/StandingsPage";
 import TeamsRostersPage from "@/pages/season/TeamsRostersPage";
+import BracketsPage from "@/pages/season/BracketsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/season/games" element={<GamesPage />} />
             <Route path="/season/teams" element={<TeamsRostersPage />} />
             <Route path="/season/standings" element={<StandingsPage />} />
+            <Route path="/season/brackets" element={<BracketsPage />} />
             <Route path="/season/stats" element={<PlaceholderPage title="Stats" description="Player and team statistics overview." />} />
             <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
             <Route path="/season/reports" element={<PlaceholderPage title="Reports & Exports" description="Generate and download reports." />} />
