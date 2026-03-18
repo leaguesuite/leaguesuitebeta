@@ -69,7 +69,7 @@ const App = () => (
             <Route path="/cms/ai-content" element={<AIContentPage />} />
             <Route path="/cms/authors" element={<PlaceholderPage title="Authors" description="Manage content authors." />} />
             <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
-            <Route path="/cms/navigation" element={<PlaceholderPage title="Navigation / Menus" description="Manage site navigation and menus." />} />
+            <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
             <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
             <Route path="/admin/users" element={<UsersPermissionsPage />} />
             <Route path="/admin/roles" element={<UsersPermissionsPage />} />
