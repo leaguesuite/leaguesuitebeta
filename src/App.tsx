@@ -33,7 +33,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/season/overview" element={<PlaceholderPage title="Season Overview" description="Current season summary and key metrics." />} />
             <Route path="/season/games" element={<GamesPage />} />
-            <Route path="/season/teams" element={<PlaceholderPage title="Teams & Rosters" description="Manage teams and player rosters for the active season." />} />
+            <Route path="/season/teams" element={<TeamsRostersPage />} />
             <Route path="/season/standings" element={<StandingsPage />} />
             <Route path="/season/stats" element={<PlaceholderPage title="Stats" description="Player and team statistics overview." />} />
             <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
