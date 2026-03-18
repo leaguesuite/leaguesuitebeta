@@ -103,6 +103,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         label: "CMS", icon: FileText,
         children: [
           { label: "Pages", path: "/cms/pages" },
+          { label: "News", path: "/cms/news" },
           { label: "Articles", path: "/cms/articles" },
           { label: "AI Content", path: "/cms/ai-content" },
           { label: "Authors", path: "/cms/authors" },

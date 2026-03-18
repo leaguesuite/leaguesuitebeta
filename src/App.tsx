@@ -64,6 +64,7 @@ const App = () => (
             <Route path="/members/*" element={<MembersPage />} />
             <Route path="/cms/pages" element={<CMSPagesPage />} />
             <Route path="/cms/articles" element={<PlaceholderPage title="Articles" description="Manage news articles and blog posts." />} />
+            <Route path="/cms/news" element={<NewsPage />} />
             <Route path="/cms/ai-content" element={<AIContentPage />} />
             <Route path="/cms/authors" element={<PlaceholderPage title="Authors" description="Manage content authors." />} />
             <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
