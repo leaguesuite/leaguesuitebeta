@@ -10,6 +10,7 @@ import StandingsPage from "@/pages/season/StandingsPage";
 import TeamsRostersPage from "@/pages/season/TeamsRostersPage";
 import BracketsPage from "@/pages/season/BracketsPage";
 import ReportsPage from "@/pages/season/ReportsPage";
+import StatsPage from "@/pages/season/StatsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
@@ -41,7 +42,7 @@ const App = () => (
             <Route path="/season/teams" element={<TeamsRostersPage />} />
             <Route path="/season/standings" element={<StandingsPage />} />
             <Route path="/season/brackets" element={<BracketsPage />} />
-            <Route path="/season/stats" element={<PlaceholderPage title="Stats" description="Player and team statistics overview." />} />
+            <Route path="/season/stats" element={<StatsPage />} />
             <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
             <Route path="/season/reports" element={<ReportsPage />} />
             <Route path="/setup/new-season" element={<NewSeasonWizard />} />
