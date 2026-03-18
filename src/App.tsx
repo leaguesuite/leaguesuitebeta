@@ -12,6 +12,7 @@ import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
+import MembersPage from "@/pages/members/MembersPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 
