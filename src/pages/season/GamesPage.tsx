@@ -14,8 +14,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, Download, Search, MapPin, Clock, ChevronLeft, ChevronRight,
-  Edit, Save, X, BarChart3, Pencil,
+  Edit, Save, X, BarChart3, Pencil, Upload,
 } from "lucide-react";
+import CsvImportDialog from "@/components/shared/CsvImportDialog";
 
 // ─── Stat Category Definitions ────────────────────────────────────────────────
 
