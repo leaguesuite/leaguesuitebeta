@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppLayout from "@/components/layout/AppLayout";
+import PublicLayout from "@/components/public/PublicLayout";
 import Dashboard from "@/pages/Dashboard";
 import GamesPage from "@/pages/season/GamesPage";
 import StandingsPage from "@/pages/season/StandingsPage";
@@ -25,6 +26,14 @@ import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import DomainsPage from "@/pages/settings/DomainsPage";
+import PublicHomePage from "@/pages/public/PublicHomePage";
+import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
+import PublicSchedulePage from "@/pages/public/PublicSchedulePage";
+import PublicTeamsPage from "@/pages/public/PublicTeamsPage";
+import PublicTeamPage from "@/pages/public/PublicTeamPage";
+import PublicPlayerPage from "@/pages/public/PublicPlayerPage";
+import PublicGamePage from "@/pages/public/PublicGamePage";
+import PublicStatsPage from "@/pages/public/PublicStatsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +45,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public site */}
+          <Route element={<PublicLayout />}>
+            <Route path="/site" element={<PublicHomePage />} />
+            <Route path="/site/standings" element={<PublicStandingsPage />} />
+            <Route path="/site/schedule" element={<PublicSchedulePage />} />
+            <Route path="/site/teams" element={<PublicTeamsPage />} />
+            <Route path="/site/teams/:teamId" element={<PublicTeamPage />} />
+            <Route path="/site/players/:memberId" element={<PublicPlayerPage />} />
+            <Route path="/site/games/:gameId" element={<PublicGamePage />} />
+            <Route path="/site/stats" element={<PublicStatsPage />} />
+          </Route>
+
+          {/* Admin */}
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/season/overview" element={<PlaceholderPage title="Season Overview" description="Current season summary and key metrics." />} />
