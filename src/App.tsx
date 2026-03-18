@@ -18,6 +18,7 @@ import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
 import CMSPagesPage from "@/pages/cms/CMSPagesPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
 import NotFound from "./pages/NotFound";
 
