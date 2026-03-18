@@ -21,14 +21,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import {
-  fetchMembers,
-  searchMembers,
-  fetchDivisions,
-  fetchPublicConfiguration,
-  type MemberRow,
-  type MemberListParams,
-} from '@/lib/api';
+import type { MemberRow, MemberListParams } from '@/lib/api';
+import { getMockMembers, MOCK_DIVISIONS } from '@/data/mockMembersList';
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
 
