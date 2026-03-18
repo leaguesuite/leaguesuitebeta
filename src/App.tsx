@@ -12,6 +12,7 @@ import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
+import MembersPage from "@/pages/members/MembersPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 
@@ -49,7 +50,11 @@ const App = () => (
             <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/accolades" element={<AccoladesPage />} />
-            <Route path="/members/*" element={<PlaceholderPage title="Members" description="Manage league members." />} />
+            <Route path="/members/all" element={<MembersPage />} />
+            <Route path="/members/players" element={<MembersPage />} />
+            <Route path="/members/coaches" element={<MembersPage />} />
+            <Route path="/members/staff" element={<MembersPage />} />
+            <Route path="/members/*" element={<MembersPage />} />
             <Route path="/cms/*" element={<PlaceholderPage title="Content Management" description="Manage pages, articles, and media." />} />
             <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
             <Route path="/admin/users" element={<UsersPermissionsPage />} />
