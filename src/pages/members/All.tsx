@@ -174,23 +174,11 @@ export default function MembersAll() {
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  // Fetch tenant context
-  const { data: config } = useQuery({
-    queryKey: ['public-configuration'],
-    queryFn: fetchPublicConfiguration,
-    staleTime: 1000 * 60 * 10,
-  });
-
-  // Fetch division options for filter dropdown
-  const { data: divisionOptions } = useQuery({
-    queryKey: ['divisions'],
-    queryFn: fetchDivisions,
-    staleTime: 1000 * 60 * 5,
-  });
+  const divisionOptions = MOCK_DIVISIONS;
 
   // Build query params
-  const queryParams: MemberListParams = useMemo(() => {
-    const params: MemberListParams = { per_page: 50 };
+  const queryParams = useMemo(() => {
+    const params: { search?: string; division?: string; role?: string; status?: string } = {};
     if (division !== 'all') params.division = division;
     if (role !== 'all') params.role = role;
     if (status !== 'all') params.status = status;
@@ -198,17 +186,18 @@ export default function MembersAll() {
     return params;
   }, [debouncedSearch, division, role, status]);
 
-  // Fetch members — use search endpoint when searching, members endpoint otherwise
+  // Fetch members from mock data
   const {
     data: membersResponse,
     isLoading,
     isError,
   } = useQuery({
     queryKey: ['members', queryParams],
-    queryFn: () =>
-      debouncedSearch
-        ? searchMembers(debouncedSearch)
-        : fetchMembers(queryParams),
+    queryFn: async () => {
+      // Simulate network delay
+      await new Promise((r) => setTimeout(r, 400));
+      return getMockMembers(queryParams);
+    },
     placeholderData: (prev) => prev,
   });
 
