@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import type { MemberRow, MemberListParams } from '@/lib/api';
+import type { MemberRow } from '@/lib/api';
 import { getMockMembers, MOCK_DIVISIONS } from '@/data/mockMembersList';
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
@@ -61,7 +62,8 @@ function TableSkeleton() {
           <Skeleton className="h-4 w-36" />
           <Skeleton className="h-4 w-24 hidden sm:block" />
           <Skeleton className="h-4 w-28 hidden md:block" />
-          <Skeleton className="h-4 w-14 hidden lg:block" />
+          <Skeleton className="h-4 w-10 hidden lg:block" />
+          <Skeleton className="h-4 w-10 hidden lg:block" />
           <Skeleton className="h-4 w-16 hidden lg:block" />
           <Skeleton className="h-5 w-16 ml-auto" />
         </div>
@@ -93,6 +95,8 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 // ─── Add Member Sheet (UI only) ──────────────────────────────────────────────
 
 function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const [isQb, setIsQb] = useState(false);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-lg overflow-y-auto">
@@ -150,6 +154,43 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
             <Label htmlFor="team">Team</Label>
             <Input id="team" placeholder="Search for a team…" />
           </div>
+
+          {/* Ratings section */}
+          <div className="space-y-4 pt-2">
+            <h4 className="text-sm font-semibold text-foreground">Player Ratings</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="offRating">OFF Rating <span className="text-destructive">*</span></Label>
+                <Input id="offRating" type="number" min={0} max={100} placeholder="0–100" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="defRating">DEF Rating <span className="text-destructive">*</span></Label>
+                <Input id="defRating" type="number" min={0} max={100} placeholder="0–100" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <Label htmlFor="isQb" className="text-sm font-medium cursor-pointer">Is QB</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">Enable to set a quarterback rating</p>
+              </div>
+              <Switch id="isQb" checked={isQb} onCheckedChange={setIsQb} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="qbRating" className={!isQb ? 'text-muted-foreground' : ''}>
+                QB Rating {isQb && <span className="text-destructive">*</span>}
+              </Label>
+              <Input
+                id="qbRating"
+                type="number"
+                min={0}
+                max={100}
+                placeholder="0–100"
+                disabled={!isQb}
+                className={!isQb ? 'opacity-50' : ''}
+              />
+            </div>
+          </div>
+
           <div className="pt-4 flex gap-3 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
@@ -194,7 +235,6 @@ export default function MembersAll() {
   } = useQuery({
     queryKey: ['members', queryParams],
     queryFn: async () => {
-      // Simulate network delay
       await new Promise((r) => setTimeout(r, 400));
       return getMockMembers(queryParams);
     },
@@ -281,11 +321,12 @@ export default function MembersAll() {
         </div>
 
         {/* Table header */}
-        <div className="hidden sm:grid grid-cols-[1fr_140px_160px_80px_100px_90px] px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
+        <div className="hidden sm:grid grid-cols-[1fr_130px_140px_60px_60px_100px_90px] px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
           <span>Name</span>
           <span>Team</span>
           <span>Division</span>
-          <span className="text-center">CAP</span>
+          <span className="text-center">OFF</span>
+          <span className="text-center">DEF</span>
           <span>Role</span>
           <span className="text-right">Status</span>
         </div>
@@ -306,7 +347,7 @@ export default function MembersAll() {
               <button
                 key={member.id}
                 onClick={() => handleRowClick(member.id)}
-                className="w-full text-left px-5 py-3.5 grid grid-cols-1 sm:grid-cols-[1fr_140px_160px_80px_100px_90px] items-center gap-2 sm:gap-4 hover:bg-muted/40 transition-colors cursor-pointer"
+                className="w-full text-left px-5 py-3.5 grid grid-cols-1 sm:grid-cols-[1fr_130px_140px_60px_60px_100px_90px] items-center gap-2 sm:gap-4 hover:bg-muted/40 transition-colors cursor-pointer"
               >
                 {/* Name + avatar */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -318,9 +359,16 @@ export default function MembersAll() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {member.first_name} {member.last_name}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {member.first_name} {member.last_name}
+                      </p>
+                      {member.is_qb && member.qb_rating != null && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-mono font-semibold border-primary/30 text-primary shrink-0">
+                          QB {member.qb_rating}
+                        </Badge>
+                      )}
+                    </div>
                     {member.email && (
                       <p className="text-xs text-muted-foreground truncate">{member.email}</p>
                     )}
@@ -337,9 +385,14 @@ export default function MembersAll() {
                   {member.division?.name ?? '—'}
                 </span>
 
-                {/* CAP Rating */}
+                {/* OFF Rating */}
                 <span className="text-sm font-mono font-semibold text-foreground text-center hidden sm:block">
-                  {member.cap_rating != null ? member.cap_rating : '—'}
+                  {member.off_rating != null ? member.off_rating : '—'}
+                </span>
+
+                {/* DEF Rating */}
+                <span className="text-sm font-mono font-semibold text-foreground text-center hidden sm:block">
+                  {member.def_rating != null ? member.def_rating : '—'}
                 </span>
 
                 {/* Role */}

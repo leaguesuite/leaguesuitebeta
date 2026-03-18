@@ -46,7 +46,10 @@ export interface MemberRow {
   phone?: string;
   team?: { id: string; name: string } | null;
   division?: { id: string; name: string } | null;
-  cap_rating?: number | null;
+  off_rating?: number | null;
+  def_rating?: number | null;
+  qb_rating?: number | null;
+  is_qb?: boolean;
   role?: string;
   status?: string;
   avatar_url?: string | null;
