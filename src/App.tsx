@@ -42,7 +42,7 @@ const App = () => (
             <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
             <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
             <Route path="/structure/subdivisions" element={<PlaceholderPage title="Subdivisions" description="Manage conference subdivisions." />} />
-            <Route path="/structure/locations" element={<PlaceholderPage title="Locations & Fields" description="Manage game venues and fields." />} />
+            <Route path="/structure/locations" element={<LocationsPage />} />
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
             <Route path="/members/*" element={<PlaceholderPage title="Members" description="Manage league members." />} />
