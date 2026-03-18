@@ -14,6 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          league_id: string
+          name: string
+          rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          league_id: string
+          name: string
+          rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          league_id?: string
+          name?: string
+          rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conferences: {
+        Row: {
+          created_at: string
+          division_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          division_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          division_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conferences_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      divisions: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          id: string
+          name: string
+          qb_cap: number | null
+          season_id: string
+          status: Database["public"]["Enums"]["division_status"]
+          team_cap: number | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          qb_cap?: number | null
+          season_id: string
+          status?: Database["public"]["Enums"]["division_status"]
+          team_cap?: number | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          qb_cap?: number | null
+          season_id?: string
+          status?: Database["public"]["Enums"]["division_status"]
+          team_cap?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "divisions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "divisions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leagues: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          settings: Json | null
+          sport_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          settings?: Json | null
+          sport_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          settings?: Json | null
+          sport_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leagues_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -76,6 +229,50 @@ export type Database = {
         }
         Relationships: []
       }
+      seasons: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          league_id: string
+          name: string
+          registration_open: boolean
+          start_date: string | null
+          status: Database["public"]["Enums"]["season_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          league_id: string
+          name: string
+          registration_open?: boolean
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["season_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          league_id?: string
+          name?: string
+          registration_open?: boolean
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["season_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasons_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -99,10 +296,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_division_org_id: { Args: { _division_id: string }; Returns: string }
+      get_league_org_id: { Args: { _league_id: string }; Returns: string }
       get_org_role: {
         Args: { _org_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["org_role"]
       }
+      get_season_org_id: { Args: { _season_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
