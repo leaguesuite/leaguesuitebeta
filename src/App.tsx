@@ -3,8 +3,14 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import AppLayout from "@/components/layout/AppLayout";
+import Dashboard from "@/pages/Dashboard";
+import GamesPage from "@/pages/season/GamesPage";
+import CategoriesPage from "@/pages/structure/CategoriesPage";
+import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
+import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
+import PlaceholderPage from "@/pages/PlaceholderPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -15,8 +21,39 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/season/overview" element={<PlaceholderPage title="Season Overview" description="Current season summary and key metrics." />} />
+            <Route path="/season/games" element={<GamesPage />} />
+            <Route path="/season/teams" element={<PlaceholderPage title="Teams & Rosters" description="Manage teams and player rosters for the active season." />} />
+            <Route path="/season/standings" element={<PlaceholderPage title="Standings" description="Division standings and rankings." />} />
+            <Route path="/season/stats" element={<PlaceholderPage title="Stats" description="Player and team statistics overview." />} />
+            <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
+            <Route path="/season/reports" element={<PlaceholderPage title="Reports & Exports" description="Generate and download reports." />} />
+            <Route path="/setup/new-season" element={<NewSeasonWizard />} />
+            <Route path="/setup/seasons" element={<PlaceholderPage title="Seasons" description="View and manage all seasons." />} />
+            <Route path="/setup/tournaments" element={<PlaceholderPage title="Tournaments" description="Manage tournament brackets and formats." />} />
+            <Route path="/setup/division-assignment" element={<PlaceholderPage title="Division Assignment" description="Assign teams to divisions." />} />
+            <Route path="/setup/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences and subdivisions." />} />
+            <Route path="/setup/scheduling" element={<PlaceholderPage title="Scheduling Setup" description="Configure scheduling rules and constraints." />} />
+            <Route path="/structure/leagues" element={<PlaceholderPage title="Leagues" description="Manage your leagues." />} />
+            <Route path="/structure/categories" element={<CategoriesPage />} />
+            <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
+            <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
+            <Route path="/structure/subdivisions" element={<PlaceholderPage title="Subdivisions" description="Manage conference subdivisions." />} />
+            <Route path="/structure/locations" element={<PlaceholderPage title="Locations & Fields" description="Manage game venues and fields." />} />
+            <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
+            <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
+            <Route path="/members/*" element={<PlaceholderPage title="Members" description="Manage league members." />} />
+            <Route path="/cms/*" element={<PlaceholderPage title="Content Management" description="Manage pages, articles, and media." />} />
+            <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
+            <Route path="/admin/users" element={<UsersPermissionsPage />} />
+            <Route path="/admin/roles" element={<UsersPermissionsPage />} />
+            <Route path="/admin/permissions" element={<PlaceholderPage title="Permission Groups" description="Configure granular permission groups." />} />
+            <Route path="/admin/access" element={<PlaceholderPage title="App Access Controls" description="Manage application-level access." />} />
+            <Route path="/integrations/*" element={<PlaceholderPage title="Integrations" description="Manage third-party integrations." />} />
+            <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
