@@ -467,6 +467,51 @@ export type Database = {
           },
         ]
       }
+      member_ratings: {
+        Row: {
+          defensive: number | null
+          id: string
+          member_id: string
+          offensive: number | null
+          qb: number | null
+          season_id: string
+          updated_at: string
+        }
+        Insert: {
+          defensive?: number | null
+          id?: string
+          member_id: string
+          offensive?: number | null
+          qb?: number | null
+          season_id: string
+          updated_at?: string
+        }
+        Update: {
+          defensive?: number | null
+          id?: string
+          member_id?: string
+          offensive?: number | null
+          qb?: number | null
+          season_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_ratings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_ratings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           avatar_url: string | null
@@ -585,6 +630,58 @@ export type Database = {
         }
         Relationships: []
       }
+      player_game_stats: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          member_id: string
+          stat_key: string
+          team_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          member_id: string
+          stat_key: string
+          team_id: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          member_id?: string
+          stat_key?: string
+          team_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_game_stats_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_game_stats_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_game_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           created_at: string
@@ -625,6 +722,86 @@ export type Database = {
             columns: ["league_id"]
             isOneToOne: false
             referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stat_definitions: {
+        Row: {
+          abbreviation: string
+          category: Database["public"]["Enums"]["stat_category"]
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          label: string
+          org_id: string
+          stat_key: string
+        }
+        Insert: {
+          abbreviation: string
+          category: Database["public"]["Enums"]["stat_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          label: string
+          org_id: string
+          stat_key: string
+        }
+        Update: {
+          abbreviation?: string
+          category?: Database["public"]["Enums"]["stat_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          org_id?: string
+          stat_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stat_definitions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stat_tracking_config: {
+        Row: {
+          category_id: string
+          enabled: boolean
+          id: string
+          stat_definition_id: string
+        }
+        Insert: {
+          category_id: string
+          enabled?: boolean
+          id?: string
+          stat_definition_id: string
+        }
+        Update: {
+          category_id?: string
+          enabled?: boolean
+          id?: string
+          stat_definition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stat_tracking_config_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stat_tracking_config_stat_definition_id_fkey"
+            columns: ["stat_definition_id"]
+            isOneToOne: false
+            referencedRelation: "stat_definitions"
             referencedColumns: ["id"]
           },
         ]
@@ -749,7 +926,9 @@ export type Database = {
     }
     Functions: {
       get_bracket_org_id: { Args: { _bracket_id: string }; Returns: string }
+      get_category_org_id: { Args: { _category_id: string }; Returns: string }
       get_division_org_id: { Args: { _division_id: string }; Returns: string }
+      get_game_org_id: { Args: { _game_id: string }; Returns: string }
       get_league_org_id: { Args: { _league_id: string }; Returns: string }
       get_location_org_id: { Args: { _location_id: string }; Returns: string }
       get_member_org_id: { Args: { _member_id: string }; Returns: string }
