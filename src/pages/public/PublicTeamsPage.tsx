@@ -1,17 +1,20 @@
 import { Link } from 'react-router-dom';
-import { useTeams } from '@/hooks/use-public-data';
-
-const DIVISIONS = [
-  { id: 'e0000000-0000-0000-0000-000000000001', label: 'Division A · Men\'s' },
-  { id: 'e0000000-0000-0000-0000-000000000002', label: 'Division B · Co-Ed' },
-];
+import { useOrganization, useCurrentSeason, useDivisions, useTeams } from '@/hooks/use-public-data';
 
 export default function PublicTeamsPage() {
+  const { data: org } = useOrganization();
+  const { data: season } = useCurrentSeason(org?.id);
+  const { data: divisions } = useDivisions(season?.id);
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-extrabold uppercase tracking-tight">Teams</h1>
-      {DIVISIONS.map(div => (
-        <DivisionTeams key={div.id} divisionId={div.id} title={div.label} />
+      {divisions?.map(div => (
+        <DivisionTeams
+          key={div.id}
+          divisionId={div.id}
+          title={`${div.name}${div.categories?.name ? ` · ${div.categories.name}` : ''}`}
+        />
       ))}
     </div>
   );

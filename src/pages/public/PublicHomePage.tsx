@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useGames, useStandings } from '@/hooks/use-public-data';
+import { useOrganization, useCurrentSeason, useDivisions, useGamesByDivisions, useStandings } from '@/hooks/use-public-data';
 import { format } from 'date-fns';
-
-const DIVISION_A = 'e0000000-0000-0000-0000-000000000001';
-const DIVISION_B = 'e0000000-0000-0000-0000-000000000002';
 
 function ScoreCard({ game }: { game: any }) {
   const isCompleted = game.status === 'completed';
@@ -13,7 +10,7 @@ function ScoreCard({ game }: { game: any }) {
   return (
     <Link to={`/site/games/${game.id}`} className="block bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-colors">
       <div className="text-xs text-white/40 mb-2 uppercase font-semibold">
-        {isCompleted ? 'Final' : format(new Date(game.scheduled_date), 'MMM d')} · {game.scheduled_time?.slice(0, 5)}
+        {isCompleted ? 'Final' : game.scheduled_date ? format(new Date(game.scheduled_date), 'MMM d') : 'TBD'} · {game.scheduled_time?.slice(0, 5)}
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -76,17 +73,29 @@ function MiniStandings({ divisionId, title }: { divisionId: string; title: strin
 }
 
 export default function PublicHomePage() {
-  const { data: recentGames } = useGames();
+  const { data: org } = useOrganization();
+  const { data: season } = useCurrentSeason(org?.id);
+  const { data: divisions } = useDivisions(season?.id);
+  const divisionIds = divisions?.map(d => d.id);
+  const { data: allGames } = useGamesByDivisions(divisionIds);
 
-  const completedGames = recentGames?.filter(g => g.status === 'completed').slice(0, 4) ?? [];
-  const upcomingGames = recentGames?.filter(g => g.status === 'scheduled').slice(0, 4) ?? [];
+  const completedGames = allGames?.filter(g => g.status === 'completed').slice(0, 4) ?? [];
+  const upcomingGames = allGames?.filter(g => g.status === 'scheduled').slice(0, 4) ?? [];
+
+  const teamCount = new Set([
+    ...(allGames ?? []).map(g => g.home_team_id).filter(Boolean),
+    ...(allGames ?? []).map(g => g.away_team_id).filter(Boolean),
+  ]).size;
 
   return (
     <div className="space-y-8">
       {/* Hero */}
       <div className="bg-gradient-to-br from-[hsl(215,90%,20%)] to-[hsl(220,25%,8%)] rounded-2xl p-8 border border-white/10">
-        <h1 className="text-3xl font-extrabold tracking-tight">Spring 2025 Season</h1>
-        <p className="text-white/50 mt-1">Week 4 · 8 Teams · 2 Divisions</p>
+        <h1 className="text-3xl font-extrabold tracking-tight">{season?.name ?? 'Current Season'}</h1>
+        <p className="text-white/50 mt-1">
+          {teamCount > 0 && `${teamCount} Teams`}
+          {divisions && divisions.length > 0 && ` · ${divisions.length} Division${divisions.length > 1 ? 's' : ''}`}
+        </p>
       </div>
 
       {/* Recent Scores */}
@@ -113,16 +122,23 @@ export default function PublicHomePage() {
       )}
 
       {/* Standings */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold uppercase tracking-wide">Standings</h2>
-          <Link to="/site/standings" className="text-sm text-[hsl(var(--primary))] hover:underline">Full Standings →</Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MiniStandings divisionId={DIVISION_A} title="Division A · Men's" />
-          <MiniStandings divisionId={DIVISION_B} title="Division B · Co-Ed" />
-        </div>
-      </section>
+      {divisions && divisions.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold uppercase tracking-wide">Standings</h2>
+            <Link to="/site/standings" className="text-sm text-[hsl(var(--primary))] hover:underline">Full Standings →</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {divisions.map(div => (
+              <MiniStandings
+                key={div.id}
+                divisionId={div.id}
+                title={`${div.name}${div.categories?.name ? ` · ${div.categories.name}` : ''}`}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
