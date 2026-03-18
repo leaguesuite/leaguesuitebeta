@@ -216,9 +216,7 @@ export default function MembersAll() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">All Members</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {config?.tenant?.name
-              ? `Manage members for ${config.tenant.name}`
-              : 'Manage your league member database.'}
+            Manage members for FlagPlus Football
           </p>
         </div>
         <Button onClick={() => setSheetOpen(true)} className="gap-2">
