@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Users, UserX } from 'lucide-react';
+import { Search, Plus, UserX, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,9 +23,9 @@ import {
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import type { MemberRow } from '@/lib/api';
-import { getMockMembers, MOCK_DIVISIONS } from '@/data/mockMembersList';
+import { getMockMembers } from '@/data/mockMembersList';
 
-// ─── Hooks ───────────────────────────────────────────────────────────────────
+/* ─── Debounce hook ───────────────────────────────────────────────────────── */
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -36,63 +36,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced;
 }
 
-// ─── Status badge helper ─────────────────────────────────────────────────────
-
-function StatusBadge({ status }: { status?: string }) {
-  const s = (status ?? 'unknown').toLowerCase();
-  const variant = s === 'active' ? 'default' : s === 'inactive' ? 'secondary' : 'outline';
-  const dotColor =
-    s === 'active' ? 'bg-accent' : s === 'inactive' ? 'bg-muted-foreground' : 'bg-warning';
-  return (
-    <Badge variant={variant} className="gap-1.5 font-medium text-xs">
-      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-      {status ?? 'Unknown'}
-    </Badge>
-  );
-}
-
-// ─── Loading skeleton ────────────────────────────────────────────────────────
-
-function TableSkeleton() {
-  return (
-    <div className="divide-y divide-border">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="px-5 py-3.5 flex items-center gap-4">
-          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-          <Skeleton className="h-4 w-36" />
-          <Skeleton className="h-4 w-24 hidden sm:block" />
-          <Skeleton className="h-4 w-28 hidden md:block" />
-          <Skeleton className="h-4 w-10 hidden lg:block" />
-          <Skeleton className="h-4 w-10 hidden lg:block" />
-          <Skeleton className="h-4 w-16 hidden lg:block" />
-          <Skeleton className="h-5 w-16 ml-auto" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Empty state ─────────────────────────────────────────────────────────────
-
-function EmptyState({ hasFilters }: { hasFilters: boolean }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
-        <UserX className="w-6 h-6 text-muted-foreground" />
-      </div>
-      <h3 className="text-sm font-semibold text-foreground">
-        {hasFilters ? 'No members match your filters' : 'No members yet'}
-      </h3>
-      <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-        {hasFilters
-          ? "Try adjusting your search or filters to find what you're looking for."
-          : 'Add your first member to get started building your league roster.'}
-      </p>
-    </div>
-  );
-}
-
-// ─── Add Member Sheet (UI only) ──────────────────────────────────────────────
+/* ─── Add Member Sheet ────────────────────────────────────────────────────── */
 
 function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [isQb, setIsQb] = useState(false);
@@ -104,7 +48,9 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <SheetTitle>Add Member</SheetTitle>
           <SheetDescription>Create a new member record in your league.</SheetDescription>
         </SheetHeader>
+
         <div className="space-y-5 mt-6">
+          {/* Name */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
@@ -115,6 +61,8 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
               <Input id="lastName" placeholder="Doe" />
             </div>
           </div>
+
+          {/* Contact */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="john@example.com" />
@@ -123,15 +71,16 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" type="tel" placeholder="(555) 123-4567" />
           </div>
+
+          {/* Role + Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <Select>
-                <SelectTrigger id="role">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
+                <SelectTrigger id="role"><SelectValue placeholder="Select role" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="player">Player</SelectItem>
+                  <SelectItem value="captain">Captain</SelectItem>
                   <SelectItem value="coach">Coach</SelectItem>
                   <SelectItem value="official">Official</SelectItem>
                 </SelectContent>
@@ -140,9 +89,7 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select defaultValue="active">
-                <SelectTrigger id="status">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger id="status"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
@@ -150,14 +97,10 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
               </Select>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="team">Team</Label>
-            <Input id="team" placeholder="Search for a team…" />
-          </div>
 
-          {/* Ratings section */}
-          <div className="space-y-4 pt-2">
-            <h4 className="text-sm font-semibold text-foreground">Player Ratings</h4>
+          {/* Ratings */}
+          <div className="space-y-4 pt-2 border-t border-border">
+            <h4 className="text-sm font-semibold text-foreground pt-2">Ratings</h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="offRating">OFF Rating <span className="text-destructive">*</span></Label>
@@ -168,6 +111,7 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
                 <Input id="defRating" type="number" min={0} max={100} placeholder="0–100" />
               </div>
             </div>
+
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <div>
                 <Label htmlFor="isQb" className="text-sm font-medium cursor-pointer">Is QB</Label>
@@ -175,6 +119,7 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
               </div>
               <Switch id="isQb" checked={isQb} onCheckedChange={setIsQb} />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="qbRating" className={!isQb ? 'text-muted-foreground' : ''}>
                 QB Rating {isQb && <span className="text-destructive">*</span>}
@@ -191,10 +136,9 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
             </div>
           </div>
 
+          {/* Actions */}
           <div className="pt-4 flex gap-3 justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button disabled>Save Member</Button>
           </div>
         </div>
@@ -203,46 +147,36 @@ function AddMemberSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────────────────
+/* ─── Main Page ───────────────────────────────────────────────────────────── */
 
 export default function MembersAll() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [division, setDivision] = useState('all');
   const [role, setRole] = useState('all');
   const [status, setStatus] = useState('all');
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  const divisionOptions = MOCK_DIVISIONS;
-
-  // Build query params
   const queryParams = useMemo(() => {
-    const params: { search?: string; division?: string; role?: string; status?: string } = {};
-    if (division !== 'all') params.division = division;
-    if (role !== 'all') params.role = role;
-    if (status !== 'all') params.status = status;
-    if (debouncedSearch) params.search = debouncedSearch;
-    return params;
-  }, [debouncedSearch, division, role, status]);
+    const p: { search?: string; role?: string; status?: string } = {};
+    if (role !== 'all') p.role = role;
+    if (status !== 'all') p.status = status;
+    if (debouncedSearch) p.search = debouncedSearch;
+    return p;
+  }, [debouncedSearch, role, status]);
 
-  // Fetch members from mock data
-  const {
-    data: membersResponse,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: membersResponse, isLoading } = useQuery({
     queryKey: ['members', queryParams],
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 300));
       return getMockMembers(queryParams);
     },
     placeholderData: (prev) => prev,
   });
 
   const members: MemberRow[] = membersResponse?.data ?? [];
-  const hasFilters = debouncedSearch !== '' || division !== 'all' || role !== 'all' || status !== 'all';
+  const total = membersResponse?.meta?.total ?? members.length;
 
   const handleRowClick = useCallback(
     (id: string | number) => navigate(`/members/${id}`),
@@ -251,67 +185,49 @@ export default function MembersAll() {
 
   return (
     <div className="space-y-6 max-w-7xl">
-      {/* Page header */}
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">All Members</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage members for FlagPlus Football
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Members</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage your league member database.</p>
         </div>
         <Button onClick={() => setSheetOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Member
+          <Plus className="h-4 w-4" /> Add Member
         </Button>
       </div>
 
-      {/* Filters bar */}
+      {/* Card */}
       <div className="section-card">
+        {/* Toolbar */}
         <div className="px-5 py-4 border-b border-border flex flex-wrap items-center gap-3">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[220px] max-w-sm">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search members…"
+              placeholder="Search by name…"
               className="pl-9"
             />
           </div>
 
-          {/* Division filter */}
-          <Select value={division} onValueChange={setDivision}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Division" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Divisions</SelectItem>
-              {divisionOptions?.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <span className="text-xs text-muted-foreground flex items-center gap-1.5 mr-auto">
+            <Users className="h-3.5 w-3.5" />
+            {total} member{total !== 1 ? 's' : ''}
+          </span>
 
-          {/* Role filter */}
           <Select value={role} onValueChange={setRole}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Role" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[130px]"><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="player">Player</SelectItem>
+              <SelectItem value="captain">Captain</SelectItem>
               <SelectItem value="coach">Coach</SelectItem>
               <SelectItem value="official">Official</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Status filter */}
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="active">Active</SelectItem>
@@ -320,112 +236,111 @@ export default function MembersAll() {
           </Select>
         </div>
 
-        {/* Table header */}
-        <div className="hidden sm:grid grid-cols-[1fr_130px_140px_60px_60px_100px_90px] px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
+        {/* Column header */}
+        <div className="hidden sm:grid grid-cols-[1fr_90px_55px_55px_55px_90px_80px] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
           <span>Name</span>
-          <span>Team</span>
-          <span>Division</span>
+          <span>Member ID</span>
           <span className="text-center">OFF</span>
           <span className="text-center">DEF</span>
+          <span className="text-center">QB</span>
           <span>Role</span>
           <span className="text-right">Status</span>
         </div>
 
-        {/* Table body */}
+        {/* Rows */}
         {isLoading ? (
-          <TableSkeleton />
-        ) : isError ? (
-          <div className="px-5 py-12 text-center">
-            <p className="text-sm text-destructive font-medium">Failed to load members</p>
-            <p className="text-xs text-muted-foreground mt-1">Check your connection and try again.</p>
+          <div className="divide-y divide-border">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="px-5 py-3.5 flex items-center gap-4">
+                <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-16 hidden sm:block" />
+                <Skeleton className="h-4 w-8 hidden sm:block" />
+                <Skeleton className="h-4 w-8 hidden sm:block" />
+                <Skeleton className="h-4 w-8 hidden sm:block" />
+                <Skeleton className="h-4 w-14 hidden sm:block" />
+                <Skeleton className="h-5 w-14 ml-auto hidden sm:block" />
+              </div>
+            ))}
           </div>
         ) : members.length === 0 ? (
-          <EmptyState hasFilters={hasFilters} />
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
+              <UserX className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-semibold text-foreground">No members found</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+              Try adjusting your search or filters.
+            </p>
+          </div>
         ) : (
           <div className="divide-y divide-border">
-            {members.map((member) => (
+            {members.map((m) => (
               <button
-                key={member.id}
-                onClick={() => handleRowClick(member.id)}
-                className="w-full text-left px-5 py-3.5 grid grid-cols-1 sm:grid-cols-[1fr_130px_140px_60px_60px_100px_90px] items-center gap-2 sm:gap-4 hover:bg-muted/40 transition-colors cursor-pointer"
+                key={m.id}
+                onClick={() => handleRowClick(m.id)}
+                className="w-full text-left px-5 py-3 grid grid-cols-1 sm:grid-cols-[1fr_90px_55px_55px_55px_90px_80px] items-center gap-2 sm:gap-4 hover:bg-muted/40 transition-colors cursor-pointer"
               >
-                {/* Name + avatar */}
+                {/* Avatar + Name */}
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 uppercase">
-                    {member.avatar_url ? (
-                      <img src={member.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                    {m.avatar_url ? (
+                      <img src={m.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
                     ) : (
-                      `${member.first_name?.charAt(0) ?? ''}${member.last_name?.charAt(0) ?? ''}`
+                      `${m.first_name?.charAt(0) ?? ''}${m.last_name?.charAt(0) ?? ''}`
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-foreground truncate">
-                        {member.first_name} {member.last_name}
-                      </p>
-                      {member.is_qb && member.qb_rating != null && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-mono font-semibold border-primary/30 text-primary shrink-0">
-                          QB {member.qb_rating}
-                        </Badge>
-                      )}
-                    </div>
-                    {member.email && (
-                      <p className="text-xs text-muted-foreground truncate">{member.email}</p>
-                    )}
-                  </div>
+                  <span className="text-sm font-medium text-foreground truncate">
+                    {m.first_name} {m.last_name}
+                  </span>
                 </div>
 
-                {/* Team */}
-                <span className="text-sm text-foreground truncate hidden sm:block">
-                  {member.team?.name ?? '—'}
-                </span>
+                {/* Member ID */}
+                <span className="text-sm font-mono text-muted-foreground hidden sm:block">#{m.id}</span>
 
-                {/* Division */}
-                <span className="text-sm text-muted-foreground truncate hidden sm:block">
-                  {member.division?.name ?? '—'}
-                </span>
-
-                {/* OFF Rating */}
+                {/* OFF */}
                 <span className="text-sm font-mono font-semibold text-foreground text-center hidden sm:block">
-                  {member.off_rating != null ? member.off_rating : '—'}
+                  {m.off_rating ?? '—'}
                 </span>
 
-                {/* DEF Rating */}
+                {/* DEF */}
                 <span className="text-sm font-mono font-semibold text-foreground text-center hidden sm:block">
-                  {member.def_rating != null ? member.def_rating : '—'}
+                  {m.def_rating ?? '—'}
+                </span>
+
+                {/* QB */}
+                <span className="text-sm font-mono font-semibold text-center hidden sm:block">
+                  {m.is_qb && m.qb_rating != null ? (
+                    <span className="text-primary">{m.qb_rating}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </span>
 
                 {/* Role */}
-                <span className="text-sm text-foreground capitalize hidden sm:block">
-                  {member.role ?? '—'}
-                </span>
+                <span className="text-sm text-foreground capitalize hidden sm:block">{m.role ?? '—'}</span>
 
                 {/* Status */}
                 <div className="hidden sm:flex justify-end">
-                  <StatusBadge status={member.status} />
+                  {(() => {
+                    const s = (m.status ?? 'unknown').toLowerCase();
+                    return (
+                      <Badge
+                        variant={s === 'active' ? 'default' : 'secondary'}
+                        className="gap-1.5 font-medium text-xs"
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${s === 'active' ? 'bg-accent' : 'bg-muted-foreground'}`} />
+                        {m.status}
+                      </Badge>
+                    );
+                  })()}
                 </div>
               </button>
             ))}
           </div>
         )}
-
-        {/* Footer with count */}
-        {!isLoading && members.length > 0 && (
-          <div className="px-5 py-3 border-t border-border flex items-center justify-between">
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5" />
-              {membersResponse?.meta?.total ?? members.length} member{(membersResponse?.meta?.total ?? members.length) !== 1 ? 's' : ''}
-            </span>
-            {membersResponse?.meta && membersResponse.meta.last_page > 1 && (
-              <span className="text-xs text-muted-foreground">
-                Page {membersResponse.meta.current_page} of {membersResponse.meta.last_page}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Add Member Sheet */}
       <AddMemberSheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </div>
   );

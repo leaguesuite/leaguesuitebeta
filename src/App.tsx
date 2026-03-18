@@ -86,11 +86,12 @@ const App = () => (
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/accolades" element={<AccoladesPage />} />
+            <Route path="/members" element={<MembersAll />} />
             <Route path="/members/all" element={<MembersAll />} />
-            <Route path="/members/players" element={<MembersPage />} />
-            <Route path="/members/coaches" element={<MembersPage />} />
-            <Route path="/members/staff" element={<MembersPage />} />
-            <Route path="/members/*" element={<MembersPage />} />
+            <Route path="/members/players" element={<MembersAll />} />
+            <Route path="/members/coaches" element={<MembersAll />} />
+            <Route path="/members/staff" element={<MembersAll />} />
+            <Route path="/members/*" element={<MembersAll />} />
             <Route path="/cms/pages" element={<CMSPagesPage />} />
             <Route path="/cms/articles" element={<PlaceholderPage title="Articles" description="Manage news articles and blog posts." />} />
             <Route path="/cms/news" element={<NewsPage />} />
