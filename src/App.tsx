@@ -6,10 +6,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import GamesPage from "@/pages/season/GamesPage";
+import StandingsPage from "@/pages/season/StandingsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
+import StandingsRulesPage from "@/pages/structure/StandingsRulesPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
@@ -31,7 +33,7 @@ const App = () => (
             <Route path="/season/overview" element={<PlaceholderPage title="Season Overview" description="Current season summary and key metrics." />} />
             <Route path="/season/games" element={<GamesPage />} />
             <Route path="/season/teams" element={<PlaceholderPage title="Teams & Rosters" description="Manage teams and player rosters for the active season." />} />
-            <Route path="/season/standings" element={<PlaceholderPage title="Standings" description="Division standings and rankings." />} />
+            <Route path="/season/standings" element={<StandingsPage />} />
             <Route path="/season/stats" element={<PlaceholderPage title="Stats" description="Player and team statistics overview." />} />
             <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
             <Route path="/season/reports" element={<PlaceholderPage title="Reports & Exports" description="Generate and download reports." />} />
@@ -49,6 +51,7 @@ const App = () => (
             <Route path="/structure/locations" element={<LocationsPage />} />
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
+            <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/accolades" element={<AccoladesPage />} />
             <Route path="/members/all" element={<MembersPage />} />
