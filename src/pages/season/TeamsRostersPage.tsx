@@ -43,6 +43,7 @@ export default function TeamsRostersPage() {
   const [rosterOpen, setRosterOpen] = useState(false);
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [editForm, setEditForm] = useState<Team | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const filteredTeams = divisionFilter === "All Divisions" ? teams : teams.filter(t => t.division === divisionFilter);
 
