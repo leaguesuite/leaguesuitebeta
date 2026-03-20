@@ -4,86 +4,12 @@ import { ArrowLeft, Shield, Swords, Target, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const API_BASE = 'https://flagplusfootball.com';
-const defaultHeaders: HeadersInit = {
-  'X-Requested-With': 'XMLHttpRequest',
-  Accept: 'application/json',
-  'Content-Type': 'application/json',
-};
-
-interface PlayerInfo {
-  id: number | string;
-  first_name: string;
-  last_name: string;
-  email?: string;
-  phone?: string;
-  avatar_url?: string | null;
-  role?: string;
-  status?: string;
-  off_rating?: number | null;
-  def_rating?: number | null;
-  qb_rating?: number | null;
-  is_qb?: boolean;
-}
-
-interface TeamHistoryRow {
-  season_name: string;
-  team_name: string;
-  division_name: string;
-}
-
-interface SeasonStatRow {
-  season_name: string;
-  team_name: string;
-  division_name: string;
-  GP?: number;
-  TD?: number;
-  YDS?: number;
-  INT?: number;
-  COM?: number;
-}
-
-interface CareerTotals {
-  GP?: number;
-  TD?: number;
-  YDS?: number;
-  INT?: number;
-  COM?: number;
-}
-
-async function fetchPlayer(id: string): Promise<PlayerInfo> {
-  const res = await fetch(`${API_BASE}/api/v1/${id}`, {
-    credentials: 'include',
-    headers: defaultHeaders,
-  });
-  if (!res.ok) throw new Error(`Player fetch failed: ${res.status}`);
-  const json = await res.json();
-  return json.data ?? json;
-}
-
-async function fetchSeasonStats(id: string): Promise<SeasonStatRow[]> {
-  const codes = ['GP', 'TD', 'YDS', 'INT', 'COM'];
-  const query = new URLSearchParams({ memberId: id });
-  codes.forEach((c) => query.append('statsCode[]', c));
-  const res = await fetch(`${API_BASE}/api/v1/player-stats-season?${query}`, {
-    credentials: 'include',
-    headers: defaultHeaders,
-  });
-  if (!res.ok) throw new Error(`Season stats fetch failed: ${res.status}`);
-  const json = await res.json();
-  return json.data ?? json;
-}
-
-async function fetchCareerTotals(): Promise<CareerTotals> {
-  const res = await fetch(
-    `${API_BASE}/api/v1/career-totals?${new URLSearchParams({ stat_type: 'passing' })}`,
-    { credentials: 'include', headers: defaultHeaders },
-  );
-  if (!res.ok) throw new Error(`Career totals fetch failed: ${res.status}`);
-  const json = await res.json();
-  return json.data ?? json;
-}
+import {
+  fetchPlayer,
+  fetchSeasonStats,
+  fetchCareerTotals,
+} from '@/lib/api/members';
+import type { PlayerInfo } from '@/lib/api/members';
 
 /* ─── Sub-components ──────────────────────────────────────────────────────── */
 
@@ -214,7 +140,6 @@ export default function MemberProfile() {
           </div>
 
           <div className="flex-1 min-w-0 space-y-2.5">
-            {/* Name + ID */}
             <div>
               <h1 className="text-xl font-bold text-foreground">
                 {player.first_name} {player.last_name}
@@ -222,7 +147,6 @@ export default function MemberProfile() {
               <span className="text-sm font-mono text-muted-foreground">Member #{player.id}</span>
             </div>
 
-            {/* Badges row */}
             <div className="flex flex-wrap items-center gap-2">
               {player.role && (
                 <Badge variant="outline" className="capitalize text-xs">
@@ -243,7 +167,6 @@ export default function MemberProfile() {
               })()}
             </div>
 
-            {/* Ratings */}
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <RatingBadge label="OFF" value={player.off_rating} icon={Swords} />
               <RatingBadge label="DEF" value={player.def_rating} icon={Shield} />
@@ -262,7 +185,6 @@ export default function MemberProfile() {
             <h2 className="text-sm font-semibold text-foreground">Season History</h2>
           </div>
 
-          {/* Column headers */}
           <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_60px_60px_70px] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
             <span>Season</span>
             <span>Team</span>
@@ -292,7 +214,6 @@ export default function MemberProfile() {
                 </div>
               ))}
 
-              {/* Career totals */}
               {careerTotals && (
                 <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_60px_60px_70px] px-5 py-3 items-center gap-1 sm:gap-4 text-sm bg-muted/30 font-bold">
                   <span className="text-foreground">Career Totals</span>
