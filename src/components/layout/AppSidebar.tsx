@@ -44,15 +44,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Setup",
     items: [
       {
-        label: "Season & Tournament", icon: PlusCircle,
-        children: [
-          { label: "New Season Wizard", path: "/setup/new-season", icon: Zap },
-          { label: "Seasons", path: "/setup/seasons" },
-          { label: "Tournaments", path: "/setup/tournaments" },
-          { label: "Division Assignment", path: "/setup/division-assignment" },
-          { label: "Conferences", path: "/setup/conferences" },
-          { label: "Scheduling Setup", path: "/setup/scheduling" },
-        ],
+        label: "New Competition Wizard", icon: PlusCircle,
+        path: "/setup/new-season",
       },
     ],
   },
@@ -63,10 +56,14 @@ const navSections: { title: string; items: NavItem[] }[] = [
         label: "League Structure", icon: Layers,
         children: [
           { label: "Leagues", path: "/structure/leagues" },
+          { label: "Seasons", path: "/setup/seasons" },
+          { label: "Tournaments", path: "/setup/tournaments" },
           { label: "Categories", path: "/structure/categories" },
           { label: "Divisions", path: "/structure/divisions" },
           { label: "Conferences", path: "/structure/conferences" },
           { label: "Subdivisions", path: "/structure/subdivisions" },
+          { label: "Division Assignment", path: "/setup/division-assignment" },
+          { label: "Scheduling Setup", path: "/setup/scheduling" },
           { label: "Locations & Fields", path: "/structure/locations" },
           { label: "Rules Settings", path: "/structure/rules" },
           { label: "Stats Tracking", path: "/structure/stats-tracking" },
