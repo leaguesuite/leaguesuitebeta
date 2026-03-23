@@ -17,6 +17,7 @@ import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
 import StandingsRulesPage from "@/pages/structure/StandingsRulesPage";
+import StatsTrackingPage from "@/pages/structure/StatsTrackingPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
@@ -88,7 +89,7 @@ const App = () => (
             <Route path="/structure/subdivisions" element={<PlaceholderPage title="Subdivisions" description="Manage conference subdivisions." />} />
             <Route path="/structure/locations" element={<LocationsPage />} />
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
-            <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
+            <Route path="/structure/stats-tracking" element={<StatsTrackingPage />} />
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
             <Route path="/ratings/eagle-wizard" element={<EagleRatingsWizard />} />
             <Route path="/registration" element={<RegistrationPage />} />
