@@ -28,6 +28,7 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
+import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
 import PublicHomePage from "@/pages/public/PublicHomePage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
