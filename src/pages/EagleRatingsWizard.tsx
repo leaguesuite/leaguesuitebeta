@@ -39,7 +39,7 @@ export default function EagleRatingsWizard() {
   const canProceed = () => {
     switch (currentStep) {
       case 0:
-        return config.seasonId && config.ratingType;
+        return config.seasonId && config.ratingTypes.length > 0;
       case 1:
         return true;
       case 2:

@@ -33,6 +33,7 @@ export interface EagleRatingsConfig {
 export const defaultEagleConfig: EagleRatingsConfig = {
   seasonId: '',
   ratingType: 'offensive',
+  ratingTypes: ['offensive', 'defensive', 'quarterback'],
   useWeightedDivisions: false,
   divisions: [],
   globalRatingRange: { min: 60, max: 90 },
