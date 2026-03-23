@@ -93,6 +93,7 @@ const App = () => (
             <Route path="/members/players" element={<MembersAll />} />
             <Route path="/members/coaches" element={<MembersAll />} />
             <Route path="/members/staff" element={<MembersAll />} />
+            <Route path="/members/merge" element={<MergeDuplicatesPage />} />
             <Route path="/members/:id" element={<MemberProfile />} />
             <Route path="/cms/pages" element={<CMSPagesPage />} />
             <Route path="/cms/articles" element={<PlaceholderPage title="Articles" description="Manage news articles and blog posts." />} />
