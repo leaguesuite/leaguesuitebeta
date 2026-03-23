@@ -157,6 +157,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Branding", path: "/settings/branding" },
           { label: "Domains", path: "/settings/domains" },
           { label: "Notifications", path: "/settings/notifications" },
+          { label: "Languages", path: "/settings/languages" },
           { label: "Audit Log", path: "/settings/audit" },
         ],
       },
