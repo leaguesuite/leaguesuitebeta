@@ -27,6 +27,7 @@ import CMSPagesPage from "@/pages/cms/CMSPagesPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
+import DocumentsPage from "@/pages/cms/DocumentsPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
