@@ -47,6 +47,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         label: "New Competition Wizard", icon: PlusCircle,
         path: "/setup/new-season",
       },
+      { label: "Registration", icon: ClipboardList, path: "/registration" },
     ],
   },
   {
@@ -76,62 +77,6 @@ const navSections: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Ratings",
-    items: [
-      {
-        label: "Player Ratings", icon: Bird,
-        path: "/ratings/eagle-wizard",
-      },
-    ],
-  },
-  {
-    title: "Registration",
-    items: [
-      { label: "Registration", icon: ClipboardList, path: "/registration" },
-    ],
-  },
-  {
-    title: "Accolades",
-    items: [
-      { label: "Accolades Hub", icon: Trophy, path: "/accolades" },
-    ],
-  },
-  {
-    title: "People",
-    items: [
-      { label: "Members", icon: Users, path: "/members/all" },
-      { label: "Merge Duplicates", icon: UserCheck, path: "/members/merge" },
-    ],
-  },
-  {
-    title: "Content",
-    items: [
-      {
-        label: "CMS", icon: FileText,
-        children: [
-          { label: "Pages", path: "/cms/pages" },
-          { label: "News", path: "/cms/news" },
-          { label: "Articles", path: "/cms/articles" },
-          { label: "AI Content", path: "/cms/ai-content" },
-          { label: "Authors", path: "/cms/authors" },
-          
-          { label: "Documents", path: "/cms/documents" },
-        ],
-      },
-      {
-        label: "Forms", icon: ClipboardList,
-        children: [
-          { label: "All Forms", path: "/forms/all" },
-          { label: "Submissions", path: "/forms/submissions" },
-          { label: "Templates", path: "/forms/templates" },
-          { label: "Payments", path: "/forms/payments" },
-          { label: "Embed Settings", path: "/forms/embed" },
-        ],
-      },
-      { label: "Imports / Exports", icon: Download, path: "/members/imports" },
-    ],
-  },
-  {
     title: "Administration",
     items: [
       {
@@ -158,6 +103,47 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Languages", path: "/settings/languages" },
         ],
       },
+    ],
+  },
+  {
+    title: "People",
+    items: [
+      { label: "Members", icon: Users, path: "/members/all" },
+      { label: "Merge Duplicates", icon: UserCheck, path: "/members/merge" },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      {
+        label: "CMS", icon: FileText,
+        children: [
+          { label: "Pages", path: "/cms/pages" },
+          { label: "News", path: "/cms/news" },
+          { label: "Articles", path: "/cms/articles" },
+          { label: "AI Content", path: "/cms/ai-content" },
+          { label: "Authors", path: "/cms/authors" },
+          { label: "Documents", path: "/cms/documents" },
+        ],
+      },
+      {
+        label: "Forms", icon: ClipboardList,
+        children: [
+          { label: "All Forms", path: "/forms/all" },
+          { label: "Submissions", path: "/forms/submissions" },
+          { label: "Templates", path: "/forms/templates" },
+          { label: "Payments", path: "/forms/payments" },
+          { label: "Embed Settings", path: "/forms/embed" },
+        ],
+      },
+      { label: "Imports / Exports", icon: Download, path: "/members/imports" },
+    ],
+  },
+  {
+    title: "Features",
+    items: [
+      { label: "Player Ratings", icon: Bird, path: "/ratings/eagle-wizard" },
+      { label: "Accolades Hub", icon: Trophy, path: "/accolades" },
     ],
   },
 ];
