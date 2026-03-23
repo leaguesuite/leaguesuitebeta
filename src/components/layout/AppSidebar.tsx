@@ -116,6 +116,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Authors", path: "/cms/authors" },
           { label: "Media / Documents", path: "/cms/media" },
           { label: "Documents", path: "/cms/documents" },
+        ],
       },
       {
         label: "Forms", icon: ClipboardList,
