@@ -191,7 +191,7 @@ function BracketPreviewSVG({ teamCount, height = 300 }: { teamCount: number; hei
 
 // ─── Match Card ──────────────────────────────────────────────────────────────
 
-function MatchCardUI({ match }: { match: Match }) {
+function MatchCardUI({ match }: { match: LegacyMatch }) {
   const isComplete = match.status === "completed";
   return (
     <div className="rounded-lg border border-border bg-card p-3 shadow-sm w-56 shrink-0">
