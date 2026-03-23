@@ -2,7 +2,7 @@ export interface StatDefinition {
   id: string;
   label: string;
   abbreviation: string;
-  category: 'passing' | 'rushing' | 'receiving' | 'defense' | 'special_teams' | 'general';
+  category: 'passing' | 'rushing' | 'receiving' | 'defense' | 'converts' | 'special_teams' | 'general';
   description: string;
   defaultEnabled: boolean;
 }
