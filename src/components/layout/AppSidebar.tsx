@@ -139,8 +139,6 @@ const navSections: { title: string; items: NavItem[] }[] = [
         children: [
           { label: "Users", path: "/admin/users" },
           { label: "Roles", path: "/admin/roles" },
-          { label: "Permission Groups", path: "/admin/permissions" },
-          { label: "App Access Controls", path: "/admin/access" },
         ],
       },
       {
