@@ -46,6 +46,11 @@ export const statDefinitions: StatDefinition[] = [
   { id: 'def_pd', label: 'Passes Defended', abbreviation: 'PD', category: 'defense', description: 'Passes knocked down or deflected', defaultEnabled: false },
   { id: 'def_safety', label: 'Safeties', abbreviation: 'SAF', category: 'defense', description: 'Safeties forced', defaultEnabled: false },
 
+  // Converts
+  { id: 'conv_1pt', label: '1-Point Converts', abbreviation: '1PT', category: 'converts', description: '1-point conversion attempts made', defaultEnabled: true },
+  { id: 'conv_2pt', label: '2-Point Converts', abbreviation: '2PT', category: 'converts', description: '2-point conversion attempts made', defaultEnabled: true },
+  { id: 'conv_att', label: 'Convert Attempts', abbreviation: 'ATT', category: 'converts', description: 'Total conversion attempts', defaultEnabled: false },
+
   // Special Teams
   { id: 'st_ret_yds', label: 'Return Yards', abbreviation: 'YDS', category: 'special_teams', description: 'Total return yards', defaultEnabled: false },
   { id: 'st_ret_td', label: 'Return Touchdowns', abbreviation: 'TD', category: 'special_teams', description: 'Touchdowns on returns', defaultEnabled: false },
@@ -62,8 +67,9 @@ export const statCategoryLabels: Record<string, string> = {
   rushing: 'Rushing',
   receiving: 'Receiving',
   defense: 'Defense',
+  converts: 'Converts',
   special_teams: 'Special Teams',
   general: 'General',
 };
 
-export const statCategoryOrder = ['general', 'passing', 'rushing', 'receiving', 'defense', 'special_teams'] as const;
+export const statCategoryOrder = ['general', 'passing', 'rushing', 'receiving', 'defense', 'converts', 'special_teams'] as const;
