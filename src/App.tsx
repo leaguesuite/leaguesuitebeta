@@ -31,6 +31,7 @@ import DocumentsPage from "@/pages/cms/DocumentsPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
+import BracketManagerPage from "@/pages/features/BracketManagerPage";
 import BrandingPage from "@/pages/settings/BrandingPage";
 import PublicHomePage from "@/pages/public/PublicHomePage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
