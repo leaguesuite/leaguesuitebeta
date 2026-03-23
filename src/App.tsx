@@ -28,6 +28,7 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
+import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
 import PublicHomePage from "@/pages/public/PublicHomePage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
@@ -86,6 +87,7 @@ const App = () => (
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<PlaceholderPage title="Stats Tracking" description="Configure which stats to track." />} />
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
+            <Route path="/ratings/eagle-wizard" element={<EagleRatingsWizard />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/accolades" element={<AccoladesPage />} />
             <Route path="/members" element={<MembersAll />} />
