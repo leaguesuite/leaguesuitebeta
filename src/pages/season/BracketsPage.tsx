@@ -80,7 +80,7 @@ function createBracketFromTeams(
       const team1: TeamMatchData = { id: `${id}-r${ri}-m${mi}-t1`, name: t1Name, seed: m.seeds[0], score: null };
       const team2: TeamMatchData = { id: `${id}-r${ri}-m${mi}-t2`, name: t2Name, seed: m.seeds.length > 1 ? m.seeds[1] : undefined, score: null };
 
-      let matchStatus: Match["status"] = "upcoming";
+      let matchStatus: LegacyMatch["status"] = "upcoming";
       let winnerId: string | undefined;
 
       if (withScores && ri === 0) {
