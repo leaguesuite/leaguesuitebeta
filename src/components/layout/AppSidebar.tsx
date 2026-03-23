@@ -62,9 +62,12 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Divisions", path: "/structure/divisions" },
           { label: "Conferences", path: "/structure/conferences" },
           { label: "Subdivisions", path: "/structure/subdivisions" },
-          { label: "Division Assignment", path: "/setup/division-assignment" },
-          { label: "Scheduling Setup", path: "/setup/scheduling" },
           { label: "Locations & Fields", path: "/structure/locations" },
+        ],
+      },
+      {
+        label: "League Settings", icon: Settings,
+        children: [
           { label: "Rules Settings", path: "/structure/rules" },
           { label: "Stats Tracking", path: "/structure/stats-tracking" },
           { label: "Standings Rules", path: "/structure/standings-rules" },
