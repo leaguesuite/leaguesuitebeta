@@ -66,7 +66,7 @@ function createBracketFromTeams(
   const structure = generateBracketStructure(teamCount);
   const numRounds = structure.length;
 
-  const rounds: Round[] = structure.map((roundMatches, ri) => {
+  const rounds: LegacyRound[] = structure.map((roundMatches, ri) => {
     const roundsFromEnd = numRounds - ri - 1;
     let roundName = `Round ${ri + 1}`;
     if (roundsFromEnd === 0) roundName = "Finals";
