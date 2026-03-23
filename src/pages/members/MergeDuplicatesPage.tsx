@@ -192,7 +192,7 @@ export default function MergeDuplicatesPage() {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium text-foreground">
                       {group.match_reason}
                     </span>
