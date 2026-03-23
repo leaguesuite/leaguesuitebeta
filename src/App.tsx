@@ -27,6 +27,7 @@ import CMSPagesPage from "@/pages/cms/CMSPagesPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
+import DocumentsPage from "@/pages/cms/DocumentsPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
@@ -103,6 +104,7 @@ const App = () => (
             <Route path="/cms/ai-content" element={<AIContentPage />} />
             <Route path="/cms/authors" element={<PlaceholderPage title="Authors" description="Manage content authors." />} />
             <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
+            <Route path="/cms/documents" element={<DocumentsPage />} />
             <Route path="/cms/media" element={<PlaceholderPage title="Media / Documents" description="Manage media files and documents." />} />
             <Route path="/forms/*" element={<PlaceholderPage title="Forms" description="Manage forms, submissions, and payments." />} />
             <Route path="/admin/users" element={<UsersPermissionsPage />} />
