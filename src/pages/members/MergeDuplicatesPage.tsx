@@ -124,10 +124,10 @@ export default function MergeDuplicatesPage() {
 
   const confidenceBadge = (confidence: number) => {
     if (confidence >= 90)
-      return <Badge className="bg-destructive/10 text-destructive border-destructive/20">High {confidence}%</Badge>;
+      return <Badge variant="destructive">{confidence}% — High</Badge>;
     if (confidence >= 75)
-      return <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20">Medium {confidence}%</Badge>;
-    return <Badge variant="secondary">{confidence}%</Badge>;
+      return <Badge variant="secondary">{confidence}% — Medium</Badge>;
+    return <Badge variant="outline">{confidence}%</Badge>;
   };
 
   return (
