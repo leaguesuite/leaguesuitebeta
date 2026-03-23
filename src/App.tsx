@@ -31,6 +31,7 @@ import DocumentsPage from "@/pages/cms/DocumentsPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
 import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
+import BrandingPage from "@/pages/settings/BrandingPage";
 import PublicHomePage from "@/pages/public/PublicHomePage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
 import PublicSchedulePage from "@/pages/public/PublicSchedulePage";
@@ -114,6 +115,7 @@ const App = () => (
             <Route path="/integrations/*" element={<PlaceholderPage title="Integrations" description="Manage third-party integrations." />} />
             <Route path="/settings/navigation" element={<NavigationMenusPage />} />
             <Route path="/settings/domains" element={<DomainsPage />} />
+            <Route path="/settings/branding" element={<BrandingPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
           </Route>
           <Route path="*" element={<NotFound />} />
