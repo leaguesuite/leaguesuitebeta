@@ -17,6 +17,7 @@ import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
 import StandingsRulesPage from "@/pages/structure/StandingsRulesPage";
+import StatsTrackingPage from "@/pages/structure/StatsTrackingPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
