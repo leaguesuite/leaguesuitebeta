@@ -174,7 +174,7 @@ export default function MergeDuplicatesPage() {
       {/* Duplicate Groups */}
       {filtered.length === 0 ? (
         <div className="section-card text-center py-12">
-          <Check className="h-12 w-12 text-green-500 mx-auto mb-3" />
+          <Check className="h-12 w-12 text-primary mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-foreground">No Duplicates Found</h3>
           <p className="text-muted-foreground mt-1">
             All member records appear to be unique.
