@@ -73,7 +73,7 @@ function createBracketFromTeams(
     else if (roundsFromEnd === 1) roundName = "Semi-Finals";
     else if (roundsFromEnd === 2) roundName = "Quarter-Finals";
 
-    const matches: Match[] = roundMatches.map((m, mi) => {
+    const matches: LegacyMatch[] = roundMatches.map((m, mi) => {
       const t1Name = ri === 0 && m.seeds[0] <= teamNames.length ? teamNames[m.seeds[0] - 1] : "TBD";
       const t2Name = ri === 0 && m.seeds.length > 1 && m.seeds[1] <= teamNames.length ? teamNames[m.seeds[1] - 1] : "TBD";
 
