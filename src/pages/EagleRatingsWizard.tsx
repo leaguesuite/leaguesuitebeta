@@ -39,7 +39,7 @@ export default function EagleRatingsWizard() {
   const canProceed = () => {
     switch (currentStep) {
       case 0:
-        return config.seasonId && config.ratingType;
+        return config.seasonId && config.ratingTypes.length > 0;
       case 1:
         return true;
       case 2:
@@ -97,7 +97,7 @@ export default function EagleRatingsWizard() {
             <Bird className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">Eagle Ratings</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Player Ratings</h1>
             <p className="text-sm text-muted-foreground">Configure player rating parameters</p>
           </div>
         </div>

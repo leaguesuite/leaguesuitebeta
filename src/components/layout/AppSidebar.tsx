@@ -79,7 +79,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Ratings",
     items: [
       {
-        label: "Eagle Ratings", icon: Bird,
+        label: "Player Ratings", icon: Bird,
         path: "/ratings/eagle-wizard",
       },
     ],

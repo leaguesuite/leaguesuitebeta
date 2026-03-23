@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Target, Shield, Crosshair } from 'lucide-react';
 
 interface Props {
@@ -17,12 +17,6 @@ interface Props {
 }
 
 const ratingTypes: { value: EagleRatingType; label: string; description: string; icon: typeof Target }[] = [
-  {
-    value: 'quarterback',
-    label: 'Quarterback',
-    description: 'Passing efficiency, decision making, and leadership',
-    icon: Crosshair,
-  },
   {
     value: 'offensive',
     label: 'Offensive',
@@ -35,9 +29,23 @@ const ratingTypes: { value: EagleRatingType; label: string; description: string;
     description: 'Coverage, flag pulling, and playmaking',
     icon: Shield,
   },
+  {
+    value: 'quarterback',
+    label: 'Quarterback',
+    description: 'Passing efficiency, decision making, and leadership',
+    icon: Crosshair,
+  },
 ];
 
 export function EagleSeasonTypeStep({ config, updateConfig, seasons }: Props) {
+  const toggleRatingType = (type: EagleRatingType) => {
+    const current = config.ratingTypes;
+    const updated = current.includes(type)
+      ? current.filter((t) => t !== type)
+      : [...current, type];
+    updateConfig({ ratingTypes: updated });
+  };
+
   return (
     <div className="space-y-8">
       <div className="space-y-3">
@@ -60,37 +68,34 @@ export function EagleSeasonTypeStep({ config, updateConfig, seasons }: Props) {
       </div>
 
       <div className="space-y-3">
-        <Label className="text-base font-medium">Rating Type</Label>
-        <RadioGroup
-          value={config.ratingType}
-          onValueChange={(value) => updateConfig({ ratingType: value as EagleRatingType })}
-          className="grid gap-4"
-        >
+        <Label className="text-base font-medium">Rating Types to Run</Label>
+        <p className="text-sm text-muted-foreground">Select one or more rating types to generate in this run.</p>
+        <div className="grid gap-3">
           {ratingTypes.map((type) => {
             const Icon = type.icon;
+            const checked = config.ratingTypes.includes(type.value);
             return (
-              <div key={type.value}>
-                <RadioGroupItem
-                  value={type.value}
-                  id={type.value}
-                  className="peer sr-only"
+              <label
+                key={type.value}
+                className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-muted/50 ${
+                  checked ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+              >
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={() => toggleRatingType(type.value)}
                 />
-                <Label
-                  htmlFor={type.value}
-                  className="flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-muted/50 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{type.label}</div>
-                    <div className="text-sm text-muted-foreground">{type.description}</div>
-                  </div>
-                </Label>
-              </div>
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">{type.label}</div>
+                  <div className="text-sm text-muted-foreground">{type.description}</div>
+                </div>
+              </label>
             );
           })}
-        </RadioGroup>
+        </div>
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ export interface SeasonWeight {
 export interface EagleRatingsConfig {
   seasonId: string;
   ratingType: EagleRatingType;
+  ratingTypes: EagleRatingType[];
   useWeightedDivisions: boolean;
   divisions: DivisionOrder[];
   globalRatingRange: { min: number; max: number };
@@ -32,6 +33,7 @@ export interface EagleRatingsConfig {
 export const defaultEagleConfig: EagleRatingsConfig = {
   seasonId: '',
   ratingType: 'offensive',
+  ratingTypes: ['offensive', 'defensive', 'quarterback'],
   useWeightedDivisions: false,
   divisions: [],
   globalRatingRange: { min: 60, max: 90 },
