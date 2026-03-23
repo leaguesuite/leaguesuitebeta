@@ -117,6 +117,7 @@ const App = () => (
             <Route path="/settings/domains" element={<DomainsPage />} />
             <Route path="/settings/branding" element={<BrandingPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
+            <Route path="/features/brackets" element={<BracketManagerPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
