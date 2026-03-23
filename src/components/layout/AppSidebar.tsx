@@ -44,15 +44,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Setup",
     items: [
       {
-        label: "Season & Tournament", icon: PlusCircle,
-        children: [
-          { label: "New Season Wizard", path: "/setup/new-season", icon: Zap },
-          { label: "Seasons", path: "/setup/seasons" },
-          { label: "Tournaments", path: "/setup/tournaments" },
-          { label: "Division Assignment", path: "/setup/division-assignment" },
-          { label: "Conferences", path: "/setup/conferences" },
-          { label: "Scheduling Setup", path: "/setup/scheduling" },
-        ],
+        label: "New Competition Wizard", icon: PlusCircle,
+        path: "/setup/new-season",
       },
     ],
   },
