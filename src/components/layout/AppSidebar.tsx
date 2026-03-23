@@ -97,6 +97,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Players", path: "/members/players" },
           { label: "Coaches", path: "/members/coaches" },
           { label: "Staff", path: "/members/staff" },
+          { label: "Merge Duplicates", path: "/members/merge" },
           { label: "Imports / Exports", path: "/members/imports" },
         ],
       },
