@@ -18,6 +18,7 @@ export interface SeasonWeight {
 export interface EagleRatingsConfig {
   seasonId: string;
   ratingType: EagleRatingType;
+  ratingTypes: EagleRatingType[];
   useWeightedDivisions: boolean;
   divisions: DivisionOrder[];
   globalRatingRange: { min: number; max: number };
