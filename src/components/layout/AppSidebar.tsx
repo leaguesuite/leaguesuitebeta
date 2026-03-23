@@ -99,17 +99,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "People",
     items: [
-      {
-        label: "Members", icon: Users,
-        children: [
-          { label: "All Members", path: "/members/all" },
-          { label: "Players", path: "/members/players" },
-          { label: "Coaches", path: "/members/coaches" },
-          { label: "Staff", path: "/members/staff" },
-          { label: "Merge Duplicates", path: "/members/merge" },
-          { label: "Imports / Exports", path: "/members/imports" },
-        ],
-      },
+      { label: "Members", icon: Users, path: "/members/all" },
+      { label: "Merge Duplicates", icon: UserCheck, path: "/members/merge" },
     ],
   },
   {
@@ -136,6 +127,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Embed Settings", path: "/forms/embed" },
         ],
       },
+      { label: "Imports / Exports", icon: Download, path: "/members/imports" },
     ],
   },
   {
