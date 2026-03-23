@@ -5,7 +5,7 @@ import {
   ClipboardList, Shield, Plug, ChevronDown, ChevronRight, MapPin,
   BarChart3, UserCheck, Download, Globe, Layers, FolderOpen, Zap,
   PlusCircle, Flag, GitBranch, BookOpen, Image, Menu as MenuIcon,
-  ScrollText, CreditCard, Code, Share2, Bell, Lock, Palette, Link2
+  ScrollText, CreditCard, Code, Share2, Bell, Lock, Palette, Link2, Bird
 } from "lucide-react";
 
 interface NavItem {
