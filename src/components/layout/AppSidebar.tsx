@@ -145,6 +145,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Player Ratings", icon: Bird, path: "/ratings/eagle-wizard" },
       { label: "Accolades Hub", icon: Trophy, path: "/accolades" },
+      { label: "Bracket Manager", icon: GitBranch, path: "/features/brackets" },
     ],
   },
 ];
