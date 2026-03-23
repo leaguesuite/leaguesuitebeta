@@ -8,7 +8,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { generateBracketStructure } from "@/utils/bracketGenerator";
-import type { Bracket, Match, Round, TeamMatchData } from "@/types/bracket";
+// Local types for this page's legacy bracket display
+interface TeamMatchData {
+  id: string;
+  name: string;
+  score?: number | null;
+  seed?: number;
+  logo?: string;
+}
+
+interface LegacyMatch {
+  id: string;
+  matchNumber: number;
+  teams: [TeamMatchData, TeamMatchData];
+  winnerId?: string;
+  status: "upcoming" | "inProgress" | "completed";
+  venue?: string;
+}
+
+interface LegacyRound {
+  id: string;
+  name: string;
+  date?: string;
+  matches: LegacyMatch[];
+}
+
+interface Bracket {
+  id: string;
+  name: string;
+  division: string;
+  rounds: LegacyRound[];
+  teamCount: number;
+  status: "setup" | "active" | "completed";
+  isReseeding: boolean;
+}
 import {
   Plus, Trophy, Edit, Trash2, ChevronRight, Play, CheckCircle2,
   Clock, Settings, Eye, Maximize2, RotateCcw, Shield,
@@ -33,21 +66,21 @@ function createBracketFromTeams(
   const structure = generateBracketStructure(teamCount);
   const numRounds = structure.length;
 
-  const rounds: Round[] = structure.map((roundMatches, ri) => {
+  const rounds: LegacyRound[] = structure.map((roundMatches, ri) => {
     const roundsFromEnd = numRounds - ri - 1;
     let roundName = `Round ${ri + 1}`;
     if (roundsFromEnd === 0) roundName = "Finals";
     else if (roundsFromEnd === 1) roundName = "Semi-Finals";
     else if (roundsFromEnd === 2) roundName = "Quarter-Finals";
 
-    const matches: Match[] = roundMatches.map((m, mi) => {
+    const matches: LegacyMatch[] = roundMatches.map((m, mi) => {
       const t1Name = ri === 0 && m.seeds[0] <= teamNames.length ? teamNames[m.seeds[0] - 1] : "TBD";
       const t2Name = ri === 0 && m.seeds.length > 1 && m.seeds[1] <= teamNames.length ? teamNames[m.seeds[1] - 1] : "TBD";
 
       const team1: TeamMatchData = { id: `${id}-r${ri}-m${mi}-t1`, name: t1Name, seed: m.seeds[0], score: null };
       const team2: TeamMatchData = { id: `${id}-r${ri}-m${mi}-t2`, name: t2Name, seed: m.seeds.length > 1 ? m.seeds[1] : undefined, score: null };
 
-      let matchStatus: Match["status"] = "upcoming";
+      let matchStatus: LegacyMatch["status"] = "upcoming";
       let winnerId: string | undefined;
 
       if (withScores && ri === 0) {
@@ -158,7 +191,7 @@ function BracketPreviewSVG({ teamCount, height = 300 }: { teamCount: number; hei
 
 // ─── Match Card ──────────────────────────────────────────────────────────────
 
-function MatchCardUI({ match }: { match: Match }) {
+function MatchCardUI({ match }: { match: LegacyMatch }) {
   const isComplete = match.status === "completed";
   return (
     <div className="rounded-lg border border-border bg-card p-3 shadow-sm w-56 shrink-0">
