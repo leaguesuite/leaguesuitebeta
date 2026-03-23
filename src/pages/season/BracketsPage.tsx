@@ -8,7 +8,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { generateBracketStructure } from "@/utils/bracketGenerator";
-import type { Bracket, Match, Round, TeamMatchData } from "@/types/bracket";
+// Local types for this page's legacy bracket display
+interface TeamMatchData {
+  id: string;
+  name: string;
+  score?: number | null;
+  seed?: number;
+  logo?: string;
+}
+
+interface LegacyMatch {
+  id: string;
+  matchNumber: number;
+  teams: [TeamMatchData, TeamMatchData];
+  winnerId?: string;
+  status: "upcoming" | "inProgress" | "completed";
+  venue?: string;
+}
+
+interface LegacyRound {
+  id: string;
+  name: string;
+  date?: string;
+  matches: LegacyMatch[];
+}
+
+interface Bracket {
+  id: string;
+  name: string;
+  division: string;
+  rounds: LegacyRound[];
+  teamCount: number;
+  status: "setup" | "active" | "completed";
+  isReseeding: boolean;
+}
 import {
   Plus, Trophy, Edit, Trash2, ChevronRight, Play, CheckCircle2,
   Clock, Settings, Eye, Maximize2, RotateCcw, Shield,
