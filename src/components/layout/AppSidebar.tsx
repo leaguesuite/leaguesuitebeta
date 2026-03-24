@@ -35,7 +35,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Standings", path: "/season/standings" },
           { label: "Playoffs / Brackets", path: "/season/brackets" },
           
-          { label: "Officials / Staff", path: "/season/officials" },
+          
           { label: "Reports / Exports", path: "/season/reports" },
         ],
       },
