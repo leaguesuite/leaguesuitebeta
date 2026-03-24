@@ -85,7 +85,7 @@ const App = () => (
             <Route path="/setup/division-assignment" element={<PlaceholderPage title="Division Assignment" description="Assign teams to divisions." />} />
             <Route path="/setup/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences and subdivisions." />} />
             <Route path="/setup/scheduling" element={<PlaceholderPage title="Scheduling Setup" description="Configure scheduling rules and constraints." />} />
-            <Route path="/structure/leagues" element={<PlaceholderPage title="Leagues" description="Manage your leagues." />} />
+            <Route path="/structure/leagues" element={<LeaguesPage />} />
             <Route path="/structure/categories" element={<CategoriesPage />} />
             <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
             <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
