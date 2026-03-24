@@ -1,20 +1,28 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { generateBracketStructure } from "@/utils/bracketGenerator";
-// Local types for this page's legacy bracket display
+import {
+  Plus, Trophy, Trash2, Play, CheckCircle2, Clock, Eye, Maximize2,
+  Settings, ChevronRight, SplitSquareHorizontal, Users, ArrowLeft,
+  Swords, Shield,
+} from "lucide-react";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface TeamMatchData {
   id: string;
   name: string;
   score?: number | null;
   seed?: number;
-  logo?: string;
 }
 
 interface LegacyMatch {
@@ -29,39 +37,99 @@ interface LegacyMatch {
 interface LegacyRound {
   id: string;
   name: string;
-  date?: string;
   matches: LegacyMatch[];
 }
 
-interface Bracket {
+interface PlayoffSplit {
+  name: string;
+  teamCount: number;
+  bracketId?: string;
+}
+
+interface DivisionPlayoff {
+  divisionId: string;
+  divisionName: string;
+  totalTeams: number;
+  status: "not_started" | "setup" | "active" | "completed";
+  qualifyingTeams: number;
+  hasSplit: boolean;
+  splits: PlayoffSplit[];
+  reseeding: boolean;
+  brackets: BracketData[];
+}
+
+interface BracketData {
   id: string;
   name: string;
-  division: string;
+  splitName?: string;
   rounds: LegacyRound[];
   teamCount: number;
   status: "setup" | "active" | "completed";
   isReseeding: boolean;
+  teams: string[];
 }
-import {
-  Plus, Trophy, Edit, Trash2, ChevronRight, Play, CheckCircle2,
-  Clock, Settings, Eye, Maximize2, RotateCcw, Shield,
-} from "lucide-react";
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
 
-const DIVISIONS = ["All Divisions", "Men's D1", "Men's D2", "Women's D1", "Co-Ed Open"];
+const MOCK_DIVISIONS: DivisionPlayoff[] = [
+  {
+    divisionId: "d1",
+    divisionName: "Men's Division 1",
+    totalTeams: 8,
+    status: "active",
+    qualifyingTeams: 8,
+    hasSplit: false,
+    splits: [],
+    reseeding: false,
+    brackets: [],
+  },
+  {
+    divisionId: "d2",
+    divisionName: "Men's Division 2",
+    totalTeams: 12,
+    status: "not_started",
+    qualifyingTeams: 8,
+    hasSplit: false,
+    splits: [],
+    reseeding: false,
+    brackets: [],
+  },
+  {
+    divisionId: "d3",
+    divisionName: "Women's Division 1",
+    totalTeams: 8,
+    status: "not_started",
+    qualifyingTeams: 6,
+    hasSplit: false,
+    splits: [],
+    reseeding: false,
+    brackets: [],
+  },
+  {
+    divisionId: "d4",
+    divisionName: "Co-Ed Open",
+    totalTeams: 6,
+    status: "completed",
+    qualifyingTeams: 4,
+    hasSplit: false,
+    splits: [],
+    reseeding: false,
+    brackets: [],
+  },
+];
 
-const DIVISION_TEAMS: Record<string, string[]> = {
-  "Men's D1": ["Thunder Hawks", "Iron Eagles", "Crimson Tide", "Blue Lightning", "Storm Riders", "Night Owls", "Golden Bears", "Viper Squad"],
-  "Men's D2": ["Silver Sharks", "Red Rockets", "Arctic Wolves", "Dark Knights", "Green Machine", "Wild Cards"],
-  "Women's D1": ["Phoenix Rising", "Steel Wolves", "Valkyries", "Lightning Bolts", "Storm Queens", "Fire Hawks", "Ice Tigers", "Shadow Cats"],
-  "Co-Ed Open": ["Blaze FC", "Chaos Theory", "Dream Team", "Misfits"],
+const MOCK_TEAM_NAMES: Record<string, string[]> = {
+  d1: ["Thunder Hawks", "Iron Eagles", "Crimson Tide", "Blue Lightning", "Storm Riders", "Night Owls", "Golden Bears", "Viper Squad"],
+  d2: ["Silver Sharks", "Red Rockets", "Arctic Wolves", "Dark Knights", "Green Machine", "Wild Cards", "Phantom Force", "Steel City", "Blazers", "Lightning FC", "Rebels", "Outlaws"],
+  d3: ["Phoenix Rising", "Steel Wolves", "Valkyries", "Lightning Bolts", "Storm Queens", "Fire Hawks", "Ice Tigers", "Shadow Cats"],
+  d4: ["Blaze FC", "Chaos Theory", "Dream Team", "Misfits", "Renegades", "Thunder"],
 };
 
-function createBracketFromTeams(
-  id: string, name: string, division: string, teamNames: string[],
-  status: Bracket["status"] = "setup", withScores: boolean = false,
-): Bracket {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function createBracket(
+  id: string, name: string, teamNames: string[], splitName?: string
+): BracketData {
   const teamCount = teamNames.length;
   const structure = generateBracketStructure(teamCount);
   const numRounds = structure.length;
@@ -77,43 +145,26 @@ function createBracketFromTeams(
       const t1Name = ri === 0 && m.seeds[0] <= teamNames.length ? teamNames[m.seeds[0] - 1] : "TBD";
       const t2Name = ri === 0 && m.seeds.length > 1 && m.seeds[1] <= teamNames.length ? teamNames[m.seeds[1] - 1] : "TBD";
 
-      const team1: TeamMatchData = { id: `${id}-r${ri}-m${mi}-t1`, name: t1Name, seed: m.seeds[0], score: null };
-      const team2: TeamMatchData = { id: `${id}-r${ri}-m${mi}-t2`, name: t2Name, seed: m.seeds.length > 1 ? m.seeds[1] : undefined, score: null };
-
-      let matchStatus: LegacyMatch["status"] = "upcoming";
-      let winnerId: string | undefined;
-
-      if (withScores && ri === 0) {
-        team1.score = Math.floor(Math.random() * 35) + 7;
-        team2.score = Math.floor(Math.random() * 35) + 7;
-        if (team2.score === team1.score) team2.score! += 7;
-        matchStatus = "completed";
-        winnerId = team1.score! > team2.score! ? team1.id : team2.id;
-      }
-
       return {
         id: `${id}-r${ri}-m${mi}`,
         matchNumber: mi + 1,
-        teams: [team1, team2] as [TeamMatchData, TeamMatchData],
-        status: matchStatus,
-        winnerId,
+        teams: [
+          { id: `${id}-r${ri}-m${mi}-t1`, name: t1Name, seed: m.seeds[0], score: null },
+          { id: `${id}-r${ri}-m${mi}-t2`, name: t2Name, seed: m.seeds.length > 1 ? m.seeds[1] : undefined, score: null },
+        ] as [TeamMatchData, TeamMatchData],
+        status: "upcoming" as const,
       };
     });
 
     return { id: `${id}-round-${ri}`, name: roundName, matches };
   });
 
-  return { id, name, division, rounds, teamCount, status, isReseeding: false };
+  return { id, name, splitName, rounds, teamCount, status: "setup", isReseeding: false, teams: teamNames };
 }
-
-const INITIAL_BRACKETS: Bracket[] = [
-  createBracketFromTeams("b1", "Men's D1 Playoffs", "Men's D1", DIVISION_TEAMS["Men's D1"], "active", true),
-  createBracketFromTeams("b2", "Women's D1 Playoffs", "Women's D1", DIVISION_TEAMS["Women's D1"], "setup", false),
-];
 
 // ─── Bracket SVG Preview ─────────────────────────────────────────────────────
 
-function BracketPreviewSVG({ teamCount, height = 300 }: { teamCount: number; height?: number }) {
+function BracketPreviewSVG({ teamCount, height = 220 }: { teamCount: number; height?: number }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -128,8 +179,8 @@ function BracketPreviewSVG({ teamCount, height = 300 }: { teamCount: number; hei
       const ch = containerRef.current.clientHeight;
       const maxR = structure.length;
       const colW = cw / (maxR + 0.5);
-      const tH = 28;
-      const gap = 16;
+      const tH = 24;
+      const gap = 12;
 
       structure.forEach((round, ri) => {
         const totalH = round.length * tH + (round.length - 1) * gap;
@@ -137,20 +188,20 @@ function BracketPreviewSVG({ teamCount, height = 300 }: { teamCount: number; hei
 
         round.forEach((m, mi) => {
           const y = startY + mi * (tH + gap);
-          const x = ri * colW + 16;
+          const x = ri * colW + 12;
           const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
           rect.setAttribute("x", String(x)); rect.setAttribute("y", String(y));
-          rect.setAttribute("width", String(colW - 32)); rect.setAttribute("height", String(tH));
-          rect.setAttribute("rx", "4");
-          rect.setAttribute("fill", m.bye ? "hsl(210, 15%, 94%)" : "hsl(215, 90%, 95%)");
-          rect.setAttribute("stroke", m.bye ? "hsl(214, 20%, 85%)" : "hsl(215, 90%, 80%)");
+          rect.setAttribute("width", String(colW - 24)); rect.setAttribute("height", String(tH));
+          rect.setAttribute("rx", "3");
+          rect.setAttribute("fill", m.bye ? "hsl(var(--muted))" : "hsl(var(--primary) / 0.08)");
+          rect.setAttribute("stroke", m.bye ? "hsl(var(--border))" : "hsl(var(--primary) / 0.2)");
           svg.appendChild(rect);
 
           const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          txt.setAttribute("x", String(x + (colW - 32) / 2)); txt.setAttribute("y", String(y + tH / 2 + 4));
-          txt.setAttribute("text-anchor", "middle"); txt.setAttribute("font-size", "11");
-          txt.setAttribute("fill", "hsl(215, 14%, 50%)");
-          txt.textContent = m.bye ? `Bye (#${m.seeds[0]})` : `#${m.seeds[0]} vs #${m.seeds[1]}`;
+          txt.setAttribute("x", String(x + (colW - 24) / 2)); txt.setAttribute("y", String(y + tH / 2 + 4));
+          txt.setAttribute("text-anchor", "middle"); txt.setAttribute("font-size", "9");
+          txt.setAttribute("fill", "hsl(var(--muted-foreground))");
+          txt.textContent = m.bye ? `Bye` : `#${m.seeds[0]} v #${m.seeds[1]}`;
           svg.appendChild(txt);
 
           if (ri < maxR - 1) {
@@ -160,30 +211,21 @@ function BracketPreviewSVG({ teamCount, height = 300 }: { teamCount: number; hei
             const nTotalH = nr.length * tH + (nr.length - 1) * gap;
             const nStartY = (ch - nTotalH) / 2;
             const ny = nStartY + nmi * (tH + gap);
-            const sx = x + colW - 32; const sy = y + tH / 2;
-            const ex = (ri + 1) * colW + 16; const ey = ny + tH / 2;
+            const sx = x + colW - 24; const sy = y + tH / 2;
+            const ex = (ri + 1) * colW + 12; const ey = ny + tH / 2;
             const mx = (sx + ex) / 2;
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute("d", `M${sx} ${sy} L${mx} ${sy} L${mx} ${ey} L${ex} ${ey}`);
-            path.setAttribute("stroke", "hsl(214, 20%, 85%)"); path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "hsl(var(--border))"); path.setAttribute("fill", "none");
             svg.appendChild(path);
           }
         });
-
-        const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        title.setAttribute("x", String(ri * colW + colW / 2));
-        title.setAttribute("y", "16"); title.setAttribute("text-anchor", "middle");
-        title.setAttribute("font-size", "11"); title.setAttribute("font-weight", "600");
-        title.setAttribute("fill", "hsl(215, 14%, 50%)");
-        const rfe = maxR - ri - 1;
-        title.textContent = rfe === 0 ? "Finals" : rfe === 1 ? "Semis" : rfe === 2 ? "Quarters" : `Round ${ri + 1}`;
-        svg.appendChild(title);
       });
     } catch {}
   }, [teamCount]);
 
   return (
-    <div ref={containerRef} className="w-full overflow-hidden rounded-lg border border-border bg-card" style={{ height }}>
+    <div ref={containerRef} className="w-full overflow-hidden rounded-lg border border-border bg-muted/30" style={{ height }}>
       <svg ref={svgRef} width="100%" height="100%" />
     </div>
   );
@@ -205,254 +247,568 @@ function MatchCardUI({ match }: { match: LegacyMatch }) {
         </Badge>
       </div>
       <div className="space-y-1.5">
-        {match.teams.map((team, i) => {
+        {match.teams.map((team) => {
           const isWinner = isComplete && team.id === match.winnerId;
           return (
             <div
               key={team.id}
               className={`flex items-center justify-between px-2 py-1.5 rounded text-sm ${
-                isWinner ? "bg-accent/10 font-semibold text-foreground" :
+                isWinner ? "bg-primary/10 font-semibold text-foreground" :
                 !team.name || team.name === "TBD" ? "border border-dashed border-border text-muted-foreground" :
                 "text-foreground"
               }`}
             >
               <div className="flex items-center gap-1.5">
                 {team.seed && <span className="text-[10px] text-muted-foreground font-mono">#{team.seed}</span>}
-                <span className={isWinner ? "text-accent" : ""}>{team.name || "TBD"}</span>
+                <span>{team.name || "TBD"}</span>
               </div>
               <span className="font-mono text-xs w-5 text-right">{team.score ?? ""}</span>
             </div>
           );
         })}
       </div>
-      {match.venue && <div className="mt-2 pt-2 border-t border-border text-[11px] text-muted-foreground">{match.venue}</div>}
     </div>
   );
+}
+
+// ─── Setup Dialog ────────────────────────────────────────────────────────────
+
+function PlayoffSetupDialog({
+  division,
+  open,
+  onOpenChange,
+  onSave,
+}: {
+  division: DivisionPlayoff;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (config: Partial<DivisionPlayoff>) => void;
+}) {
+  const [qualifyingTeams, setQualifyingTeams] = useState(division.qualifyingTeams);
+  const [hasSplit, setHasSplit] = useState(division.hasSplit);
+  const [splitCount, setSplitCount] = useState(2);
+  const [splits, setSplits] = useState<PlayoffSplit[]>(
+    division.splits.length > 0
+      ? division.splits
+      : [
+          { name: `${division.divisionName} A`, teamCount: Math.ceil(qualifyingTeams / 2) },
+          { name: `${division.divisionName} B`, teamCount: Math.floor(qualifyingTeams / 2) },
+        ]
+  );
+  const [reseeding, setReseeding] = useState(division.reseeding);
+
+  // Recalculate splits when qualifying teams or split toggle changes
+  const updateSplits = (count: number, qualifying: number) => {
+    const perSplit = Math.floor(qualifying / count);
+    const remainder = qualifying % count;
+    const labels = ["A", "B", "C", "D"];
+    const newSplits: PlayoffSplit[] = [];
+    for (let i = 0; i < count; i++) {
+      newSplits.push({
+        name: `${division.divisionName.replace(/Division \d+/, `D${division.divisionName.match(/\d+/)?.[0] || ""}`)} ${labels[i] || String(i + 1)}`,
+        teamCount: perSplit + (i < remainder ? 1 : 0),
+      });
+    }
+    setSplits(newSplits);
+  };
+
+  const handleSplitToggle = (enabled: boolean) => {
+    setHasSplit(enabled);
+    if (enabled) {
+      updateSplits(splitCount, qualifyingTeams);
+    }
+  };
+
+  const handleSplitCountChange = (val: string) => {
+    const n = parseInt(val);
+    setSplitCount(n);
+    updateSplits(n, qualifyingTeams);
+  };
+
+  const handleQualifyingChange = (val: string) => {
+    const n = parseInt(val);
+    setQualifyingTeams(n);
+    if (hasSplit) {
+      updateSplits(splitCount, n);
+    }
+  };
+
+  const updateSplitName = (index: number, name: string) => {
+    setSplits(prev => prev.map((s, i) => i === index ? { ...s, name } : s));
+  };
+
+  const updateSplitTeamCount = (index: number, count: number) => {
+    setSplits(prev => prev.map((s, i) => i === index ? { ...s, teamCount: count } : s));
+  };
+
+  const totalSplitTeams = splits.reduce((acc, s) => acc + s.teamCount, 0);
+  const splitMismatch = hasSplit && totalSplitTeams !== qualifyingTeams;
+
+  const handleSave = () => {
+    onSave({
+      qualifyingTeams,
+      hasSplit,
+      splits: hasSplit ? splits : [],
+      reseeding,
+      status: "setup",
+    });
+    onOpenChange(false);
+  };
+
+  const teamOptions = [];
+  for (let i = 2; i <= division.totalTeams; i++) {
+    teamOptions.push(i);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-primary" />
+            Set Up Playoffs — {division.divisionName}
+          </DialogTitle>
+          <DialogDescription>
+            Configure how many teams qualify and whether to split the division into sub-brackets.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2">
+          {/* Qualifying teams */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Qualifying Teams</Label>
+            <p className="text-xs text-muted-foreground">
+              {division.totalTeams} teams in this division. How many make the playoffs?
+            </p>
+            <Select value={String(qualifyingTeams)} onValueChange={handleQualifyingChange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {teamOptions.map(n => (
+                  <SelectItem key={n} value={String(n)}>{n} teams</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          {/* Split toggle */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <SplitSquareHorizontal className="h-4 w-4 text-primary" />
+                  Split Division
+                </Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Break the division into separate playoff brackets (e.g., "2A" and "2B", or "Top" and "Bottom")
+                </p>
+              </div>
+              <Switch checked={hasSplit} onCheckedChange={handleSplitToggle} />
+            </div>
+
+            {hasSplit && (
+              <div className="space-y-3 pl-2 border-l-2 border-primary/20 ml-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Number of Splits</Label>
+                  <Select value={String(splitCount)} onValueChange={handleSplitCountChange}>
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2">2 splits</SelectItem>
+                      <SelectItem value="3">3 splits</SelectItem>
+                      <SelectItem value="4">4 splits</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  {splits.map((split, i) => (
+                    <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
+                      <div className="flex-1 space-y-1">
+                        <Label className="text-xs text-muted-foreground">Bracket Name</Label>
+                        <Input
+                          value={split.name}
+                          onChange={e => updateSplitName(i, e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="w-28 space-y-1">
+                        <Label className="text-xs text-muted-foreground">Teams</Label>
+                        <Select
+                          value={String(split.teamCount)}
+                          onValueChange={v => updateSplitTeamCount(i, parseInt(v))}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teamOptions.map(n => (
+                              <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  ))}
+
+                  {splitMismatch && (
+                    <p className="text-xs text-destructive font-medium">
+                      ⚠ Split teams ({totalSplitTeams}) don't match qualifying teams ({qualifyingTeams})
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Reseeding */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium">Reseeding Between Rounds</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Re-rank remaining teams after each round
+              </p>
+            </div>
+            <Switch checked={reseeding} onCheckedChange={setReseeding} />
+          </div>
+
+          {/* Preview */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-muted-foreground">Bracket Preview</Label>
+            {hasSplit ? (
+              <div className="grid grid-cols-2 gap-3">
+                {splits.map((split, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <p className="text-xs font-medium text-foreground">{split.name}</p>
+                    <BracketPreviewSVG teamCount={split.teamCount} height={140} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <BracketPreviewSVG teamCount={qualifyingTeams} height={180} />
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={splitMismatch} className="gap-2">
+            <CheckCircle2 className="h-4 w-4" /> Save Configuration
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Bracket Viewer Dialog ───────────────────────────────────────────────────
+
+function BracketViewerDialog({
+  bracket,
+  open,
+  onOpenChange,
+}: {
+  bracket: BracketData | null;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
+  if (!bracket) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-5xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-primary" />
+            {bracket.name}
+          </DialogTitle>
+          <DialogDescription>
+            {bracket.teamCount} teams • {bracket.rounds.length} rounds
+            {bracket.splitName && ` • ${bracket.splitName}`}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6 py-2">
+          {bracket.rounds.map(round => (
+            <div key={round.id}>
+              <h4 className="text-sm font-semibold text-foreground mb-3">{round.name}</h4>
+              <div className="flex flex-wrap gap-3">
+                {round.matches.map(match => (
+                  <MatchCardUI key={match.id} match={match} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Status helpers ──────────────────────────────────────────────────────────
+
+function statusBadge(status: DivisionPlayoff["status"]) {
+  switch (status) {
+    case "not_started":
+      return <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" /> Not Started</Badge>;
+    case "setup":
+      return <Badge variant="outline" className="gap-1 border-primary/30 text-primary"><Settings className="h-3 w-3" /> Set Up</Badge>;
+    case "active":
+      return <Badge className="gap-1 bg-primary text-primary-foreground"><Play className="h-3 w-3" /> In Progress</Badge>;
+    case "completed":
+      return <Badge variant="secondary" className="gap-1 bg-accent/10 text-accent"><CheckCircle2 className="h-3 w-3" /> Completed</Badge>;
+  }
 }
 
 // ─── Page Component ──────────────────────────────────────────────────────────
 
 export default function BracketsPage() {
-  const [brackets, setBrackets] = useState<Bracket[]>(INITIAL_BRACKETS);
-  const [divisionFilter, setDivisionFilter] = useState("All Divisions");
-  const [createOpen, setCreateOpen] = useState(false);
-  const [viewBracket, setViewBracket] = useState<Bracket | null>(null);
+  const [divisions, setDivisions] = useState<DivisionPlayoff[]>(MOCK_DIVISIONS);
+  const [setupDivision, setSetupDivision] = useState<DivisionPlayoff | null>(null);
+  const [viewBracket, setViewBracket] = useState<BracketData | null>(null);
+  const [expandedDivision, setExpandedDivision] = useState<string | null>(null);
 
-  // Create form
-  const [newName, setNewName] = useState("");
-  const [newDivision, setNewDivision] = useState("Men's D1");
-  const [newTeamCount, setNewTeamCount] = useState("8");
-  const [newReseeding, setNewReseeding] = useState(false);
-
-  const filtered = divisionFilter === "All Divisions" ? brackets : brackets.filter(b => b.division === divisionFilter);
-
-  const handleCreate = () => {
-    if (!newName.trim()) return;
-    const teams = DIVISION_TEAMS[newDivision] || [];
-    const count = Math.min(parseInt(newTeamCount) || 4, teams.length || 32);
-    const teamSlice = teams.slice(0, count);
-    // Pad with TBD if not enough teams
-    while (teamSlice.length < count) teamSlice.push(`Team ${teamSlice.length + 1}`);
-
-    const bracket = createBracketFromTeams(
-      String(Date.now()), newName.trim(), newDivision, teamSlice, "setup"
-    );
-    bracket.isReseeding = newReseeding;
-    setBrackets(prev => [...prev, bracket]);
-    setCreateOpen(false);
-    setNewName("");
-    toast({ title: "Bracket created", description: `${newName} has been set up.` });
+  const handleSaveSetup = (divisionId: string, config: Partial<DivisionPlayoff>) => {
+    setDivisions(prev => prev.map(d => {
+      if (d.divisionId !== divisionId) return d;
+      return { ...d, ...config };
+    }));
+    toast.success("Playoff configuration saved");
   };
 
-  const deleteBracket = (id: string) => {
-    setBrackets(prev => prev.filter(b => b.id !== id));
-    toast({ title: "Deleted", description: "Bracket removed." });
+  const handleStartPlayoffs = (divisionId: string) => {
+    setDivisions(prev => prev.map(d => {
+      if (d.divisionId !== divisionId) return d;
+
+      const teamNames = MOCK_TEAM_NAMES[divisionId] || [];
+      let brackets: BracketData[] = [];
+
+      if (d.hasSplit && d.splits.length > 0) {
+        let teamIndex = 0;
+        brackets = d.splits.map((split, i) => {
+          const splitTeams = teamNames.slice(teamIndex, teamIndex + split.teamCount);
+          teamIndex += split.teamCount;
+          return createBracket(`${divisionId}-split-${i}`, split.name, splitTeams, split.name);
+        });
+      } else {
+        const qualifiedTeams = teamNames.slice(0, d.qualifyingTeams);
+        brackets = [createBracket(`${divisionId}-main`, `${d.divisionName} Playoffs`, qualifiedTeams)];
+      }
+
+      return { ...d, status: "active" as const, brackets };
+    }));
+    setExpandedDivision(divisionId);
+    toast.success("Playoffs started! Brackets have been generated.");
   };
 
-  const statusIcon = (s: Bracket["status"]) => {
-    if (s === "completed") return <CheckCircle2 className="h-4 w-4 text-accent" />;
-    if (s === "active") return <Play className="h-4 w-4 text-primary" />;
-    return <Clock className="h-4 w-4 text-muted-foreground" />;
+  const handleResetPlayoffs = (divisionId: string) => {
+    setDivisions(prev => prev.map(d =>
+      d.divisionId === divisionId
+        ? { ...d, status: "not_started", brackets: [], hasSplit: false, splits: [] }
+        : d
+    ));
+    toast.info("Playoffs reset");
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Playoffs & Brackets</h1>
-          <p className="text-sm text-muted-foreground mt-1">Set up and manage playoff brackets for each division.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Select value={divisionFilter} onValueChange={setDivisionFilter}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {DIVISIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Button size="sm" className="gap-2" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" /> New Bracket
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Playoffs & Brackets</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Set up and manage playoff brackets for each division. Split divisions into sub-brackets if needed.
+        </p>
       </div>
 
-      {/* Bracket Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {filtered.map(bracket => (
-          <div key={bracket.id} className="section-card overflow-hidden">
-            <div className="h-1.5 bg-primary" />
-            <div className="p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  {statusIcon(bracket.status)}
-                  <div>
-                    <h3 className="font-semibold text-foreground">{bracket.name}</h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Badge variant="secondary" className="text-xs">{bracket.division}</Badge>
-                      <span className="text-xs text-muted-foreground">{bracket.teamCount} teams</span>
-                      {bracket.isReseeding && <Badge variant="secondary" className="text-[10px]">Reseeding</Badge>}
+      {/* Division Cards */}
+      <div className="space-y-4">
+        {divisions.map(division => {
+          const isExpanded = expandedDivision === division.divisionId;
+
+          return (
+            <Card key={division.divisionId} className="overflow-hidden">
+              {/* Division Header */}
+              <CardHeader
+                className="cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={() => setExpandedDivision(isExpanded ? null : division.divisionId)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">{division.divisionName}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-0.5">
+                        <Users className="h-3.5 w-3.5" />
+                        {division.totalTeams} teams
+                        {division.status !== "not_started" && (
+                          <>
+                            <span className="text-border">•</span>
+                            {division.qualifyingTeams} qualifying
+                          </>
+                        )}
+                        {division.hasSplit && (
+                          <>
+                            <span className="text-border">•</span>
+                            <SplitSquareHorizontal className="h-3.5 w-3.5" />
+                            {division.splits.length} splits
+                          </>
+                        )}
+                      </CardDescription>
                     </div>
                   </div>
+                  <div className="flex items-center gap-3">
+                    {statusBadge(division.status)}
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewBracket(bracket)}>
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteBracket(bracket.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
+              </CardHeader>
 
-              {/* Mini bracket preview */}
-              <BracketPreviewSVG teamCount={bracket.teamCount} height={180} />
+              {/* Expanded Content */}
+              {isExpanded && (
+                <CardContent className="border-t border-border pt-4">
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2 mb-4">
+                    {(division.status === "not_started" || division.status === "setup") && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={(e) => { e.stopPropagation(); setSetupDivision(division); }}
+                        >
+                          <Settings className="h-4 w-4" />
+                          {division.status === "setup" ? "Edit Setup" : "Set Up Playoffs"}
+                        </Button>
+                        {division.status === "setup" && (
+                          <Button
+                            size="sm"
+                            className="gap-2"
+                            onClick={(e) => { e.stopPropagation(); handleStartPlayoffs(division.divisionId); }}
+                          >
+                            <Play className="h-4 w-4" /> Start Playoffs
+                          </Button>
+                        )}
+                      </>
+                    )}
+                    {(division.status === "active" || division.status === "completed") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 text-destructive hover:text-destructive"
+                        onClick={(e) => { e.stopPropagation(); handleResetPlayoffs(division.divisionId); }}
+                      >
+                        <Trash2 className="h-4 w-4" /> Reset Playoffs
+                      </Button>
+                    )}
+                  </div>
 
-              {/* Round summary */}
-              <div className="flex items-center gap-2 mt-3 flex-wrap">
-                {bracket.rounds.map(round => {
-                  const completed = round.matches.filter(m => m.status === "completed").length;
-                  const total = round.matches.length;
-                  return (
-                    <div key={round.id} className="flex items-center gap-1.5 text-xs">
-                      <span className="text-muted-foreground">{round.name}:</span>
-                      <span className={`font-medium ${completed === total && total > 0 ? "text-accent" : "text-foreground"}`}>
-                        {completed}/{total}
-                      </span>
+                  {/* Setup summary */}
+                  {division.status === "setup" && (
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">Configuration Summary</h4>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground text-xs">Qualifying Teams</p>
+                          <p className="font-medium">{division.qualifyingTeams}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Division Split</p>
+                          <p className="font-medium">{division.hasSplit ? `${division.splits.length} brackets` : "No"}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Reseeding</p>
+                          <p className="font-medium">{division.reseeding ? "Yes" : "No"}</p>
+                        </div>
+                      </div>
+                      {division.hasSplit && (
+                        <div className="flex gap-2 flex-wrap">
+                          {division.splits.map((split, i) => (
+                            <Badge key={i} variant="secondary" className="gap-1">
+                              <Swords className="h-3 w-3" />
+                              {split.name} ({split.teamCount} teams)
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      <BracketPreviewSVG teamCount={division.qualifyingTeams} height={160} />
                     </div>
-                  );
-                })}
-              </div>
+                  )}
 
-              <Button variant="outline" size="sm" className="w-full mt-3 gap-2" onClick={() => setViewBracket(bracket)}>
-                <Maximize2 className="h-3.5 w-3.5" /> View Full Bracket
-              </Button>
-            </div>
-          </div>
-        ))}
-        {filtered.length === 0 && (
-          <div className="lg:col-span-2 section-card p-12 text-center">
-            <Trophy className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No brackets yet. Create one to get started.</p>
-          </div>
-        )}
+                  {/* Active/Completed brackets */}
+                  {(division.status === "active" || division.status === "completed") && division.brackets.length > 0 && (
+                    <div className="space-y-3">
+                      {division.brackets.map(bracket => (
+                        <div key={bracket.id} className="rounded-lg border border-border p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Trophy className="h-4 w-4 text-primary" />
+                              <span className="font-medium text-sm">{bracket.name}</span>
+                              <Badge variant="secondary" className="text-xs">{bracket.teamCount} teams</Badge>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              onClick={() => setViewBracket(bracket)}
+                            >
+                              <Maximize2 className="h-3.5 w-3.5" /> View Bracket
+                            </Button>
+                          </div>
+                          <BracketPreviewSVG teamCount={bracket.teamCount} height={160} />
+                          <div className="flex items-center gap-3 text-xs">
+                            {bracket.rounds.map(round => {
+                              const completed = round.matches.filter(m => m.status === "completed").length;
+                              return (
+                                <span key={round.id} className="text-muted-foreground">
+                                  {round.name}: <span className="font-medium text-foreground">{completed}/{round.matches.length}</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Not started state */}
+                  {division.status === "not_started" && (
+                    <div className="text-center py-8">
+                      <Trophy className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                      <p className="text-sm text-muted-foreground">
+                        Playoffs haven't been configured yet. Click "Set Up Playoffs" to get started.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              )}
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Create Bracket Dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-primary" />
-              New Playoff Bracket
-            </DialogTitle>
-            <DialogDescription>Set up a bracket for a division's playoffs.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label>Bracket Name</Label>
-              <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Men's D1 Playoffs" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Division</Label>
-                <Select value={newDivision} onValueChange={setNewDivision}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {DIVISIONS.filter(d => d !== "All Divisions").map(d => (
-                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Number of Teams</Label>
-                <Select value={newTeamCount} onValueChange={setNewTeamCount}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["2", "4", "6", "8", "12", "16"].map(n => (
-                      <SelectItem key={n} value={n}>{n} Teams</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Reseeding</Label>
-                <p className="text-xs text-muted-foreground">Re-seed teams after each round based on original seed.</p>
-              </div>
-              <Switch checked={newReseeding} onCheckedChange={setNewReseeding} />
-            </div>
-            {/* Preview */}
-            <div>
-              <Label className="text-xs text-muted-foreground mb-2 block">Bracket Preview</Label>
-              <BracketPreviewSVG teamCount={parseInt(newTeamCount) || 4} height={220} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={!newName.trim()}>Create Bracket</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Setup Dialog */}
+      {setupDivision && (
+        <PlayoffSetupDialog
+          division={setupDivision}
+          open={!!setupDivision}
+          onOpenChange={(open) => { if (!open) setSetupDivision(null); }}
+          onSave={(config) => handleSaveSetup(setupDivision.divisionId, config)}
+        />
+      )}
 
-      {/* View Full Bracket Dialog */}
-      <Dialog open={!!viewBracket} onOpenChange={v => !v && setViewBracket(null)}>
-        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-primary" />
-              {viewBracket?.name}
-              <Badge variant="secondary" className="text-xs ml-1">{viewBracket?.division}</Badge>
-            </DialogTitle>
-          </DialogHeader>
-          {viewBracket && (
-            <div className="py-2">
-              {/* Full bracket view with match cards */}
-              <div className="overflow-x-auto pb-4">
-                <div className="flex gap-6 min-w-max pt-8">
-                  {viewBracket.rounds.map((round, ri) => (
-                    <div key={round.id} className="flex flex-col w-60 shrink-0">
-                      <div className="text-center mb-4">
-                        <h3 className="text-sm font-semibold text-foreground">{round.name}</h3>
-                        {round.date && <span className="text-xs text-muted-foreground">{round.date}</span>}
-                      </div>
-                      <div
-                        className="flex flex-col justify-around flex-1 gap-3"
-                        style={{ minHeight: viewBracket.rounds[0].matches.length * 90 }}
-                      >
-                        {round.matches.map(match => (
-                          <MatchCardUI key={match.id} match={match} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Bracket Viewer */}
+      <BracketViewerDialog
+        bracket={viewBracket}
+        open={!!viewBracket}
+        onOpenChange={(open) => { if (!open) setViewBracket(null); }}
+      />
     </div>
   );
 }
