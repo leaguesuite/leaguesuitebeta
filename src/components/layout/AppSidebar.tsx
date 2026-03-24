@@ -29,7 +29,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
       {
         label: "Active Season", icon: CalendarDays,
         children: [
-          { label: "Overview", path: "/season/overview" },
+          
           { label: "Games / Schedule", path: "/season/games" },
           { label: "Teams / Rosters", path: "/season/teams" },
           { label: "Standings", path: "/season/standings" },
