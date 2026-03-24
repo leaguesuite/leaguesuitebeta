@@ -18,6 +18,9 @@ import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
 import StandingsRulesPage from "@/pages/structure/StandingsRulesPage";
 import StatsTrackingPage from "@/pages/structure/StatsTrackingPage";
+import LeaguesPage from "@/pages/structure/LeaguesPage";
+import SeasonsPage from "@/pages/structure/SeasonsPage";
+import TournamentsPage from "@/pages/structure/TournamentsPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
@@ -77,12 +80,12 @@ const App = () => (
             <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
             <Route path="/season/reports" element={<ReportsPage />} />
             <Route path="/setup/new-season" element={<NewSeasonWizard />} />
-            <Route path="/setup/seasons" element={<PlaceholderPage title="Seasons" description="View and manage all seasons." />} />
-            <Route path="/setup/tournaments" element={<PlaceholderPage title="Tournaments" description="Manage tournament brackets and formats." />} />
+            <Route path="/setup/seasons" element={<SeasonsPage />} />
+            <Route path="/setup/tournaments" element={<TournamentsPage />} />
             <Route path="/setup/division-assignment" element={<PlaceholderPage title="Division Assignment" description="Assign teams to divisions." />} />
             <Route path="/setup/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences and subdivisions." />} />
             <Route path="/setup/scheduling" element={<PlaceholderPage title="Scheduling Setup" description="Configure scheduling rules and constraints." />} />
-            <Route path="/structure/leagues" element={<PlaceholderPage title="Leagues" description="Manage your leagues." />} />
+            <Route path="/structure/leagues" element={<LeaguesPage />} />
             <Route path="/structure/categories" element={<CategoriesPage />} />
             <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
             <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
