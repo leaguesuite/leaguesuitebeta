@@ -194,7 +194,7 @@ export default function TournamentsPage() {
                     <TableCell>
                       {tournament.champion ? (
                         <div className="flex items-center gap-1.5 text-sm">
-                          <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                          <Trophy className="h-3.5 w-3.5 text-primary" />
                           <span className="font-medium">{tournament.champion}</span>
                         </div>
                       ) : (
