@@ -80,8 +80,8 @@ const App = () => (
             <Route path="/season/officials" element={<PlaceholderPage title="Officials & Staff" description="Manage officials and game staff." />} />
             <Route path="/season/reports" element={<ReportsPage />} />
             <Route path="/setup/new-season" element={<NewSeasonWizard />} />
-            <Route path="/setup/seasons" element={<PlaceholderPage title="Seasons" description="View and manage all seasons." />} />
-            <Route path="/setup/tournaments" element={<PlaceholderPage title="Tournaments" description="Manage tournament brackets and formats." />} />
+            <Route path="/setup/seasons" element={<SeasonsPage />} />
+            <Route path="/setup/tournaments" element={<TournamentsPage />} />
             <Route path="/setup/division-assignment" element={<PlaceholderPage title="Division Assignment" description="Assign teams to divisions." />} />
             <Route path="/setup/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences and subdivisions." />} />
             <Route path="/setup/scheduling" element={<PlaceholderPage title="Scheduling Setup" description="Configure scheduling rules and constraints." />} />
