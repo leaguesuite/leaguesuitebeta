@@ -1,58 +1,51 @@
 
 
-## Plan: Prepare API Layer for C# Backend Handoff
+## Client Onboarding Portal
 
-### What this does
-Refactors the API integration layer so a C# developer can swap in an ASP.NET Core backend with minimal frontend changes.
+### Overview
+Build a new "Client Onboarding" section under Features in the sidebar that lets you create onboarding packages for new clients. Each package contains three documents: a Pre-Deployment Form (questionnaire), a Master Service Agreement (e-sign), and an Order Sheet (e-sign). You can generate a package per client, track status, and collect e-signatures.
 
-### Changes
+### What gets built
 
-**1. Extract API config to a single environment-driven config file**
+**1. Database tables (3 new tables)**
+- `onboarding_packages` -- one row per client onboarding (client name, email, status, created_at, org_id)
+- `onboarding_documents` -- one row per document in a package (package_id, doc_type enum [pre_deployment_form, service_agreement, order_sheet], status [draft, sent, viewed, signed], signature_data jsonb, signed_at, custom_fields jsonb)
+- `onboarding_form_responses` -- stores answers to the pre-deployment questionnaire (document_id, responses jsonb, submitted_at)
 
-Create `src/lib/api-config.ts`:
-- Move `API_BASE` here, read from `import.meta.env.VITE_API_BASE_URL` with fallback to `https://flagplusfootball.com`
-- Export auth mode flag (`cookie` vs `bearer`) so the C# dev can switch to JWT tokens if preferred
-- Export default headers as a function that can adapt based on auth mode
+**2. Pages & Components**
 
-**2. Create a centralized HTTP client wrapper**
+- **Onboarding Dashboard** (`/onboarding`) -- lists all client packages with status indicators (draft, sent, partially signed, complete). "New Package" button opens a creation dialog.
+- **New Package Dialog** -- enter client name, email, company; auto-generates the three documents. Pre-fill order sheet fields (pricing, dates). Preview before sending.
+- **Package Detail Page** (`/onboarding/:id`) -- shows the three documents as cards with individual status. Actions: edit, send/resend, view responses, download signed copies.
+- **Pre-Deployment Form Builder** -- a configured questionnaire (league name, expected teams, divisions, scoring preferences, etc.) rendered as a form. Stored as JSON config so questions can evolve.
+- **E-Signature Component** -- canvas-based signature pad for the MSA and Order Sheet. Captures signature as base64 image, stores timestamp and IP. Uses a simple draw-on-canvas approach (no third-party e-sign service needed initially).
+- **Public Signing Pages** (`/sign/:token`) -- unauthenticated routes where clients can view documents, fill the questionnaire, and sign. Token-based access via a unique link per package.
 
-Create `src/lib/http-client.ts`:
-- Single `apiClient.get()`, `apiClient.post()`, `apiClient.put()`, `apiClient.delete()` wrapper around fetch
-- Handles headers, credentials, error parsing, and response typing in one place
-- Adds a response interceptor pattern for 401 redirects (useful for both Laravel and ASP.NET)
-- A C# dev only needs to update this one file if auth strategy changes
+**3. Sidebar addition**
+- Add "Client Onboarding" under Features with a `ClipboardList` or `ScrollText` icon, linking to `/onboarding`.
 
-**3. Organize API functions into domain modules**
+**4. Routes**
+- `/onboarding` -- dashboard (admin, inside AppLayout)
+- `/onboarding/:id` -- package detail (admin)
+- `/sign/:token` -- public signing page (outside AppLayout, no auth required)
 
-Split `src/lib/api.ts` into:
-- `src/lib/api/members.ts` — member CRUD + search
-- `src/lib/api/config.ts` — tenant/league configuration
-- `src/lib/api/divisions.ts` — division lookups
-- `src/lib/api/index.ts` — re-exports everything (no breaking changes to existing imports)
+### Technical details
 
-Each file imports from `http-client.ts`, keeping the actual endpoint paths visible and easy to map.
+- **Signature pad**: Use an HTML canvas element for drawing signatures. Store as base64 PNG in `signature_data` jsonb column. No external library needed.
+- **Token-based public access**: Generate a UUID token per package stored in `onboarding_packages.access_token`. The `/sign/:token` route fetches package data via the token with anon RLS policy.
+- **Document templates**: MSA content stored as a rich text template in the codebase (can later move to DB). Order sheet is a form with editable pricing/date fields.
+- **RLS**: Admin org members can CRUD packages/documents. Anon users can SELECT and UPDATE documents matched by access_token only.
+- **Email sending**: For now, display a "copy link" button for the signing URL. Email integration can be added later.
 
-**4. Add an API contract reference document**
-
-Create `docs/api-contract.md`:
-- Documents every endpoint the frontend calls: method, path, query params, request body shape, response shape
-- TypeScript interfaces listed alongside equivalent C# class signatures
-- A C# developer reads this and knows exactly what controllers/actions to build
-
-**5. Add `VITE_API_BASE_URL` to `.env.example`**
-
-Create `.env.example` (not `.env` itself) documenting the available config vars so a new developer knows what to set.
-
-### What stays the same
-- All existing page components untouched
-- Mock data files untouched
-- No new dependencies
-
-### Why this helps
-A C# developer receiving this codebase would:
-1. Read `docs/api-contract.md` to understand every endpoint needed
-2. Build ASP.NET Core controllers matching those routes
-3. Set `VITE_API_BASE_URL` to their server
-4. Optionally flip auth mode from `cookie` to `bearer` in one config file
-5. Everything works
+### Files to create/modify
+- Migration: 3 new tables + RLS policies
+- `src/pages/onboarding/OnboardingDashboard.tsx`
+- `src/pages/onboarding/OnboardingPackageDetail.tsx`
+- `src/pages/onboarding/PublicSigningPage.tsx`
+- `src/components/onboarding/NewPackageDialog.tsx`
+- `src/components/onboarding/SignaturePad.tsx`
+- `src/components/onboarding/PreDeploymentForm.tsx`
+- `src/components/onboarding/DocumentCard.tsx`
+- Update `AppSidebar.tsx` -- add nav item
+- Update `App.tsx` -- add routes
 
