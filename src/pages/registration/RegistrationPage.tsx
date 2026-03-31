@@ -103,6 +103,7 @@ export default function RegistrationPage() {
   const [selectedFormId, setSelectedFormId] = useState<string>("");
   const [sortField, setSortField] = useState<"date" | "division">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [viewingTeamSub, setViewingTeamSub] = useState<TeamSubmission | null>(null);
 
   const toggleSort = (field: "date" | "division") => {
     if (sortField === field) {
