@@ -85,6 +85,17 @@ export default function RegistrationPage() {
 
   // Submissions tab state
   const [selectedFormId, setSelectedFormId] = useState<string>("");
+  const [sortField, setSortField] = useState<"date" | "division">("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const toggleSort = (field: "date" | "division") => {
+    if (sortField === field) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  };
 
   const resetCreate = () => {
     setCreateType(null);
