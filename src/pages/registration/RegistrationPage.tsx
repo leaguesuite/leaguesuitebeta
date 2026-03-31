@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Users, UserCheck, Eye, Edit, Trash2, CalendarDays, ClipboardList, ChevronRight, ToggleLeft, ToggleRight, ArrowLeft, Inbox, DollarSign, Phone, Mail, ArrowUpDown, Download } from "lucide-react";
+import { Plus, Search, Users, UserCheck, Eye, Edit, Trash2, CalendarDays, ClipboardList, ChevronRight, ToggleLeft, ToggleRight, ArrowLeft, Inbox, DollarSign, Phone, Mail, ArrowUpDown, Download, MapPin, Palette, Clock, FileText, X } from "lucide-react";
 import { exportToExcel } from "@/utils/exportToExcel";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -22,6 +22,14 @@ interface RegistrationForm {
   closesAt: string;
 }
 
+interface RosterPlayer {
+  name: string;
+  email: string;
+  phone: string;
+  jerseyNumber: string;
+  position: string;
+}
+
 interface TeamSubmission {
   id: string;
   submittedAt: string;
@@ -31,6 +39,11 @@ interface TeamSubmission {
   email: string;
   phone: string;
   paidToDate: number;
+  captainAddress: string;
+  teamColors: string;
+  preferredDay: string;
+  notes: string;
+  roster: RosterPlayer[];
 }
 
 interface IndividualSubmission {
@@ -51,12 +64,15 @@ const initialForms: RegistrationForm[] = [
   { id: "5", name: "Fall 2024 Team Registration", type: "team", season: "Fall 2024", status: "completed", submissions: 14, capacity: 24, createdAt: "Jul 1, 2024", opensAt: "Jul 10, 2024", closesAt: "Sep 1, 2024" },
 ];
 
+const mockRoster = (names: string[]): RosterPlayer[] =>
+  names.map((n, i) => ({ name: n, email: `${n.toLowerCase().replace(/ /g, ".")}@email.com`, phone: `(555) ${100 + i}-${1000 + i}`, jerseyNumber: `${(i + 1) * 3}`, position: ["QB", "WR", "WR", "RB", "C", "LB", "CB", "S", "DE", "WR", "RB", "LB", "CB", "WR", "S"][i % 15] }));
+
 const mockTeamSubmissions: TeamSubmission[] = [
-  { id: "t1", submittedAt: "Mar 14, 2025 2:30 PM", division: "Adult Men's A", teamName: "Thunder Hawks", captainName: "John Doe", email: "john@thunderhawks.com", phone: "(555) 123-4567", paidToDate: 450 },
-  { id: "t2", submittedAt: "Mar 13, 2025 10:15 AM", division: "Adult Men's A", teamName: "Iron Eagles", captainName: "Sarah Chen", email: "sarah@ironeagles.com", phone: "(555) 234-5678", paidToDate: 450 },
-  { id: "t3", submittedAt: "Mar 12, 2025 4:45 PM", division: "Adult Men's B", teamName: "Storm Riders", captainName: "Mike Torres", email: "mike@stormriders.com", phone: "(555) 345-6789", paidToDate: 225 },
-  { id: "t4", submittedAt: "Mar 11, 2025 9:00 AM", division: "Adult Co-Ed", teamName: "Blaze FC", captainName: "Ana Rivera", email: "ana@blazefc.com", phone: "(555) 456-7890", paidToDate: 0 },
-  { id: "t5", submittedAt: "Mar 10, 2025 1:20 PM", division: "Adult Men's B", teamName: "Night Wolves", captainName: "Derek Miles", email: "derek@nightwolves.com", phone: "(555) 567-8901", paidToDate: 450 },
+  { id: "t1", submittedAt: "Mar 14, 2025 2:30 PM", division: "Adult Men's A", teamName: "Thunder Hawks", captainName: "John Doe", email: "john@thunderhawks.com", phone: "(555) 123-4567", paidToDate: 450, captainAddress: "123 Main St, Springfield, IL 62701", teamColors: "Navy Blue / Gold", preferredDay: "Saturday", notes: "Returning team from Fall 2024. Need early game slots if possible.", roster: mockRoster(["John Doe", "Alex Smith", "Ray Cooper", "Liam Brown", "Noah Davis", "Ethan Wilson", "Lucas Moore", "Mason Taylor", "Logan Anderson", "James Thomas", "Oliver Jackson", "Elijah White", "William Harris", "Benjamin Martin"]) },
+  { id: "t2", submittedAt: "Mar 13, 2025 10:15 AM", division: "Adult Men's A", teamName: "Iron Eagles", captainName: "Sarah Chen", email: "sarah@ironeagles.com", phone: "(555) 234-5678", paidToDate: 450, captainAddress: "456 Oak Ave, Springfield, IL 62702", teamColors: "Red / Black", preferredDay: "Sunday", notes: "New team this season.", roster: mockRoster(["Sarah Chen", "Kevin Park", "David Kim", "Chris Nguyen", "Ryan Lee", "Justin Pham", "Brandon Tran", "Tyler Wu", "Aaron Chang", "Derek Huang", "Marcus Lin", "Steven Yao"]) },
+  { id: "t3", submittedAt: "Mar 12, 2025 4:45 PM", division: "Adult Men's B", teamName: "Storm Riders", captainName: "Mike Torres", email: "mike@stormriders.com", phone: "(555) 345-6789", paidToDate: 225, captainAddress: "789 Elm Blvd, Springfield, IL 62703", teamColors: "Green / White", preferredDay: "Saturday", notes: "Would like to be in the same division as Night Wolves if possible.", roster: mockRoster(["Mike Torres", "Carlos Rivera", "Juan Garcia", "Pedro Sanchez", "Miguel Flores", "Jose Morales", "Luis Hernandez", "Diego Vargas", "Pablo Cruz", "Andres Mendoza", "Hector Ramos", "Fernando Diaz", "Ricardo Lopez"]) },
+  { id: "t4", submittedAt: "Mar 11, 2025 9:00 AM", division: "Adult Co-Ed", teamName: "Blaze FC", captainName: "Ana Rivera", email: "ana@blazefc.com", phone: "(555) 456-7890", paidToDate: 0, captainAddress: "321 Pine Rd, Springfield, IL 62704", teamColors: "Orange / Black", preferredDay: "Sunday", notes: "Co-ed team, mix of experienced and new players.", roster: mockRoster(["Ana Rivera", "Tom Baker", "Lisa Chen", "Mark Johnson", "Sarah Williams", "Dave Martinez", "Kelly Brown", "Chris Davis", "Jen Wilson", "Rob Taylor", "Amy Moore"]) },
+  { id: "t5", submittedAt: "Mar 10, 2025 1:20 PM", division: "Adult Men's B", teamName: "Night Wolves", captainName: "Derek Miles", email: "derek@nightwolves.com", phone: "(555) 567-8901", paidToDate: 450, captainAddress: "654 Cedar Ln, Springfield, IL 62705", teamColors: "Black / Silver", preferredDay: "Saturday", notes: "", roster: mockRoster(["Derek Miles", "Jason Scott", "Travis Green", "Blake Adams", "Cole Nelson", "Shane Carter", "Bryce Mitchell", "Trent Roberts", "Gavin Phillips", "Chase Campbell", "Reid Parker", "Troy Evans", "Brock Stewart", "Lane Morris", "Grant Rogers"]) },
 ];
 
 const mockIndividualSubmissions: IndividualSubmission[] = [
@@ -87,6 +103,7 @@ export default function RegistrationPage() {
   const [selectedFormId, setSelectedFormId] = useState<string>("");
   const [sortField, setSortField] = useState<"date" | "division">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [viewingTeamSub, setViewingTeamSub] = useState<TeamSubmission | null>(null);
 
   const toggleSort = (field: "date" | "division") => {
     if (sortField === field) {
@@ -519,7 +536,7 @@ export default function RegistrationPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {sortedTeamSubs.map(sub => (
-                    <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
+                    <tr key={sub.id} className="hover:bg-secondary/30 transition-colors cursor-pointer" onClick={() => setViewingTeamSub(sub)}>
                       <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.submittedAt}</td>
                       <td className="px-5 py-3.5">
                         <Badge variant="outline" className="text-xs font-normal">{sub.division}</Badge>
@@ -653,6 +670,142 @@ export default function RegistrationPage() {
           {renderSubmissionsTab()}
         </TabsContent>
       </Tabs>
+
+      {/* Team Submission Detail Drawer */}
+      {viewingTeamSub && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setViewingTeamSub(null)} />
+          <div className="relative w-full max-w-2xl bg-card border-l border-border shadow-xl overflow-y-auto animate-in slide-in-from-right">
+            {/* Header */}
+            <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between z-10">
+              <div>
+                <h2 className="text-lg font-bold text-foreground">{viewingTeamSub.teamName}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs">{viewingTeamSub.division}</Badge>
+                  <span className="text-xs text-muted-foreground">Submitted {viewingTeamSub.submittedAt}</span>
+                </div>
+              </div>
+              <button onClick={() => setViewingTeamSub(null)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Captain Info */}
+              <div className="section-card p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-primary" /> Captain Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Name</p>
+                    <p className="text-sm font-medium text-foreground mt-0.5">{viewingTeamSub.captainName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Phone</p>
+                    <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Address</p>
+                    <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.captainAddress}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Team Details */}
+              <div className="section-card p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" /> Team Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Team Colors</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.teamColors}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Preferred Game Day</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.preferredDay}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Paid to Date</p>
+                      <p className={`text-sm font-medium mt-0.5 ${viewingTeamSub.paidToDate > 0 ? "text-success" : "text-destructive"}`}>
+                        ${viewingTeamSub.paidToDate.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Roster Size</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.roster.length} players</p>
+                    </div>
+                  </div>
+                </div>
+                {viewingTeamSub.notes && (
+                  <div className="flex items-start gap-2 pt-2 border-t border-border">
+                    <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Notes</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Roster */}
+              <div className="section-card overflow-hidden">
+                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground">Submitted Roster</h3>
+                  <Badge variant="secondary" className="text-xs">{viewingTeamSub.roster.length} players</Badge>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/50">
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider w-8">#</th>
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
+                        <th className="text-center px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Jersey</th>
+                        <th className="text-center px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Pos</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {viewingTeamSub.roster.map((player, idx) => (
+                        <tr key={idx} className="hover:bg-secondary/30 transition-colors">
+                          <td className="px-5 py-2.5 text-xs text-muted-foreground">{idx + 1}</td>
+                          <td className="px-5 py-2.5 text-sm font-medium text-foreground">
+                            {player.name}
+                            {idx === 0 && <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">Captain</Badge>}
+                          </td>
+                          <td className="px-5 py-2.5 text-sm text-muted-foreground">{player.email}</td>
+                          <td className="px-5 py-2.5 text-sm text-muted-foreground">{player.phone}</td>
+                          <td className="px-5 py-2.5 text-sm text-center text-foreground">{player.jerseyNumber}</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <Badge variant="outline" className="text-xs font-normal">{player.position}</Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
