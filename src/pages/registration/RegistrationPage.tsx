@@ -399,9 +399,64 @@ export default function RegistrationPage() {
       );
     }
 
+    const sortedTeamSubs = [...mockTeamSubmissions].sort((a, b) => {
+      const mul = sortDir === "asc" ? 1 : -1;
+      if (sortField === "division") return mul * a.division.localeCompare(b.division);
+      return mul * (new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+    });
+
+    const sortedIndividualSubs = [...mockIndividualSubmissions].sort((a, b) => {
+      const mul = sortDir === "asc" ? 1 : -1;
+      if (sortField === "division") return mul * a.division.localeCompare(b.division);
+      return mul * (new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+    });
+
+    const handleExport = () => {
+      if (isTeamForm) {
+        exportToExcel(
+          sortedTeamSubs.map(s => ({
+            "Submission Date/Time": s.submittedAt,
+            "Division": s.division,
+            "Team Name": s.teamName,
+            "Captain Name": s.captainName,
+            "Email": s.email,
+            "Phone": s.phone,
+            "Paid to Date": s.paidToDate,
+          })),
+          `${selectedForm?.name || "team-submissions"}-export`,
+          "Submissions"
+        );
+      } else {
+        exportToExcel(
+          sortedIndividualSubs.map(s => ({
+            "Submission Date/Time": s.submittedAt,
+            "Division": s.division,
+            "Player Name": s.name,
+            "Email": s.email,
+            "Phone": s.phone,
+            "Status": s.status,
+          })),
+          `${selectedForm?.name || "individual-submissions"}-export`,
+          "Submissions"
+        );
+      }
+    };
+
+    const SortHeader = ({ field, label }: { field: "date" | "division"; label: string }) => (
+      <th
+        className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors select-none"
+        onClick={() => toggleSort(field)}
+      >
+        <span className="inline-flex items-center gap-1">
+          {label}
+          <ArrowUpDown className={`h-3 w-3 ${sortField === field ? "text-primary" : "text-muted-foreground/50"}`} />
+        </span>
+      </th>
+    );
+
     return (
       <div className="space-y-4">
-        {/* Form selector */}
+        {/* Form selector + export */}
         <div className="section-card p-4">
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
@@ -425,13 +480,21 @@ export default function RegistrationPage() {
                 </SelectContent>
               </Select>
             </div>
-            {selectedForm && (
-              <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
-                <Badge variant="secondary">{selectedForm.type === "team" ? "Team" : "Individual"}</Badge>
-                <span>{selectedForm.submissions} submissions</span>
-                {selectedForm.capacity && <span>· Capacity: {selectedForm.capacity}</span>}
-              </div>
-            )}
+            <div className="ml-auto flex items-center gap-3">
+              {selectedForm && (
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Badge variant="secondary">{selectedForm.type === "team" ? "Team" : "Individual"}</Badge>
+                  <span>{selectedForm.submissions} submissions</span>
+                  {selectedForm.capacity && <span>· Capacity: {selectedForm.capacity}</span>}
+                </div>
+              )}
+              <button
+                onClick={handleExport}
+                className="h-9 px-3 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" /> Export
+              </button>
+            </div>
           </div>
         </div>
 
@@ -445,8 +508,8 @@ export default function RegistrationPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Submission Date/Time</th>
-                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Division</th>
+                    <SortHeader field="date" label="Submission Date/Time" />
+                    <SortHeader field="division" label="Division" />
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Team Name</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Captain Name</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
@@ -455,7 +518,7 @@ export default function RegistrationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {mockTeamSubmissions.map(sub => (
+                  {sortedTeamSubs.map(sub => (
                     <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
                       <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.submittedAt}</td>
                       <td className="px-5 py-3.5">
@@ -485,8 +548,8 @@ export default function RegistrationPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Submission Date/Time</th>
-                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Division</th>
+                    <SortHeader field="date" label="Submission Date/Time" />
+                    <SortHeader field="division" label="Division" />
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Player Name</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
@@ -494,7 +557,7 @@ export default function RegistrationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {mockIndividualSubmissions.map(sub => (
+                  {sortedIndividualSubs.map(sub => (
                     <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
                       <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.submittedAt}</td>
                       <td className="px-5 py-3.5">
