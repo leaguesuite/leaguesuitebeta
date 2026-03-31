@@ -22,6 +22,14 @@ interface RegistrationForm {
   closesAt: string;
 }
 
+interface RosterPlayer {
+  name: string;
+  email: string;
+  phone: string;
+  jerseyNumber: string;
+  position: string;
+}
+
 interface TeamSubmission {
   id: string;
   submittedAt: string;
@@ -31,6 +39,11 @@ interface TeamSubmission {
   email: string;
   phone: string;
   paidToDate: number;
+  captainAddress: string;
+  teamColors: string;
+  preferredDay: string;
+  notes: string;
+  roster: RosterPlayer[];
 }
 
 interface IndividualSubmission {
