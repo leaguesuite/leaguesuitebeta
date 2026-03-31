@@ -670,6 +670,142 @@ export default function RegistrationPage() {
           {renderSubmissionsTab()}
         </TabsContent>
       </Tabs>
+
+      {/* Team Submission Detail Drawer */}
+      {viewingTeamSub && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setViewingTeamSub(null)} />
+          <div className="relative w-full max-w-2xl bg-card border-l border-border shadow-xl overflow-y-auto animate-in slide-in-from-right">
+            {/* Header */}
+            <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between z-10">
+              <div>
+                <h2 className="text-lg font-bold text-foreground">{viewingTeamSub.teamName}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs">{viewingTeamSub.division}</Badge>
+                  <span className="text-xs text-muted-foreground">Submitted {viewingTeamSub.submittedAt}</span>
+                </div>
+              </div>
+              <button onClick={() => setViewingTeamSub(null)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Captain Info */}
+              <div className="section-card p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-primary" /> Captain Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Name</p>
+                    <p className="text-sm font-medium text-foreground mt-0.5">{viewingTeamSub.captainName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Phone</p>
+                    <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Address</p>
+                    <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.captainAddress}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Team Details */}
+              <div className="section-card p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" /> Team Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-start gap-2">
+                    <Palette className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Team Colors</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.teamColors}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Preferred Game Day</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.preferredDay}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Paid to Date</p>
+                      <p className={`text-sm font-medium mt-0.5 ${viewingTeamSub.paidToDate > 0 ? "text-success" : "text-destructive"}`}>
+                        ${viewingTeamSub.paidToDate.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Roster Size</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.roster.length} players</p>
+                    </div>
+                  </div>
+                </div>
+                {viewingTeamSub.notes && (
+                  <div className="flex items-start gap-2 pt-2 border-t border-border">
+                    <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Notes</p>
+                      <p className="text-sm text-foreground mt-0.5">{viewingTeamSub.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Roster */}
+              <div className="section-card overflow-hidden">
+                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground">Submitted Roster</h3>
+                  <Badge variant="secondary" className="text-xs">{viewingTeamSub.roster.length} players</Badge>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/50">
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider w-8">#</th>
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                        <th className="text-left px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
+                        <th className="text-center px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Jersey</th>
+                        <th className="text-center px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">Pos</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {viewingTeamSub.roster.map((player, idx) => (
+                        <tr key={idx} className="hover:bg-secondary/30 transition-colors">
+                          <td className="px-5 py-2.5 text-xs text-muted-foreground">{idx + 1}</td>
+                          <td className="px-5 py-2.5 text-sm font-medium text-foreground">
+                            {player.name}
+                            {idx === 0 && <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">Captain</Badge>}
+                          </td>
+                          <td className="px-5 py-2.5 text-sm text-muted-foreground">{player.email}</td>
+                          <td className="px-5 py-2.5 text-sm text-muted-foreground">{player.phone}</td>
+                          <td className="px-5 py-2.5 text-sm text-center text-foreground">{player.jerseyNumber}</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <Badge variant="outline" className="text-xs font-normal">{player.position}</Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
