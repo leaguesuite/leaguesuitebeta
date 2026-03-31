@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Plus, Search, Users, UserCheck, Eye, Edit, Trash2, ExternalLink, X, CalendarDays, ClipboardList, ChevronRight, ToggleLeft, ToggleRight, ArrowLeft } from "lucide-react";
+import { Plus, Search, Users, UserCheck, Eye, Edit, Trash2, CalendarDays, ClipboardList, ChevronRight, ToggleLeft, ToggleRight, ArrowLeft, Inbox, DollarSign, Phone, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type FormType = "individual" | "team";
 type FormStatus = "active" | "draft" | "completed";
@@ -19,14 +21,24 @@ interface RegistrationForm {
   closesAt: string;
 }
 
-interface Submission {
+interface TeamSubmission {
   id: string;
+  submittedAt: string;
+  division: string;
+  teamName: string;
+  captainName: string;
+  email: string;
+  phone: string;
+  paidToDate: number;
+}
+
+interface IndividualSubmission {
+  id: string;
+  submittedAt: string;
+  division: string;
   name: string;
   email: string;
-  date: string;
-  team?: string;
-  captain?: string;
-  playerCount?: number;
+  phone: string;
   status: "confirmed" | "pending" | "cancelled";
 }
 
@@ -35,41 +47,43 @@ const initialForms: RegistrationForm[] = [
   { id: "2", name: "Spring 2025 Team Registration", type: "team", season: "Spring 2025", status: "active", submissions: 18, capacity: 32, createdAt: "Jan 15, 2025", opensAt: "Jan 20, 2025", closesAt: "Mar 1, 2025" },
   { id: "3", name: "Summer Tournament Individual Entry", type: "individual", season: "Summer Tournament 2025", status: "draft", submissions: 0, capacity: 100, createdAt: "Mar 10, 2025", opensAt: "Apr 1, 2025", closesAt: "May 15, 2025" },
   { id: "4", name: "Fall 2024 Player Registration", type: "individual", season: "Fall 2024", status: "completed", submissions: 184, capacity: 200, createdAt: "Jul 1, 2024", opensAt: "Jul 10, 2024", closesAt: "Sep 1, 2024" },
+  { id: "5", name: "Fall 2024 Team Registration", type: "team", season: "Fall 2024", status: "completed", submissions: 14, capacity: 24, createdAt: "Jul 1, 2024", opensAt: "Jul 10, 2024", closesAt: "Sep 1, 2024" },
 ];
 
-const mockIndividualSubs: Submission[] = [
-  { id: "s1", name: "Marcus Johnson", email: "marcus@email.com", date: "Mar 14, 2025", status: "confirmed" },
-  { id: "s2", name: "Jake Williams", email: "jake@email.com", date: "Mar 13, 2025", status: "confirmed" },
-  { id: "s3", name: "Emily Torres", email: "emily@email.com", date: "Mar 12, 2025", status: "pending" },
-  { id: "s4", name: "Aisha Brown", email: "aisha@email.com", date: "Mar 12, 2025", status: "confirmed" },
-  { id: "s5", name: "Chris Lee", email: "chris@email.com", date: "Mar 11, 2025", status: "cancelled" },
+const mockTeamSubmissions: TeamSubmission[] = [
+  { id: "t1", submittedAt: "Mar 14, 2025 2:30 PM", division: "Adult Men's A", teamName: "Thunder Hawks", captainName: "John Doe", email: "john@thunderhawks.com", phone: "(555) 123-4567", paidToDate: 450 },
+  { id: "t2", submittedAt: "Mar 13, 2025 10:15 AM", division: "Adult Men's A", teamName: "Iron Eagles", captainName: "Sarah Chen", email: "sarah@ironeagles.com", phone: "(555) 234-5678", paidToDate: 450 },
+  { id: "t3", submittedAt: "Mar 12, 2025 4:45 PM", division: "Adult Men's B", teamName: "Storm Riders", captainName: "Mike Torres", email: "mike@stormriders.com", phone: "(555) 345-6789", paidToDate: 225 },
+  { id: "t4", submittedAt: "Mar 11, 2025 9:00 AM", division: "Adult Co-Ed", teamName: "Blaze FC", captainName: "Ana Rivera", email: "ana@blazefc.com", phone: "(555) 456-7890", paidToDate: 0 },
+  { id: "t5", submittedAt: "Mar 10, 2025 1:20 PM", division: "Adult Men's B", teamName: "Night Wolves", captainName: "Derek Miles", email: "derek@nightwolves.com", phone: "(555) 567-8901", paidToDate: 450 },
 ];
 
-const mockTeamSubs: Submission[] = [
-  { id: "t1", name: "Thunder Hawks", captain: "John Doe", email: "john@thunderhawks.com", playerCount: 14, date: "Feb 28, 2025", status: "confirmed" },
-  { id: "t2", name: "Iron Eagles", captain: "Sarah Chen", email: "sarah@ironeagles.com", playerCount: 12, date: "Feb 25, 2025", status: "confirmed" },
-  { id: "t3", name: "Storm Riders", captain: "Mike Torres", email: "mike@stormriders.com", playerCount: 15, date: "Feb 22, 2025", status: "pending" },
-  { id: "t4", name: "Blaze FC", captain: "Ana Rivera", email: "ana@blazefc.com", playerCount: 11, date: "Feb 20, 2025", status: "confirmed" },
+const mockIndividualSubmissions: IndividualSubmission[] = [
+  { id: "s1", submittedAt: "Mar 14, 2025 3:12 PM", division: "Adult Men's A", name: "Marcus Johnson", email: "marcus@email.com", phone: "(555) 111-2222", status: "confirmed" },
+  { id: "s2", submittedAt: "Mar 13, 2025 11:30 AM", division: "Adult Men's A", name: "Jake Williams", email: "jake@email.com", phone: "(555) 222-3333", status: "confirmed" },
+  { id: "s3", submittedAt: "Mar 12, 2025 5:00 PM", division: "Adult Co-Ed", name: "Emily Torres", email: "emily@email.com", phone: "(555) 333-4444", status: "pending" },
+  { id: "s4", submittedAt: "Mar 12, 2025 2:15 PM", division: "Adult Men's B", name: "Aisha Brown", email: "aisha@email.com", phone: "(555) 444-5555", status: "confirmed" },
+  { id: "s5", submittedAt: "Mar 11, 2025 8:45 AM", division: "Junior", name: "Chris Lee", email: "chris@email.com", phone: "(555) 555-6666", status: "cancelled" },
 ];
 
 const seasons = ["Spring 2025", "Summer Tournament 2025", "Fall 2025"];
 
-type View = "list" | "create" | "submissions";
-
 export default function RegistrationPage() {
   const [forms, setForms] = useState<RegistrationForm[]>(initialForms);
-  const [view, setView] = useState<View>("list");
-  const [viewingForm, setViewingForm] = useState<RegistrationForm | null>(null);
   const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<"all" | FormType>("all");
+  const [activeTab, setActiveTab] = useState("team");
 
   // Create form state
+  const [isCreating, setIsCreating] = useState(false);
   const [createType, setCreateType] = useState<FormType | null>(null);
   const [formName, setFormName] = useState("");
   const [formSeason, setFormSeason] = useState(seasons[0]);
   const [formCapacity, setFormCapacity] = useState("");
   const [formOpens, setFormOpens] = useState("");
   const [formCloses, setFormCloses] = useState("");
+
+  // Submissions tab state
+  const [selectedFormId, setSelectedFormId] = useState<string>("");
 
   const resetCreate = () => {
     setCreateType(null);
@@ -78,7 +92,7 @@ export default function RegistrationPage() {
     setFormCapacity("");
     setFormOpens("");
     setFormCloses("");
-    setView("list");
+    setIsCreating(false);
   };
 
   const handleCreate = () => {
@@ -111,135 +125,12 @@ export default function RegistrationPage() {
     setForms(forms.filter(f => f.id !== id));
   };
 
-  const openSubmissions = (form: RegistrationForm) => {
-    setViewingForm(form);
-    setView("submissions");
-  };
-
-  const filtered = forms.filter(f => {
-    if (filterType !== "all" && f.type !== filterType) return false;
-    if (search && !f.name.toLowerCase().includes(search.toLowerCase()) && !f.season.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
-
-  // ─── Submissions View ───
-  if (view === "submissions" && viewingForm) {
-    const subs = viewingForm.type === "team" ? mockTeamSubs : mockIndividualSubs;
-    return (
-      <div className="space-y-6 max-w-6xl">
-        <div className="flex items-center gap-3">
-          <button onClick={() => { setView("list"); setViewingForm(null); }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{viewingForm.name}</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="secondary" className="text-xs">{viewingForm.type === "team" ? "Team Registration" : "Individual Registration"}</Badge>
-              <span className="text-sm text-muted-foreground">·</span>
-              <span className="text-sm text-muted-foreground">{viewingForm.season}</span>
-              <span className="text-sm text-muted-foreground">·</span>
-              <StatusBadge status={viewingForm.status as any} />
-            </div>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="stat-card">
-            <p className="text-sm text-muted-foreground font-medium">Total Submissions</p>
-            <p className="text-2xl font-bold text-foreground mt-1">{subs.length}</p>
-          </div>
-          <div className="stat-card">
-            <p className="text-sm text-muted-foreground font-medium">Confirmed</p>
-            <p className="text-2xl font-bold text-success mt-1">{subs.filter(s => s.status === "confirmed").length}</p>
-          </div>
-          <div className="stat-card">
-            <p className="text-sm text-muted-foreground font-medium">Pending</p>
-            <p className="text-2xl font-bold text-warning mt-1">{subs.filter(s => s.status === "pending").length}</p>
-          </div>
-          <div className="stat-card">
-            <p className="text-sm text-muted-foreground font-medium">
-              {viewingForm.capacity ? "Capacity" : "No Cap"}
-            </p>
-            <p className="text-2xl font-bold text-foreground mt-1">
-              {viewingForm.capacity ? `${subs.length} / ${viewingForm.capacity}` : "∞"}
-            </p>
-          </div>
-        </div>
-
-        {/* Capacity Bar */}
-        {viewingForm.capacity && (
-          <div className="section-card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Registration Capacity</span>
-              <span className="text-sm text-muted-foreground">{Math.round((subs.filter(s => s.status !== "cancelled").length / viewingForm.capacity) * 100)}% filled</span>
-            </div>
-            <div className="w-full h-2.5 rounded-full bg-secondary overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, (subs.filter(s => s.status !== "cancelled").length / viewingForm.capacity) * 100)}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Submissions Table */}
-        <div className="section-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">Submissions</h2>
-            <span className="text-xs text-muted-foreground">{subs.length} total</span>
-          </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-secondary/50">
-                <th className="table-header text-left px-5 py-3">{viewingForm.type === "team" ? "Team Name" : "Player Name"}</th>
-                {viewingForm.type === "team" && <th className="table-header text-left px-5 py-3">Captain</th>}
-                <th className="table-header text-left px-5 py-3">Email</th>
-                {viewingForm.type === "team" && <th className="table-header text-left px-5 py-3">Players</th>}
-                <th className="table-header text-left px-5 py-3">Date</th>
-                <th className="table-header text-left px-5 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {subs.map(sub => (
-                <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <span className="text-sm font-medium text-foreground">{sub.name}</span>
-                  </td>
-                  {viewingForm.type === "team" && (
-                    <td className="px-5 py-3.5 text-sm text-muted-foreground">{sub.captain}</td>
-                  )}
-                  <td className="px-5 py-3.5 text-sm text-muted-foreground">{sub.email}</td>
-                  {viewingForm.type === "team" && (
-                    <td className="px-5 py-3.5">
-                      <Badge variant="secondary" className="text-xs">{sub.playerCount} players</Badge>
-                    </td>
-                  )}
-                  <td className="px-5 py-3.5 text-sm text-muted-foreground">{sub.date}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                      sub.status === "confirmed" ? "bg-success/10 text-success border-success/20" :
-                      sub.status === "pending" ? "bg-warning/10 text-warning border-warning/20" :
-                      "bg-destructive/10 text-destructive border-destructive/20"
-                    }`}>
-                      {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Confirmed submissions automatically populate the {viewingForm.type === "team" ? "teams" : "player"} list for <strong>{viewingForm.season}</strong>.
-        </p>
-      </div>
-    );
-  }
+  const teamForms = forms.filter(f => f.type === "team");
+  const individualForms = forms.filter(f => f.type === "individual");
+  const activeForms = forms.filter(f => f.status === "active");
 
   // ─── Create View ───
-  if (view === "create") {
+  if (isCreating) {
     return (
       <div className="space-y-6 max-w-3xl">
         <div className="flex items-center gap-3">
@@ -252,7 +143,6 @@ export default function RegistrationPage() {
           </div>
         </div>
 
-        {/* Step 1: Choose type */}
         {!createType && (
           <div className="space-y-4">
             <h2 className="text-base font-semibold text-foreground">What type of registration?</h2>
@@ -265,14 +155,11 @@ export default function RegistrationPage() {
                   <UserCheck className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Individual Registration</h3>
-                <p className="text-sm text-muted-foreground mt-1.5">
-                  Players register individually. Submissions populate the player list for the selected season or tournament.
-                </p>
+                <p className="text-sm text-muted-foreground mt-1.5">Players register individually for the selected season or tournament.</p>
                 <div className="mt-4 flex items-center gap-1.5 text-primary text-sm font-medium">
                   Select <ChevronRight className="h-3.5 w-3.5" />
                 </div>
               </button>
-
               <button
                 onClick={() => setCreateType("team")}
                 className="section-card p-6 text-left hover:shadow-md hover:border-primary/30 transition-all border-2 border-transparent"
@@ -281,9 +168,7 @@ export default function RegistrationPage() {
                   <Users className="h-6 w-6 text-accent" />
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Team Registration</h3>
-                <p className="text-sm text-muted-foreground mt-1.5">
-                  Teams register as a group with a captain. Submissions populate the team list and rosters for the selected season or tournament.
-                </p>
+                <p className="text-sm text-muted-foreground mt-1.5">Teams register as a group with a captain and roster.</p>
                 <div className="mt-4 flex items-center gap-1.5 text-primary text-sm font-medium">
                   Select <ChevronRight className="h-3.5 w-3.5" />
                 </div>
@@ -292,7 +177,6 @@ export default function RegistrationPage() {
           </div>
         )}
 
-        {/* Step 2: Configure form */}
         {createType && (
           <div className="section-card p-5 space-y-5">
             <div className="flex items-center gap-3 mb-2">
@@ -327,7 +211,6 @@ export default function RegistrationPage() {
                 >
                   {seasons.map(s => <option key={s}>{s}</option>)}
                 </select>
-                <p className="text-xs text-muted-foreground mt-1">Confirmed submissions will auto-populate this season's {createType === "team" ? "team" : "player"} list.</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">Capacity Limit</label>
@@ -374,10 +257,7 @@ export default function RegistrationPage() {
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={resetCreate}
-                className="h-9 px-4 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary transition-colors"
-              >
+              <button onClick={resetCreate} className="h-9 px-4 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary transition-colors">
                 Cancel
               </button>
               <button
@@ -394,53 +274,32 @@ export default function RegistrationPage() {
     );
   }
 
-  // ─── List View ───
-  return (
-    <div className="space-y-6 max-w-6xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Registration</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create and manage registration forms for seasons and tournaments.</p>
-        </div>
-        <button
-          onClick={() => setView("create")}
-          className="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" /> New Registration Form
-        </button>
-      </div>
+  // ─── Form list renderer ───
+  const renderFormList = (formList: RegistrationForm[]) => {
+    const filtered = formList.filter(f => {
+      if (search && !f.name.toLowerCase().includes(search.toLowerCase()) && !f.season.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
 
-      {/* Filters */}
-      <div className="section-card p-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search forms..."
-              className="h-9 w-56 rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring/20"
-            />
+    if (filtered.length === 0) {
+      return (
+        <div className="section-card p-12 flex flex-col items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-3">
+            <ClipboardList className="h-6 w-6 text-muted-foreground" />
           </div>
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            {(["all", "individual", "team"] as const).map(t => (
-              <button
-                key={t}
-                onClick={() => setFilterType(t)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  filterType === t ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                {t === "all" ? "All" : t === "individual" ? "Individual" : "Team"}
-              </button>
-            ))}
-          </div>
-          <div className="ml-auto text-sm text-muted-foreground">{filtered.length} form{filtered.length !== 1 ? "s" : ""}</div>
+          <h2 className="text-base font-semibold text-foreground">No registration forms</h2>
+          <p className="text-sm text-muted-foreground mt-1">Create your first registration form to start collecting signups.</p>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="mt-4 h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> New Registration Form
+          </button>
         </div>
-      </div>
+      );
+    }
 
-      {/* Forms List */}
+    return (
       <div className="space-y-3">
         {filtered.map(form => (
           <div key={form.id} className="section-card overflow-hidden">
@@ -458,8 +317,6 @@ export default function RegistrationPage() {
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                     <span>{form.season}</span>
-                    <span>·</span>
-                    <span>{form.type === "individual" ? "Individual" : "Team"}</span>
                     <span>·</span>
                     <span>Opens {form.opensAt}</span>
                     <span>·</span>
@@ -488,13 +345,6 @@ export default function RegistrationPage() {
                 )}
 
                 <div className="flex items-center gap-1 pl-2 border-l border-border">
-                  <button
-                    onClick={() => openSubmissions(form)}
-                    className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
-                    title="View submissions"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
                   {form.status !== "completed" && (
                     <button
                       onClick={() => toggleStatus(form.id)}
@@ -516,23 +366,218 @@ export default function RegistrationPage() {
             </div>
           </div>
         ))}
+      </div>
+    );
+  };
 
-        {filtered.length === 0 && (
-          <div className="section-card p-12 flex flex-col items-center justify-center">
-            <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-3">
-              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+  // ─── Submissions tab content ───
+  const selectedForm = activeForms.find(f => f.id === selectedFormId) || activeForms[0];
+  const isTeamForm = selectedForm?.type === "team";
+
+  const renderSubmissionsTab = () => {
+    if (activeForms.length === 0) {
+      return (
+        <div className="section-card p-12 flex flex-col items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-3">
+            <Inbox className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h2 className="text-base font-semibold text-foreground">No active forms</h2>
+          <p className="text-sm text-muted-foreground mt-1">Activate a registration form to start receiving submissions.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Form selector */}
+        <div className="section-card p-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-foreground">Viewing submissions for:</span>
+              <Select
+                value={selectedForm?.id || ""}
+                onValueChange={setSelectedFormId}
+              >
+                <SelectTrigger className="w-[320px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeForms.map(f => (
+                    <SelectItem key={f.id} value={f.id}>
+                      <span className="flex items-center gap-2">
+                        {f.type === "team" ? <Users className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
+                        {f.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <h2 className="text-base font-semibold text-foreground">No registration forms</h2>
-            <p className="text-sm text-muted-foreground mt-1">Create your first registration form to start collecting signups.</p>
-            <button
-              onClick={() => setView("create")}
-              className="mt-4 h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" /> New Registration Form
-            </button>
+            {selectedForm && (
+              <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+                <Badge variant="secondary">{selectedForm.type === "team" ? "Team" : "Individual"}</Badge>
+                <span>{selectedForm.submissions} submissions</span>
+                {selectedForm.capacity && <span>· Capacity: {selectedForm.capacity}</span>}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Submissions table */}
+        {isTeamForm ? (
+          <div className="section-card overflow-hidden">
+            <div className="px-5 py-4 border-b border-border">
+              <h2 className="text-sm font-semibold text-foreground">Team Submissions</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-secondary/50">
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Submission Date/Time</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Division</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Team Name</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Captain Name</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
+                    <th className="text-right px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Paid to Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {mockTeamSubmissions.map(sub => (
+                    <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.submittedAt}</td>
+                      <td className="px-5 py-3.5">
+                        <Badge variant="outline" className="text-xs font-normal">{sub.division}</Badge>
+                      </td>
+                      <td className="px-5 py-3.5 text-sm font-medium text-foreground">{sub.teamName}</td>
+                      <td className="px-5 py-3.5 text-sm text-foreground">{sub.captainName}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">{sub.email}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.phone}</td>
+                      <td className="px-5 py-3.5 text-sm text-right font-medium">
+                        <span className={sub.paidToDate > 0 ? "text-success" : "text-destructive"}>
+                          ${sub.paidToDate.toFixed(2)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="section-card overflow-hidden">
+            <div className="px-5 py-4 border-b border-border">
+              <h2 className="text-sm font-semibold text-foreground">Individual Submissions</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-secondary/50">
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Submission Date/Time</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Division</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Player Name</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {mockIndividualSubmissions.map(sub => (
+                    <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.submittedAt}</td>
+                      <td className="px-5 py-3.5">
+                        <Badge variant="outline" className="text-xs font-normal">{sub.division}</Badge>
+                      </td>
+                      <td className="px-5 py-3.5 text-sm font-medium text-foreground">{sub.name}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">{sub.email}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.phone}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                          sub.status === "confirmed" ? "bg-success/10 text-success border-success/20" :
+                          sub.status === "pending" ? "bg-warning/10 text-warning border-warning/20" :
+                          "bg-destructive/10 text-destructive border-destructive/20"
+                        }`}>
+                          {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
+    );
+  };
+
+  // ─── Main View ───
+  return (
+    <div className="space-y-6 max-w-6xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Registration</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage registration forms and view submissions.</p>
+        </div>
+        <button
+          onClick={() => setIsCreating(true)}
+          className="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" /> New Registration Form
+        </button>
+      </div>
+
+      {/* Search */}
+      <div className="section-card p-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search forms..."
+              className="h-9 w-56 rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring/20"
+            />
+          </div>
+          <div className="ml-auto text-sm text-muted-foreground">{forms.length} total forms</div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="team" className="flex items-center gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            Team Registrations
+            <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{teamForms.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="individual" className="flex items-center gap-1.5">
+            <UserCheck className="h-3.5 w-3.5" />
+            Individual Registrations
+            <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{individualForms.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="submissions" className="flex items-center gap-1.5">
+            <Inbox className="h-3.5 w-3.5" />
+            Submissions
+            {activeForms.length > 0 && (
+              <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{activeForms.length} active</Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="team">
+          {renderFormList(teamForms)}
+        </TabsContent>
+
+        <TabsContent value="individual">
+          {renderFormList(individualForms)}
+        </TabsContent>
+
+        <TabsContent value="submissions">
+          {renderSubmissionsTab()}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
