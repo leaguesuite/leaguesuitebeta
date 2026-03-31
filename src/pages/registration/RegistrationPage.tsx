@@ -536,7 +536,7 @@ export default function RegistrationPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {sortedTeamSubs.map(sub => (
-                    <tr key={sub.id} className="hover:bg-secondary/30 transition-colors">
+                    <tr key={sub.id} className="hover:bg-secondary/30 transition-colors cursor-pointer" onClick={() => setViewingTeamSub(sub)}>
                       <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{sub.submittedAt}</td>
                       <td className="px-5 py-3.5">
                         <Badge variant="outline" className="text-xs font-normal">{sub.division}</Badge>
