@@ -183,6 +183,13 @@ const initialGames: Game[] = [
 const competitions = ["All Competitions", "Regular Season", "Playoffs"];
 
 const divisions = ["All Divisions", "Men's D1", "Men's D2", "Women's D1", "Co-Ed Open"];
+const teamsByDivision: Record<string, string[]> = {
+  "Men's D1": ["Thunder Hawks", "Iron Eagles", "Crimson Tide", "Blue Lightning", "Storm Riders"],
+  "Men's D2": ["Night Owls", "Silver Sharks", "Steel Wolves"],
+  "Women's D1": ["Phoenix Rising", "Viper Squad", "Arctic Wolves"],
+  "Co-Ed Open": ["Blaze FC", "Golden Bears", "Red Rockets"],
+};
+const allTeams = Object.values(teamsByDivision).flat();
 const weeks = ["All Weeks", "Week 8", "Week 9", "Week 10"];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -769,11 +776,19 @@ export default function GamesPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs">Date <span className="text-destructive">*</span></Label>
-                <Input type="date" value={addForm.date} onChange={e => setAddForm(f => ({ ...f, date: e.target.value }))} />
+                <div className="flex gap-2">
+                  <Input type="date" value={addForm.date === "TBD" ? "" : addForm.date} disabled={addForm.date === "TBD"} onChange={e => setAddForm(f => ({ ...f, date: e.target.value }))} />
+                  <Button type="button" variant={addForm.date === "TBD" ? "default" : "outline"} size="sm"
+                    onClick={() => setAddForm(f => ({ ...f, date: f.date === "TBD" ? "" : "TBD" }))}>TBD</Button>
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Time <span className="text-destructive">*</span></Label>
-                <Input type="time" value={addForm.time} onChange={e => setAddForm(f => ({ ...f, time: e.target.value }))} />
+                <div className="flex gap-2">
+                  <Input type="time" value={addForm.time === "TBD" ? "" : addForm.time} disabled={addForm.time === "TBD"} onChange={e => setAddForm(f => ({ ...f, time: e.target.value }))} />
+                  <Button type="button" variant={addForm.time === "TBD" ? "default" : "outline"} size="sm"
+                    onClick={() => setAddForm(f => ({ ...f, time: f.time === "TBD" ? "" : "TBD" }))}>TBD</Button>
+                </div>
               </div>
             </div>
 
@@ -812,6 +827,7 @@ export default function GamesPage() {
                 <Select value={addForm.field} onValueChange={v => setAddForm(f => ({ ...f, field: v }))}>
                   <SelectTrigger><SelectValue placeholder="Choose a field" /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="TBD">TBD</SelectItem>
                     <SelectItem value="Memorial Field">Memorial Field</SelectItem>
                     <SelectItem value="Central Park">Central Park</SelectItem>
                     <SelectItem value="Riverside Field">Riverside Field</SelectItem>
@@ -842,41 +858,61 @@ export default function GamesPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-[1fr_auto] gap-4 items-end">
               <div className="space-y-1.5">
-                <Label className="text-xs">Home Team</Label>
-                <Input value={addForm.home} onChange={e => setAddForm(f => ({ ...f, home: e.target.value }))} placeholder="Home team name" />
+                <Label className="text-xs">Division</Label>
+                <Select value={addForm.division} onValueChange={v => setAddForm(f => ({ ...f, division: v, home: "", away: "" }))}>
+                  <SelectTrigger><SelectValue placeholder="Choose a division" /></SelectTrigger>
+                  <SelectContent>
+                    {divisions.filter(d => d !== "All Divisions").map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Visitor Team</Label>
-                <Input value={addForm.away} onChange={e => setAddForm(f => ({ ...f, away: e.target.value }))} placeholder="Visitor team name" />
+              <div className="flex items-center gap-2 h-10">
+                <Checkbox id="interdivision" checked={addForm.interdivision}
+                  onCheckedChange={v => setAddForm(f => ({ ...f, interdivision: !!v }))} />
+                <Label htmlFor="interdivision" className="text-sm font-medium">Interdivision Game</Label>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs">Short Notes Home</Label>
-              <Textarea rows={2} value={addForm.shortNotesHome} onChange={e => setAddForm(f => ({ ...f, shortNotesHome: e.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Short Notes Visitor</Label>
-              <Textarea rows={2} value={addForm.shortNotesVisitor} onChange={e => setAddForm(f => ({ ...f, shortNotesVisitor: e.target.value }))} />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Checkbox id="interdivision" checked={addForm.interdivision}
-                onCheckedChange={v => setAddForm(f => ({ ...f, interdivision: !!v }))} />
-              <Label htmlFor="interdivision" className="text-sm font-medium">Interdivision Game</Label>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs">Division</Label>
-              <Select value={addForm.division} onValueChange={v => setAddForm(f => ({ ...f, division: v }))}>
-                <SelectTrigger><SelectValue placeholder="Choose a division" /></SelectTrigger>
-                <SelectContent>
-                  {divisions.filter(d => d !== "All Divisions").map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {(() => {
+              const teamOpts = addForm.interdivision
+                ? allTeams
+                : (teamsByDivision[addForm.division] ?? []);
+              const TeamSelect = ({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) => (
+                <Select value={value} onValueChange={onChange} disabled={!addForm.interdivision && !addForm.division}>
+                  <SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TBD">TBD</SelectItem>
+                    {teamOpts.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              );
+              return (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Home Team</Label>
+                      <TeamSelect value={addForm.home} onChange={v => setAddForm(f => ({ ...f, home: v }))} placeholder={addForm.interdivision || addForm.division ? "Select home team" : "Choose division first"} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Short Notes Home</Label>
+                      <Textarea rows={2} value={addForm.shortNotesHome} onChange={e => setAddForm(f => ({ ...f, shortNotesHome: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Visitor Team</Label>
+                      <TeamSelect value={addForm.away} onChange={v => setAddForm(f => ({ ...f, away: v }))} placeholder={addForm.interdivision || addForm.division ? "Select visitor team" : "Choose division first"} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Short Notes Visitor</Label>
+                      <Textarea rows={2} value={addForm.shortNotesVisitor} onChange={e => setAddForm(f => ({ ...f, shortNotesVisitor: e.target.value }))} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="flex items-center gap-2">
               <Checkbox id="exhibition" checked={addForm.exhibition}
