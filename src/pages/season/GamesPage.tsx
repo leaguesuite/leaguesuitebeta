@@ -620,6 +620,7 @@ export default function GamesPage() {
             division: r.division || "",
             field: r.field || "TBD",
             week: parseInt(r.week) || 1,
+            competition: (r.competition === "Playoffs" ? "Playoffs" : "Regular Season") as Competition,
             playerStats: [],
           }));
           setGames(prev => [...prev, ...newGames]);
