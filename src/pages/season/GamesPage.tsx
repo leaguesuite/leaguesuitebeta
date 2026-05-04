@@ -200,6 +200,8 @@ export default function GamesPage() {
   const [statsGame, setStatsGame] = useState<Game | null>(null);
   const [editingStats, setEditingStats] = useState(false);
   const [editedStats, setEditedStats] = useState<PlayerStat[]>([]);
+  const [editedPeriodScores, setEditedPeriodScores] = useState<{ home: number; away: number }[]>([]);
+  const [editedPeriodType, setEditedPeriodType] = useState<"halves" | "quarters">("quarters");
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
   const [playerSort, setPlayerSort] = useState<"number" | "firstName" | "lastName">("number");
   const [importOpen, setImportOpen] = useState(false);
