@@ -187,6 +187,7 @@ export default function GamesPage() {
   const [games, setGames] = useState<Game[]>(initialGames);
   const [selectedDivision, setSelectedDivision] = useState("All Divisions");
   const [selectedWeek, setSelectedWeek] = useState("All Weeks");
+  const [selectedCompetition, setSelectedCompetition] = useState("All Competitions");
   const [search, setSearch] = useState("");
 
   // Edit game info
