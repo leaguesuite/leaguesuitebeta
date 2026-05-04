@@ -109,6 +109,8 @@ interface PlayerStat {
   [key: string]: string | number;
 }
 
+type Competition = "Regular Season" | "Playoffs";
+
 interface Game {
   id: number;
   date: string;
@@ -121,6 +123,7 @@ interface Game {
   division: string;
   field: string;
   week: number;
+  competition: Competition;
   playerStats: PlayerStat[];
 }
 
