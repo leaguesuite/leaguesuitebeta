@@ -247,8 +247,15 @@ export default function GamesPage() {
       stats = generatePlayerStats();
       setGames(prev => prev.map(g => g.id === game.id ? { ...g, playerStats: stats } : g));
     }
-    setStatsGame({ ...game, playerStats: stats });
+    const periodType = game.periodType ?? "quarters";
+    const defaultLen = periodType === "halves" ? 2 : 4;
+    const periodScores = game.periodScores && game.periodScores.length > 0
+      ? game.periodScores
+      : Array.from({ length: defaultLen }, () => ({ home: 0, away: 0 }));
+    setStatsGame({ ...game, playerStats: stats, periodScores, periodType });
     setEditedStats(stats.map(s => ({ ...s })));
+    setEditedPeriodScores(periodScores.map(p => ({ ...p })));
+    setEditedPeriodType(periodType);
     setEditingStats(false);
     setActiveStatCategory("passing");
   };
@@ -258,16 +265,45 @@ export default function GamesPage() {
     setEditedStats(prev => prev.map(s => s.id === playerId ? { ...s, [key]: v } : s));
   };
 
+  const updatePeriodScore = (idx: number, team: "home" | "away", value: string) => {
+    const v = parseInt(value) || 0;
+    setEditedPeriodScores(prev => prev.map((p, i) => i === idx ? { ...p, [team]: v } : p));
+  };
+
+  const changePeriodType = (type: "halves" | "quarters") => {
+    const len = type === "halves" ? 2 : 4;
+    setEditedPeriodType(type);
+    setEditedPeriodScores(prev => {
+      const next = [...prev];
+      while (next.length < len) next.push({ home: 0, away: 0 });
+      return next.slice(0, len);
+    });
+  };
+
   const saveStats = () => {
     if (!statsGame) return;
-    setGames(prev => prev.map(g => g.id === statsGame.id ? { ...g, playerStats: editedStats } : g));
-    setStatsGame(prev => prev ? { ...prev, playerStats: editedStats } : null);
+    const homeTotal = editedPeriodScores.reduce((s, p) => s + p.home, 0);
+    const awayTotal = editedPeriodScores.reduce((s, p) => s + p.away, 0);
+    setGames(prev => prev.map(g => g.id === statsGame.id ? {
+      ...g, playerStats: editedStats,
+      periodScores: editedPeriodScores, periodType: editedPeriodType,
+      homeScore: homeTotal, awayScore: awayTotal,
+    } : g));
+    setStatsGame(prev => prev ? {
+      ...prev, playerStats: editedStats,
+      periodScores: editedPeriodScores, periodType: editedPeriodType,
+      homeScore: homeTotal, awayScore: awayTotal,
+    } : null);
     setEditingStats(false);
     toast({ title: "Stats saved" });
   };
 
   const cancelStatsEdit = () => {
-    if (statsGame) setEditedStats(statsGame.playerStats.map(s => ({ ...s })));
+    if (statsGame) {
+      setEditedStats(statsGame.playerStats.map(s => ({ ...s })));
+      setEditedPeriodScores((statsGame.periodScores ?? []).map(p => ({ ...p })));
+      setEditedPeriodType(statsGame.periodType ?? "quarters");
+    }
     setEditingStats(false);
   };
 
