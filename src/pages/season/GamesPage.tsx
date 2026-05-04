@@ -238,7 +238,7 @@ export default function GamesPage() {
       status: addForm.status as Game["status"],
       division: addForm.division || "Men's D1",
       field: [addForm.field, addForm.fieldNumber].filter(Boolean).join(" #") || "TBD",
-      week: parseInt(addForm.week) || 1,
+      week: addForm.competition === "Playoffs" ? addForm.week : (parseInt(addForm.week) || 1),
       competition: addForm.competition,
       playerStats: [],
     };
