@@ -124,6 +124,8 @@ interface Game {
   field: string;
   week: number;
   competition: Competition;
+  periodScores?: { home: number; away: number }[];
+  periodType?: "halves" | "quarters";
   playerStats: PlayerStat[];
 }
 
