@@ -183,6 +183,13 @@ const initialGames: Game[] = [
 const competitions = ["All Competitions", "Regular Season", "Playoffs"];
 
 const divisions = ["All Divisions", "Men's D1", "Men's D2", "Women's D1", "Co-Ed Open"];
+const teamsByDivision: Record<string, string[]> = {
+  "Men's D1": ["Thunder Hawks", "Iron Eagles", "Crimson Tide", "Blue Lightning", "Storm Riders"],
+  "Men's D2": ["Night Owls", "Silver Sharks", "Steel Wolves"],
+  "Women's D1": ["Phoenix Rising", "Viper Squad", "Arctic Wolves"],
+  "Co-Ed Open": ["Blaze FC", "Golden Bears", "Red Rockets"],
+};
+const allTeams = Object.values(teamsByDivision).flat();
 const weeks = ["All Weeks", "Week 8", "Week 9", "Week 10"];
 
 // ─── Component ────────────────────────────────────────────────────────────────
