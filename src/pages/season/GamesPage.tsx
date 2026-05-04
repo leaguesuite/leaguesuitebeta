@@ -124,7 +124,7 @@ interface Game {
   status: "completed" | "upcoming" | "live" | "draft";
   division: string;
   field: string;
-  week: number;
+  week: number | string;
   competition: Competition;
   periodScores?: { home: number; away: number }[];
   periodType?: "halves" | "quarters";
@@ -238,7 +238,7 @@ export default function GamesPage() {
       status: addForm.status as Game["status"],
       division: addForm.division || "Men's D1",
       field: [addForm.field, addForm.fieldNumber].filter(Boolean).join(" #") || "TBD",
-      week: parseInt(addForm.week) || 1,
+      week: addForm.competition === "Playoffs" ? addForm.week : (parseInt(addForm.week) || 1),
       competition: addForm.competition,
       playerStats: [],
     };
@@ -803,22 +803,44 @@ export default function GamesPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Week No. <span className="text-destructive">*</span></Label>
-                <Input
-                  type="number"
-                  min={1}
-                  list="week-options"
-                  placeholder="Enter or select week number"
-                  value={addForm.week}
-                  onChange={e => setAddForm(f => ({ ...f, week: e.target.value }))}
-                />
-                <datalist id="week-options">
-                  {Array.from({ length: 16 }, (_, i) => i + 1).map(w => (
-                    <option key={w} value={String(w)}>{`Week ${w}`}</option>
-                  ))}
-                </datalist>
-              </div>
+              {addForm.competition === "Playoffs" ? (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Playoff Round <span className="text-destructive">*</span></Label>
+                  <Select value={addForm.week} onValueChange={v => setAddForm(f => ({ ...f, week: v }))}>
+                    <SelectTrigger><SelectValue placeholder="Select playoff round" /></SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "Wild-Card Round",
+                        "Divisional Round",
+                        "Quarterfinals",
+                        "Semifinals",
+                        "Championship Finals",
+                        "Consolation Semifinals",
+                        "Consolation Finals",
+                        "Bronze Medal Game",
+                        "Gold Medal Game",
+                      ].map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Week No. <span className="text-destructive">*</span></Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    list="week-options"
+                    placeholder="Enter or select week number"
+                    value={addForm.week}
+                    onChange={e => setAddForm(f => ({ ...f, week: e.target.value }))}
+                  />
+                  <datalist id="week-options">
+                    {Array.from({ length: 16 }, (_, i) => i + 1).map(w => (
+                      <option key={w} value={String(w)}>{`Week ${w}`}</option>
+                    ))}
+                  </datalist>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
