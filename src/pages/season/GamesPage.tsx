@@ -539,31 +539,77 @@ export default function GamesPage() {
           {statsGame && (
             <div className="space-y-4 mt-2">
               {/* Score header */}
-              <div className="flex items-center justify-center gap-6 py-4 rounded-lg bg-muted/50 border border-border">
-                <div className="text-center">
-                  <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
-                  <p className="text-3xl font-bold text-foreground">{statsGame.homeScore ?? "—"}</p>
+              <div className="py-4 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center justify-center gap-6">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
+                    <p className="text-3xl font-bold text-foreground">{statsGame.homeScore ?? "—"}</p>
+                  </div>
+                  <span className="text-lg font-bold text-muted-foreground">vs</span>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
+                    <p className="text-3xl font-bold text-foreground">{statsGame.awayScore ?? "—"}</p>
+                  </div>
                 </div>
-                <span className="text-lg font-bold text-muted-foreground">vs</span>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
-                  <p className="text-3xl font-bold text-foreground">{statsGame.awayScore ?? "—"}</p>
-                </div>
+
+                {/* Period breakdown */}
+                {statsGame.periodScores && statsGame.periodScores.length > 0 && (
+                  <div className="mt-4 mx-auto max-w-md">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          <th className="text-left font-medium py-1 px-2">Team</th>
+                          {statsGame.periodScores.map((_, i) => (
+                            <th key={i} className="text-center font-medium py-1 px-2">
+                              {statsGame.periodType === "halves" ? `H${i + 1}` : `Q${i + 1}`}
+                            </th>
+                          ))}
+                          <th className="text-center font-bold py-1 px-2">T</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t border-border">
+                          <td className="py-1 px-2 font-medium">{statsGame.home}</td>
+                          {statsGame.periodScores.map((p, i) => (
+                            <td key={i} className="text-center py-1 px-2 font-mono">{p.home}</td>
+                          ))}
+                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.homeScore}</td>
+                        </tr>
+                        <tr className="border-t border-border">
+                          <td className="py-1 px-2 font-medium">{statsGame.away}</td>
+                          {statsGame.periodScores.map((p, i) => (
+                            <td key={i} className="text-center py-1 px-2 font-mono">{p.away}</td>
+                          ))}
+                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.awayScore}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
-              {/* Quick summary */}
-              {renderQuickSummary()}
-
-              {/* Category tabs */}
+              {/* Sort + Category tabs */}
               <Tabs value={activeStatCategory} onValueChange={setActiveStatCategory}>
-                <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-transparent p-0">
-                  {STAT_CATEGORIES.map(cat => (
-                    <TabsTrigger key={cat.id} value={cat.id}
-                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5 rounded-md border border-border data-[state=active]:border-primary">
-                      {cat.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <TabsList className="justify-start flex-wrap h-auto gap-1 bg-transparent p-0">
+                    {STAT_CATEGORIES.map(cat => (
+                      <TabsTrigger key={cat.id} value={cat.id}
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5 rounded-md border border-border data-[state=active]:border-primary">
+                        {cat.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs text-muted-foreground">Sort by</Label>
+                    <Select value={playerSort} onValueChange={(v) => setPlayerSort(v as "number" | "name")}>
+                      <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="number">Jersey #</SelectItem>
+                        <SelectItem value="name">Name</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
                 {STAT_CATEGORIES.map(cat => (
                   <TabsContent key={cat.id} value={cat.id} className="mt-4">
