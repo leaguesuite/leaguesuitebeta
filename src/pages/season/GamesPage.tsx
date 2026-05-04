@@ -585,11 +585,12 @@ export default function GamesPage() {
                   </TabsList>
                   <div className="flex items-center gap-2">
                     <Label className="text-xs text-muted-foreground">Sort by</Label>
-                    <Select value={playerSort} onValueChange={(v) => setPlayerSort(v as "number" | "name")}>
-                      <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                    <Select value={playerSort} onValueChange={(v) => setPlayerSort(v as "number" | "firstName" | "lastName")}>
+                      <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="number">Jersey #</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="firstName">First Name</SelectItem>
+                        <SelectItem value="lastName">Last Name</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
