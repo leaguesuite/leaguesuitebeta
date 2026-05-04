@@ -166,15 +166,17 @@ const generatePlayerStats = (): PlayerStat[] => {
 };
 
 const initialGames: Game[] = [
-  { id: 1, date: "Mar 15, 2025", time: "6:00 PM", home: "Thunder Hawks", away: "Iron Eagles", homeScore: 28, awayScore: 14, status: "completed", division: "Men's D1", field: "Memorial Field 1", week: 8, playerStats: generatePlayerStats() },
-  { id: 2, date: "Mar 15, 2025", time: "7:30 PM", home: "Storm Riders", away: "Blaze FC", homeScore: 21, awayScore: 21, status: "completed", division: "Co-Ed Open", field: "Central Park A", week: 8, playerStats: generatePlayerStats() },
-  { id: 3, date: "Mar 18, 2025", time: "6:00 PM", home: "Phoenix Rising", away: "Steel Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, playerStats: [] },
-  { id: 4, date: "Mar 18, 2025", time: "7:00 PM", home: "Crimson Tide", away: "Blue Lightning", homeScore: null, awayScore: null, status: "upcoming", division: "Men's D1", field: "Riverside Field 1", week: 9, playerStats: [] },
-  { id: 5, date: "Mar 18, 2025", time: "8:00 PM", home: "Night Owls", away: "Silver Sharks", homeScore: 14, awayScore: 7, status: "live", division: "Men's D2", field: "Memorial Field 1", week: 9, playerStats: generatePlayerStats() },
-  { id: 6, date: "Mar 20, 2025", time: "6:30 PM", home: "Golden Bears", away: "Red Rockets", homeScore: null, awayScore: null, status: "upcoming", division: "Co-Ed Open", field: "Central Park B", week: 9, playerStats: [] },
-  { id: 7, date: "Mar 20, 2025", time: "7:30 PM", home: "Viper Squad", away: "Arctic Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, playerStats: [] },
-  { id: 8, date: "Mar 22, 2025", time: "10:00 AM", home: "Thunder Hawks", away: "Storm Riders", homeScore: null, awayScore: null, status: "draft", division: "Men's D1", field: "TBD", week: 10, playerStats: [] },
+  { id: 1, date: "Mar 15, 2025", time: "6:00 PM", home: "Thunder Hawks", away: "Iron Eagles", homeScore: 28, awayScore: 14, status: "completed", division: "Men's D1", field: "Memorial Field 1", week: 8, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 2, date: "Mar 15, 2025", time: "7:30 PM", home: "Storm Riders", away: "Blaze FC", homeScore: 21, awayScore: 21, status: "completed", division: "Co-Ed Open", field: "Central Park A", week: 8, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 3, date: "Mar 18, 2025", time: "6:00 PM", home: "Phoenix Rising", away: "Steel Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, competition: "Regular Season", playerStats: [] },
+  { id: 4, date: "Mar 18, 2025", time: "7:00 PM", home: "Crimson Tide", away: "Blue Lightning", homeScore: null, awayScore: null, status: "upcoming", division: "Men's D1", field: "Riverside Field 1", week: 9, competition: "Regular Season", playerStats: [] },
+  { id: 5, date: "Mar 18, 2025", time: "8:00 PM", home: "Night Owls", away: "Silver Sharks", homeScore: 14, awayScore: 7, status: "live", division: "Men's D2", field: "Memorial Field 1", week: 9, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 6, date: "Mar 20, 2025", time: "6:30 PM", home: "Golden Bears", away: "Red Rockets", homeScore: null, awayScore: null, status: "upcoming", division: "Co-Ed Open", field: "Central Park B", week: 9, competition: "Playoffs", playerStats: [] },
+  { id: 7, date: "Mar 20, 2025", time: "7:30 PM", home: "Viper Squad", away: "Arctic Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, competition: "Playoffs", playerStats: [] },
+  { id: 8, date: "Mar 22, 2025", time: "10:00 AM", home: "Thunder Hawks", away: "Storm Riders", homeScore: null, awayScore: null, status: "draft", division: "Men's D1", field: "TBD", week: 10, competition: "Playoffs", playerStats: [] },
 ];
+
+const competitions = ["All Competitions", "Regular Season", "Playoffs"];
 
 const divisions = ["All Divisions", "Men's D1", "Men's D2", "Women's D1", "Co-Ed Open"];
 const weeks = ["All Weeks", "Week 8", "Week 9", "Week 10"];
