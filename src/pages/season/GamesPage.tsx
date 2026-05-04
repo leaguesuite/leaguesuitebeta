@@ -446,7 +446,7 @@ export default function GamesPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}><Upload className="h-4 w-4" /> Import CSV</Button>
           <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Export</Button>
-          <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Game</Button>
+          <Button size="sm" className="gap-2" onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> Add Game</Button>
         </div>
       </div>
 
