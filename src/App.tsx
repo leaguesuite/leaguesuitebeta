@@ -21,6 +21,8 @@ import StatsTrackingPage from "@/pages/structure/StatsTrackingPage";
 import LeaguesPage from "@/pages/structure/LeaguesPage";
 import SeasonsPage from "@/pages/structure/SeasonsPage";
 import TournamentsPage from "@/pages/structure/TournamentsPage";
+import CompetitionNamesPage from "@/pages/structure/CompetitionNamesPage";
+import PlayoffRoundsPage from "@/pages/structure/PlayoffRoundsPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
