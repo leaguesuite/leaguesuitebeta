@@ -89,9 +89,8 @@ export default function NewSeasonWizard() {
               <div>
                 <label className="text-sm font-medium text-foreground">Format</label>
                 <select className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20">
-                  <option>Regular Season</option>
+                  <option>Season + Playoffs</option>
                   <option>Tournament</option>
-                  <option>Playoffs</option>
                 </select>
               </div>
               <div>
