@@ -779,17 +779,6 @@ export default function GamesPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-xs">Week No. <span className="text-destructive">*</span></Label>
-                <Select value={addForm.week} onValueChange={v => setAddForm(f => ({ ...f, week: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Choose a week number" /></SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 16 }, (_, i) => i + 1).map(w => (
-                      <SelectItem key={w} value={String(w)}>Week {w}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
                 <Label className="text-xs">Competition <span className="text-destructive">*</span></Label>
                 <Select value={addForm.competition} onValueChange={v => setAddForm(f => ({ ...f, competition: v as Competition }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -798,6 +787,22 @@ export default function GamesPage() {
                     <SelectItem value="Playoffs">Playoffs</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Week No. <span className="text-destructive">*</span></Label>
+                <Input
+                  type="number"
+                  min={1}
+                  list="week-options"
+                  placeholder="Enter or select week number"
+                  value={addForm.week}
+                  onChange={e => setAddForm(f => ({ ...f, week: e.target.value }))}
+                />
+                <datalist id="week-options">
+                  {Array.from({ length: 16 }, (_, i) => i + 1).map(w => (
+                    <option key={w} value={String(w)}>{`Week ${w}`}</option>
+                  ))}
+                </datalist>
               </div>
             </div>
 
