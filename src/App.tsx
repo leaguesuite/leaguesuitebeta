@@ -93,6 +93,8 @@ const App = () => (
             <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
             <Route path="/structure/subdivisions" element={<PlaceholderPage title="Subdivisions" description="Manage conference subdivisions." />} />
             <Route path="/structure/locations" element={<LocationsPage />} />
+            <Route path="/structure/competition-names" element={<CompetitionNamesPage />} />
+            <Route path="/structure/playoff-rounds" element={<PlayoffRoundsPage />} />
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<StatsTrackingPage />} />
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
