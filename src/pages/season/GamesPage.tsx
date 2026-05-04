@@ -203,6 +203,7 @@ export default function GamesPage() {
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
+    if (selectedCompetition !== "All Competitions" && g.competition !== selectedCompetition) return false;
     if (search && !g.home.toLowerCase().includes(search.toLowerCase()) && !g.away.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
