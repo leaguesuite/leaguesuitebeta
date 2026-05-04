@@ -752,6 +752,140 @@ export default function GamesPage() {
       </Dialog>
 
       {/* CSV Import */}
+      {/* ─── Add Game Dialog ──────────────────────────────────────────────── */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /> Create Match</DialogTitle>
+            <DialogDescription>Schedule a new game.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Checkbox id="hide-from-schedule" checked={addForm.hideFromSchedule}
+                onCheckedChange={v => setAddForm(f => ({ ...f, hideFromSchedule: !!v }))} />
+              <Label htmlFor="hide-from-schedule" className="text-sm font-medium">Hide match from schedule</Label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Date <span className="text-destructive">*</span></Label>
+                <Input type="date" value={addForm.date} onChange={e => setAddForm(f => ({ ...f, date: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Time <span className="text-destructive">*</span></Label>
+                <Input type="time" value={addForm.time} onChange={e => setAddForm(f => ({ ...f, time: e.target.value }))} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Week No. <span className="text-destructive">*</span></Label>
+                <Select value={addForm.week} onValueChange={v => setAddForm(f => ({ ...f, week: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Choose a week number" /></SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 16 }, (_, i) => i + 1).map(w => (
+                      <SelectItem key={w} value={String(w)}>Week {w}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Competition <span className="text-destructive">*</span></Label>
+                <Select value={addForm.competition} onValueChange={v => setAddForm(f => ({ ...f, competition: v as Competition }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Regular Season">Regular Season</SelectItem>
+                    <SelectItem value="Playoffs">Playoffs</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Field</Label>
+                <Select value={addForm.field} onValueChange={v => setAddForm(f => ({ ...f, field: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Choose a field" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Memorial Field">Memorial Field</SelectItem>
+                    <SelectItem value="Central Park">Central Park</SelectItem>
+                    <SelectItem value="Riverside Field">Riverside Field</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Field Number</Label>
+                <Select value={addForm.fieldNumber} onValueChange={v => setAddForm(f => ({ ...f, fieldNumber: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Choose a field number" /></SelectTrigger>
+                  <SelectContent>
+                    {["1", "2", "3", "A", "B"].map(n => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Status</Label>
+              <Select value={addForm.status} onValueChange={v => setAddForm(f => ({ ...f, status: v }))}>
+                <SelectTrigger><SelectValue placeholder="Choose status" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="upcoming">Upcoming</SelectItem>
+                  <SelectItem value="live">Live</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Home Team</Label>
+                <Input value={addForm.home} onChange={e => setAddForm(f => ({ ...f, home: e.target.value }))} placeholder="Home team name" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Visitor Team</Label>
+                <Input value={addForm.away} onChange={e => setAddForm(f => ({ ...f, away: e.target.value }))} placeholder="Visitor team name" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Short Notes Home</Label>
+              <Textarea rows={2} value={addForm.shortNotesHome} onChange={e => setAddForm(f => ({ ...f, shortNotesHome: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Short Notes Visitor</Label>
+              <Textarea rows={2} value={addForm.shortNotesVisitor} onChange={e => setAddForm(f => ({ ...f, shortNotesVisitor: e.target.value }))} />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox id="interdivision" checked={addForm.interdivision}
+                onCheckedChange={v => setAddForm(f => ({ ...f, interdivision: !!v }))} />
+              <Label htmlFor="interdivision" className="text-sm font-medium">Interdivision Game</Label>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Division</Label>
+              <Select value={addForm.division} onValueChange={v => setAddForm(f => ({ ...f, division: v }))}>
+                <SelectTrigger><SelectValue placeholder="Choose a division" /></SelectTrigger>
+                <SelectContent>
+                  {divisions.filter(d => d !== "All Divisions").map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox id="exhibition" checked={addForm.exhibition}
+                onCheckedChange={v => setAddForm(f => ({ ...f, exhibition: !!v }))} />
+              <Label htmlFor="exhibition" className="text-sm font-medium">Exhibition game</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={saveNewGame} className="gap-1.5"><Save className="h-3.5 w-3.5" /> Create Match</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <CsvImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
