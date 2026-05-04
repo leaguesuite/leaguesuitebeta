@@ -17,6 +17,8 @@ import {
   Edit, Save, X, BarChart3, Pencil, Upload,
 } from "lucide-react";
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 // ─── Stat Category Definitions ────────────────────────────────────────────────
 
