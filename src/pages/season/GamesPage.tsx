@@ -419,6 +419,7 @@ export default function GamesPage() {
                 <th className="table-header text-left px-5 py-3">Date / Time</th>
                 <th className="table-header text-left px-5 py-3">Matchup</th>
                 <th className="table-header text-left px-5 py-3">Division</th>
+                <th className="table-header text-left px-5 py-3">Competition</th>
                 <th className="table-header text-left px-5 py-3">Location</th>
                 <th className="table-header text-left px-5 py-3">Score</th>
                 <th className="table-header text-left px-5 py-3">Status</th>
