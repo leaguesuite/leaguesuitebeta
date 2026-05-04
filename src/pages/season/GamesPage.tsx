@@ -282,7 +282,10 @@ export default function GamesPage() {
 
   const renderCategoryTable = (team: "home" | "away", teamName: string) => {
     const stats = editingStats ? editedStats : (statsGame?.playerStats || []);
-    const teamStats = stats.filter(s => s.team === team);
+    const teamStats = stats.filter(s => s.team === team).slice().sort((a, b) => {
+      if (playerSort === "name") return a.name.localeCompare(b.name);
+      return (parseInt(a.number) || 0) - (parseInt(b.number) || 0);
+    });
     const totals = getTeamTotals(stats, team, currentCategory.columns);
 
     return (
