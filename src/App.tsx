@@ -21,6 +21,8 @@ import StatsTrackingPage from "@/pages/structure/StatsTrackingPage";
 import LeaguesPage from "@/pages/structure/LeaguesPage";
 import SeasonsPage from "@/pages/structure/SeasonsPage";
 import TournamentsPage from "@/pages/structure/TournamentsPage";
+import CompetitionNamesPage from "@/pages/structure/CompetitionNamesPage";
+import PlayoffRoundsPage from "@/pages/structure/PlayoffRoundsPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
@@ -91,6 +93,8 @@ const App = () => (
             <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
             <Route path="/structure/subdivisions" element={<PlaceholderPage title="Subdivisions" description="Manage conference subdivisions." />} />
             <Route path="/structure/locations" element={<LocationsPage />} />
+            <Route path="/structure/competition-names" element={<CompetitionNamesPage />} />
+            <Route path="/structure/playoff-rounds" element={<PlayoffRoundsPage />} />
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<StatsTrackingPage />} />
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
