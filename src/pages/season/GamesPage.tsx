@@ -439,6 +439,7 @@ export default function GamesPage() {
                     <span className="font-semibold text-foreground text-sm">{game.away}</span>
                   </td>
                   <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
+                  <td className="px-5 py-3.5"><Badge variant={game.competition === "Playoffs" ? "default" : "outline"} className="text-xs">{game.competition}</Badge></td>
                   <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {game.field}</div></td>
                   <td className="px-5 py-3.5">
                     <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
