@@ -562,52 +562,96 @@ export default function GamesPage() {
             <div className="space-y-4 mt-2">
               {/* Score header */}
               <div className="py-4 rounded-lg bg-muted/50 border border-border">
-                <div className="flex items-center justify-center gap-6">
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
-                    <p className="text-3xl font-bold text-foreground">{statsGame.homeScore ?? "—"}</p>
-                  </div>
-                  <span className="text-lg font-bold text-muted-foreground">vs</span>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
-                    <p className="text-3xl font-bold text-foreground">{statsGame.awayScore ?? "—"}</p>
-                  </div>
-                </div>
+                {(() => {
+                  const showScores = editingStats ? editedPeriodScores : (statsGame.periodScores ?? []);
+                  const showType = editingStats ? editedPeriodType : (statsGame.periodType ?? "quarters");
+                  const homeTotal = editingStats
+                    ? editedPeriodScores.reduce((s, p) => s + p.home, 0)
+                    : (statsGame.homeScore ?? "—");
+                  const awayTotal = editingStats
+                    ? editedPeriodScores.reduce((s, p) => s + p.away, 0)
+                    : (statsGame.awayScore ?? "—");
+                  return (
+                    <>
+                      <div className="flex items-center justify-center gap-6">
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
+                          <p className="text-3xl font-bold text-foreground">{homeTotal}</p>
+                        </div>
+                        <span className="text-lg font-bold text-muted-foreground">vs</span>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
+                          <p className="text-3xl font-bold text-foreground">{awayTotal}</p>
+                        </div>
+                      </div>
 
-                {/* Period breakdown */}
-                {statsGame.periodScores && statsGame.periodScores.length > 0 && (
-                  <div className="mt-4 mx-auto max-w-md">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-muted-foreground">
-                          <th className="text-left font-medium py-1 px-2">Team</th>
-                          {statsGame.periodScores.map((_, i) => (
-                            <th key={i} className="text-center font-medium py-1 px-2">
-                              {statsGame.periodType === "halves" ? `H${i + 1}` : `Q${i + 1}`}
-                            </th>
-                          ))}
-                          <th className="text-center font-bold py-1 px-2">T</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-t border-border">
-                          <td className="py-1 px-2 font-medium">{statsGame.home}</td>
-                          {statsGame.periodScores.map((p, i) => (
-                            <td key={i} className="text-center py-1 px-2 font-mono">{p.home}</td>
-                          ))}
-                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.homeScore}</td>
-                        </tr>
-                        <tr className="border-t border-border">
-                          <td className="py-1 px-2 font-medium">{statsGame.away}</td>
-                          {statsGame.periodScores.map((p, i) => (
-                            <td key={i} className="text-center py-1 px-2 font-mono">{p.away}</td>
-                          ))}
-                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.awayScore}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      {editingStats && (
+                        <div className="mt-3 flex items-center justify-center gap-2">
+                          <Label className="text-xs text-muted-foreground">Period type</Label>
+                          <Select value={editedPeriodType} onValueChange={(v) => changePeriodType(v as "halves" | "quarters")}>
+                            <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="quarters">Quarters</SelectItem>
+                              <SelectItem value="halves">Halves</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {showScores.length > 0 && (
+                        <div className="mt-4 mx-auto max-w-md">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="text-muted-foreground">
+                                <th className="text-left font-medium py-1 px-2">Team</th>
+                                {showScores.map((_, i) => (
+                                  <th key={i} className="text-center font-medium py-1 px-2">
+                                    {showType === "halves" ? `H${i + 1}` : `Q${i + 1}`}
+                                  </th>
+                                ))}
+                                <th className="text-center font-bold py-1 px-2">T</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-t border-border">
+                                <td className="py-1 px-2 font-medium">{statsGame.home}</td>
+                                {showScores.map((p, i) => (
+                                  <td key={i} className="text-center py-1 px-1 font-mono">
+                                    {editingStats ? (
+                                      <Input
+                                        type="number" min={0}
+                                        value={p.home}
+                                        onChange={e => updatePeriodScore(i, "home", e.target.value)}
+                                        className="h-7 w-14 text-center text-xs mx-auto"
+                                      />
+                                    ) : p.home}
+                                  </td>
+                                ))}
+                                <td className="text-center py-1 px-2 font-bold font-mono">{homeTotal}</td>
+                              </tr>
+                              <tr className="border-t border-border">
+                                <td className="py-1 px-2 font-medium">{statsGame.away}</td>
+                                {showScores.map((p, i) => (
+                                  <td key={i} className="text-center py-1 px-1 font-mono">
+                                    {editingStats ? (
+                                      <Input
+                                        type="number" min={0}
+                                        value={p.away}
+                                        onChange={e => updatePeriodScore(i, "away", e.target.value)}
+                                        className="h-7 w-14 text-center text-xs mx-auto"
+                                      />
+                                    ) : p.away}
+                                  </td>
+                                ))}
+                                <td className="text-center py-1 px-2 font-bold font-mono">{awayTotal}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Sort + Category tabs */}
