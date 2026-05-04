@@ -109,6 +109,8 @@ interface PlayerStat {
   [key: string]: string | number;
 }
 
+type Competition = "Regular Season" | "Playoffs";
+
 interface Game {
   id: number;
   date: string;
@@ -121,6 +123,7 @@ interface Game {
   division: string;
   field: string;
   week: number;
+  competition: Competition;
   playerStats: PlayerStat[];
 }
 
@@ -163,15 +166,17 @@ const generatePlayerStats = (): PlayerStat[] => {
 };
 
 const initialGames: Game[] = [
-  { id: 1, date: "Mar 15, 2025", time: "6:00 PM", home: "Thunder Hawks", away: "Iron Eagles", homeScore: 28, awayScore: 14, status: "completed", division: "Men's D1", field: "Memorial Field 1", week: 8, playerStats: generatePlayerStats() },
-  { id: 2, date: "Mar 15, 2025", time: "7:30 PM", home: "Storm Riders", away: "Blaze FC", homeScore: 21, awayScore: 21, status: "completed", division: "Co-Ed Open", field: "Central Park A", week: 8, playerStats: generatePlayerStats() },
-  { id: 3, date: "Mar 18, 2025", time: "6:00 PM", home: "Phoenix Rising", away: "Steel Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, playerStats: [] },
-  { id: 4, date: "Mar 18, 2025", time: "7:00 PM", home: "Crimson Tide", away: "Blue Lightning", homeScore: null, awayScore: null, status: "upcoming", division: "Men's D1", field: "Riverside Field 1", week: 9, playerStats: [] },
-  { id: 5, date: "Mar 18, 2025", time: "8:00 PM", home: "Night Owls", away: "Silver Sharks", homeScore: 14, awayScore: 7, status: "live", division: "Men's D2", field: "Memorial Field 1", week: 9, playerStats: generatePlayerStats() },
-  { id: 6, date: "Mar 20, 2025", time: "6:30 PM", home: "Golden Bears", away: "Red Rockets", homeScore: null, awayScore: null, status: "upcoming", division: "Co-Ed Open", field: "Central Park B", week: 9, playerStats: [] },
-  { id: 7, date: "Mar 20, 2025", time: "7:30 PM", home: "Viper Squad", away: "Arctic Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, playerStats: [] },
-  { id: 8, date: "Mar 22, 2025", time: "10:00 AM", home: "Thunder Hawks", away: "Storm Riders", homeScore: null, awayScore: null, status: "draft", division: "Men's D1", field: "TBD", week: 10, playerStats: [] },
+  { id: 1, date: "Mar 15, 2025", time: "6:00 PM", home: "Thunder Hawks", away: "Iron Eagles", homeScore: 28, awayScore: 14, status: "completed", division: "Men's D1", field: "Memorial Field 1", week: 8, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 2, date: "Mar 15, 2025", time: "7:30 PM", home: "Storm Riders", away: "Blaze FC", homeScore: 21, awayScore: 21, status: "completed", division: "Co-Ed Open", field: "Central Park A", week: 8, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 3, date: "Mar 18, 2025", time: "6:00 PM", home: "Phoenix Rising", away: "Steel Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, competition: "Regular Season", playerStats: [] },
+  { id: 4, date: "Mar 18, 2025", time: "7:00 PM", home: "Crimson Tide", away: "Blue Lightning", homeScore: null, awayScore: null, status: "upcoming", division: "Men's D1", field: "Riverside Field 1", week: 9, competition: "Regular Season", playerStats: [] },
+  { id: 5, date: "Mar 18, 2025", time: "8:00 PM", home: "Night Owls", away: "Silver Sharks", homeScore: 14, awayScore: 7, status: "live", division: "Men's D2", field: "Memorial Field 1", week: 9, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 6, date: "Mar 20, 2025", time: "6:30 PM", home: "Golden Bears", away: "Red Rockets", homeScore: null, awayScore: null, status: "upcoming", division: "Co-Ed Open", field: "Central Park B", week: 9, competition: "Playoffs", playerStats: [] },
+  { id: 7, date: "Mar 20, 2025", time: "7:30 PM", home: "Viper Squad", away: "Arctic Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, competition: "Playoffs", playerStats: [] },
+  { id: 8, date: "Mar 22, 2025", time: "10:00 AM", home: "Thunder Hawks", away: "Storm Riders", homeScore: null, awayScore: null, status: "draft", division: "Men's D1", field: "TBD", week: 10, competition: "Playoffs", playerStats: [] },
 ];
+
+const competitions = ["All Competitions", "Regular Season", "Playoffs"];
 
 const divisions = ["All Divisions", "Men's D1", "Men's D2", "Women's D1", "Co-Ed Open"];
 const weeks = ["All Weeks", "Week 8", "Week 9", "Week 10"];
@@ -182,6 +187,7 @@ export default function GamesPage() {
   const [games, setGames] = useState<Game[]>(initialGames);
   const [selectedDivision, setSelectedDivision] = useState("All Divisions");
   const [selectedWeek, setSelectedWeek] = useState("All Weeks");
+  const [selectedCompetition, setSelectedCompetition] = useState("All Competitions");
   const [search, setSearch] = useState("");
 
   // Edit game info
@@ -197,6 +203,7 @@ export default function GamesPage() {
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
+    if (selectedCompetition !== "All Competitions" && g.competition !== selectedCompetition) return false;
     if (search && !g.home.toLowerCase().includes(search.toLowerCase()) && !g.away.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -391,6 +398,10 @@ export default function GamesPage() {
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {divisions.map(d => <option key={d}>{d}</option>)}
           </select>
+          <select value={selectedCompetition} onChange={e => setSelectedCompetition(e.target.value)}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
+            {competitions.map(c => <option key={c}>{c}</option>)}
+          </select>
           <select value={selectedWeek} onChange={e => setSelectedWeek(e.target.value)}
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {weeks.map(w => <option key={w}>{w}</option>)}
@@ -408,6 +419,7 @@ export default function GamesPage() {
                 <th className="table-header text-left px-5 py-3">Date / Time</th>
                 <th className="table-header text-left px-5 py-3">Matchup</th>
                 <th className="table-header text-left px-5 py-3">Division</th>
+                <th className="table-header text-left px-5 py-3">Competition</th>
                 <th className="table-header text-left px-5 py-3">Location</th>
                 <th className="table-header text-left px-5 py-3">Score</th>
                 <th className="table-header text-left px-5 py-3">Status</th>
@@ -427,6 +439,7 @@ export default function GamesPage() {
                     <span className="font-semibold text-foreground text-sm">{game.away}</span>
                   </td>
                   <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
+                  <td className="px-5 py-3.5"><Badge variant={game.competition === "Playoffs" ? "default" : "outline"} className="text-xs">{game.competition}</Badge></td>
                   <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {game.field}</div></td>
                   <td className="px-5 py-3.5">
                     <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
@@ -607,6 +620,7 @@ export default function GamesPage() {
             division: r.division || "",
             field: r.field || "TBD",
             week: parseInt(r.week) || 1,
+            competition: (r.competition === "Playoffs" ? "Playoffs" : "Regular Season") as Competition,
             playerStats: [],
           }));
           setGames(prev => [...prev, ...newGames]);
