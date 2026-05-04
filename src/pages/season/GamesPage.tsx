@@ -351,32 +351,7 @@ export default function GamesPage() {
     );
   };
 
-  // ─── Summary cards for top of stats dialog ─────────────────────────────
 
-  const renderQuickSummary = () => {
-    if (!statsGame) return null;
-    const stats = editingStats ? editedStats : statsGame.playerStats;
-    const categories = [
-      { label: "Pass Yds", home: getTeamTotals(stats, "home", [{ key: "passYds", label: "", abbr: "" }]).passYds, away: getTeamTotals(stats, "away", [{ key: "passYds", label: "", abbr: "" }]).passYds },
-      { label: "Rush Yds", home: getTeamTotals(stats, "home", [{ key: "rushYds", label: "", abbr: "" }]).rushYds, away: getTeamTotals(stats, "away", [{ key: "rushYds", label: "", abbr: "" }]).rushYds },
-      { label: "Tackles", home: getTeamTotals(stats, "home", [{ key: "defTackles", label: "", abbr: "" }]).defTackles, away: getTeamTotals(stats, "away", [{ key: "defTackles", label: "", abbr: "" }]).defTackles },
-      { label: "Turnovers", home: getTeamTotals(stats, "home", [{ key: "fumbles", label: "", abbr: "" }]).fumbles + getTeamTotals(stats, "home", [{ key: "passInt", label: "", abbr: "" }]).passInt, away: getTeamTotals(stats, "away", [{ key: "fumbles", label: "", abbr: "" }]).fumbles + getTeamTotals(stats, "away", [{ key: "passInt", label: "", abbr: "" }]).passInt },
-    ];
-    return (
-      <div className="grid grid-cols-4 gap-2">
-        {categories.map(cat => (
-          <div key={cat.label} className="rounded-lg border border-border p-3 text-center">
-            <p className="text-[10px] uppercase text-muted-foreground font-medium">{cat.label}</p>
-            <div className="flex items-center justify-center gap-3 mt-1">
-              <span className="text-lg font-bold text-foreground">{cat.home}</span>
-              <span className="text-xs text-muted-foreground">-</span>
-              <span className="text-lg font-bold text-foreground">{cat.away}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-6 max-w-7xl">
