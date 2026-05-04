@@ -124,6 +124,8 @@ interface Game {
   field: string;
   week: number;
   competition: Competition;
+  periodScores?: { home: number; away: number }[];
+  periodType?: "halves" | "quarters";
   playerStats: PlayerStat[];
 }
 
@@ -132,8 +134,8 @@ interface Game {
 const rand = (max: number) => Math.floor(Math.random() * max);
 
 const generatePlayerStats = (): PlayerStat[] => {
-  const homePlayers = ["J. Smith", "M. Johnson", "R. Williams", "T. Brown", "D. Jones", "K. Davis"];
-  const awayPlayers = ["A. Wilson", "C. Martinez", "B. Anderson", "S. Taylor", "L. Thomas", "P. Garcia"];
+  const homePlayers = ["James Smith", "Marcus Johnson", "Ryan Williams", "Tyler Brown", "Derek Jones", "Kevin Davis"];
+  const awayPlayers = ["Aaron Wilson", "Carlos Martinez", "Brandon Anderson", "Sean Taylor", "Lucas Thomas", "Paul Garcia"];
 
   const makeStat = (name: string, team: "home" | "away", number: string): PlayerStat => {
     const stat: PlayerStat = { id: `${team[0]}${number}`, name, team, number };
@@ -166,11 +168,11 @@ const generatePlayerStats = (): PlayerStat[] => {
 };
 
 const initialGames: Game[] = [
-  { id: 1, date: "Mar 15, 2025", time: "6:00 PM", home: "Thunder Hawks", away: "Iron Eagles", homeScore: 28, awayScore: 14, status: "completed", division: "Men's D1", field: "Memorial Field 1", week: 8, competition: "Regular Season", playerStats: generatePlayerStats() },
-  { id: 2, date: "Mar 15, 2025", time: "7:30 PM", home: "Storm Riders", away: "Blaze FC", homeScore: 21, awayScore: 21, status: "completed", division: "Co-Ed Open", field: "Central Park A", week: 8, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 1, date: "Mar 15, 2025", time: "6:00 PM", home: "Thunder Hawks", away: "Iron Eagles", homeScore: 28, awayScore: 14, status: "completed", division: "Men's D1", field: "Memorial Field 1", week: 8, competition: "Regular Season", periodType: "quarters", periodScores: [{ home: 7, away: 0 }, { home: 7, away: 7 }, { home: 7, away: 0 }, { home: 7, away: 7 }], playerStats: generatePlayerStats() },
+  { id: 2, date: "Mar 15, 2025", time: "7:30 PM", home: "Storm Riders", away: "Blaze FC", homeScore: 21, awayScore: 21, status: "completed", division: "Co-Ed Open", field: "Central Park A", week: 8, competition: "Regular Season", periodType: "halves", periodScores: [{ home: 14, away: 7 }, { home: 7, away: 14 }], playerStats: generatePlayerStats() },
   { id: 3, date: "Mar 18, 2025", time: "6:00 PM", home: "Phoenix Rising", away: "Steel Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, competition: "Regular Season", playerStats: [] },
   { id: 4, date: "Mar 18, 2025", time: "7:00 PM", home: "Crimson Tide", away: "Blue Lightning", homeScore: null, awayScore: null, status: "upcoming", division: "Men's D1", field: "Riverside Field 1", week: 9, competition: "Regular Season", playerStats: [] },
-  { id: 5, date: "Mar 18, 2025", time: "8:00 PM", home: "Night Owls", away: "Silver Sharks", homeScore: 14, awayScore: 7, status: "live", division: "Men's D2", field: "Memorial Field 1", week: 9, competition: "Regular Season", playerStats: generatePlayerStats() },
+  { id: 5, date: "Mar 18, 2025", time: "8:00 PM", home: "Night Owls", away: "Silver Sharks", homeScore: 14, awayScore: 7, status: "live", division: "Men's D2", field: "Memorial Field 1", week: 9, competition: "Regular Season", periodType: "quarters", periodScores: [{ home: 7, away: 0 }, { home: 7, away: 7 }], playerStats: generatePlayerStats() },
   { id: 6, date: "Mar 20, 2025", time: "6:30 PM", home: "Golden Bears", away: "Red Rockets", homeScore: null, awayScore: null, status: "upcoming", division: "Co-Ed Open", field: "Central Park B", week: 9, competition: "Playoffs", playerStats: [] },
   { id: 7, date: "Mar 20, 2025", time: "7:30 PM", home: "Viper Squad", away: "Arctic Wolves", homeScore: null, awayScore: null, status: "upcoming", division: "Women's D1", field: "Memorial Field 2", week: 9, competition: "Playoffs", playerStats: [] },
   { id: 8, date: "Mar 22, 2025", time: "10:00 AM", home: "Thunder Hawks", away: "Storm Riders", homeScore: null, awayScore: null, status: "draft", division: "Men's D1", field: "TBD", week: 10, competition: "Playoffs", playerStats: [] },
@@ -199,6 +201,7 @@ export default function GamesPage() {
   const [editingStats, setEditingStats] = useState(false);
   const [editedStats, setEditedStats] = useState<PlayerStat[]>([]);
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
+  const [playerSort, setPlayerSort] = useState<"number" | "name">("number");
   const [importOpen, setImportOpen] = useState(false);
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
@@ -279,7 +282,10 @@ export default function GamesPage() {
 
   const renderCategoryTable = (team: "home" | "away", teamName: string) => {
     const stats = editingStats ? editedStats : (statsGame?.playerStats || []);
-    const teamStats = stats.filter(s => s.team === team);
+    const teamStats = stats.filter(s => s.team === team).slice().sort((a, b) => {
+      if (playerSort === "name") return a.name.localeCompare(b.name);
+      return (parseInt(a.number) || 0) - (parseInt(b.number) || 0);
+    });
     const totals = getTeamTotals(stats, team, currentCategory.columns);
 
     return (
@@ -345,32 +351,7 @@ export default function GamesPage() {
     );
   };
 
-  // ─── Summary cards for top of stats dialog ─────────────────────────────
 
-  const renderQuickSummary = () => {
-    if (!statsGame) return null;
-    const stats = editingStats ? editedStats : statsGame.playerStats;
-    const categories = [
-      { label: "Pass Yds", home: getTeamTotals(stats, "home", [{ key: "passYds", label: "", abbr: "" }]).passYds, away: getTeamTotals(stats, "away", [{ key: "passYds", label: "", abbr: "" }]).passYds },
-      { label: "Rush Yds", home: getTeamTotals(stats, "home", [{ key: "rushYds", label: "", abbr: "" }]).rushYds, away: getTeamTotals(stats, "away", [{ key: "rushYds", label: "", abbr: "" }]).rushYds },
-      { label: "Tackles", home: getTeamTotals(stats, "home", [{ key: "defTackles", label: "", abbr: "" }]).defTackles, away: getTeamTotals(stats, "away", [{ key: "defTackles", label: "", abbr: "" }]).defTackles },
-      { label: "Turnovers", home: getTeamTotals(stats, "home", [{ key: "fumbles", label: "", abbr: "" }]).fumbles + getTeamTotals(stats, "home", [{ key: "passInt", label: "", abbr: "" }]).passInt, away: getTeamTotals(stats, "away", [{ key: "fumbles", label: "", abbr: "" }]).fumbles + getTeamTotals(stats, "away", [{ key: "passInt", label: "", abbr: "" }]).passInt },
-    ];
-    return (
-      <div className="grid grid-cols-4 gap-2">
-        {categories.map(cat => (
-          <div key={cat.label} className="rounded-lg border border-border p-3 text-center">
-            <p className="text-[10px] uppercase text-muted-foreground font-medium">{cat.label}</p>
-            <div className="flex items-center justify-center gap-3 mt-1">
-              <span className="text-lg font-bold text-foreground">{cat.home}</span>
-              <span className="text-xs text-muted-foreground">-</span>
-              <span className="text-lg font-bold text-foreground">{cat.away}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -533,31 +514,77 @@ export default function GamesPage() {
           {statsGame && (
             <div className="space-y-4 mt-2">
               {/* Score header */}
-              <div className="flex items-center justify-center gap-6 py-4 rounded-lg bg-muted/50 border border-border">
-                <div className="text-center">
-                  <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
-                  <p className="text-3xl font-bold text-foreground">{statsGame.homeScore ?? "—"}</p>
+              <div className="py-4 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center justify-center gap-6">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
+                    <p className="text-3xl font-bold text-foreground">{statsGame.homeScore ?? "—"}</p>
+                  </div>
+                  <span className="text-lg font-bold text-muted-foreground">vs</span>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
+                    <p className="text-3xl font-bold text-foreground">{statsGame.awayScore ?? "—"}</p>
+                  </div>
                 </div>
-                <span className="text-lg font-bold text-muted-foreground">vs</span>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
-                  <p className="text-3xl font-bold text-foreground">{statsGame.awayScore ?? "—"}</p>
-                </div>
+
+                {/* Period breakdown */}
+                {statsGame.periodScores && statsGame.periodScores.length > 0 && (
+                  <div className="mt-4 mx-auto max-w-md">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          <th className="text-left font-medium py-1 px-2">Team</th>
+                          {statsGame.periodScores.map((_, i) => (
+                            <th key={i} className="text-center font-medium py-1 px-2">
+                              {statsGame.periodType === "halves" ? `H${i + 1}` : `Q${i + 1}`}
+                            </th>
+                          ))}
+                          <th className="text-center font-bold py-1 px-2">T</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t border-border">
+                          <td className="py-1 px-2 font-medium">{statsGame.home}</td>
+                          {statsGame.periodScores.map((p, i) => (
+                            <td key={i} className="text-center py-1 px-2 font-mono">{p.home}</td>
+                          ))}
+                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.homeScore}</td>
+                        </tr>
+                        <tr className="border-t border-border">
+                          <td className="py-1 px-2 font-medium">{statsGame.away}</td>
+                          {statsGame.periodScores.map((p, i) => (
+                            <td key={i} className="text-center py-1 px-2 font-mono">{p.away}</td>
+                          ))}
+                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.awayScore}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
-              {/* Quick summary */}
-              {renderQuickSummary()}
-
-              {/* Category tabs */}
+              {/* Sort + Category tabs */}
               <Tabs value={activeStatCategory} onValueChange={setActiveStatCategory}>
-                <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-transparent p-0">
-                  {STAT_CATEGORIES.map(cat => (
-                    <TabsTrigger key={cat.id} value={cat.id}
-                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5 rounded-md border border-border data-[state=active]:border-primary">
-                      {cat.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <TabsList className="justify-start flex-wrap h-auto gap-1 bg-transparent p-0">
+                    {STAT_CATEGORIES.map(cat => (
+                      <TabsTrigger key={cat.id} value={cat.id}
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5 rounded-md border border-border data-[state=active]:border-primary">
+                        {cat.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs text-muted-foreground">Sort by</Label>
+                    <Select value={playerSort} onValueChange={(v) => setPlayerSort(v as "number" | "name")}>
+                      <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="number">Jersey #</SelectItem>
+                        <SelectItem value="name">Name</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
                 {STAT_CATEGORIES.map(cat => (
                   <TabsContent key={cat.id} value={cat.id} className="mt-4">
