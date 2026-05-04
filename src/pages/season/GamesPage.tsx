@@ -201,7 +201,7 @@ export default function GamesPage() {
   const [editingStats, setEditingStats] = useState(false);
   const [editedStats, setEditedStats] = useState<PlayerStat[]>([]);
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
-  const [playerSort, setPlayerSort] = useState<"number" | "name">("number");
+  const [playerSort, setPlayerSort] = useState<"number" | "firstName" | "lastName">("number");
   const [importOpen, setImportOpen] = useState(false);
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
