@@ -124,7 +124,7 @@ interface Game {
   status: "completed" | "upcoming" | "live" | "draft";
   division: string;
   field: string;
-  week: number;
+  week: number | string;
   competition: Competition;
   periodScores?: { home: number; away: number }[];
   periodType?: "halves" | "quarters";
