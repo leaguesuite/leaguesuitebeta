@@ -205,6 +205,40 @@ export default function GamesPage() {
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
   const [playerSort, setPlayerSort] = useState<"number" | "firstName" | "lastName">("number");
   const [importOpen, setImportOpen] = useState(false);
+
+  // Add game
+  const emptyAddForm = {
+    hideFromSchedule: false, date: "", time: "", week: "", field: "", fieldNumber: "",
+    status: "upcoming", shortNotesHome: "", shortNotesVisitor: "", interdivision: false,
+    division: "", exhibition: false, competition: "Regular Season" as Competition,
+    home: "", away: "",
+  };
+  const [addOpen, setAddOpen] = useState(false);
+  const [addForm, setAddForm] = useState(emptyAddForm);
+
+  const saveNewGame = () => {
+    if (!addForm.date || !addForm.time || !addForm.week) {
+      toast({ title: "Missing required fields", description: "Date, Time and Week are required.", variant: "destructive" });
+      return;
+    }
+    const newGame: Game = {
+      id: Math.max(0, ...games.map(g => g.id)) + 1,
+      date: addForm.date, time: addForm.time,
+      home: addForm.home || "TBD", away: addForm.away || "TBD",
+      homeScore: null, awayScore: null,
+      status: addForm.status as Game["status"],
+      division: addForm.division || "Men's D1",
+      field: [addForm.field, addForm.fieldNumber].filter(Boolean).join(" #") || "TBD",
+      week: parseInt(addForm.week) || 1,
+      competition: addForm.competition,
+      playerStats: [],
+    };
+    setGames(prev => [...prev, newGame]);
+    setAddOpen(false);
+    setAddForm(emptyAddForm);
+    toast({ title: "Game added", description: `${newGame.home} vs ${newGame.away}` });
+  };
+
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
