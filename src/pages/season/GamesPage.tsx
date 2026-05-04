@@ -398,6 +398,10 @@ export default function GamesPage() {
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {divisions.map(d => <option key={d}>{d}</option>)}
           </select>
+          <select value={selectedCompetition} onChange={e => setSelectedCompetition(e.target.value)}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
+            {competitions.map(c => <option key={c}>{c}</option>)}
+          </select>
           <select value={selectedWeek} onChange={e => setSelectedWeek(e.target.value)}
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {weeks.map(w => <option key={w}>{w}</option>)}
