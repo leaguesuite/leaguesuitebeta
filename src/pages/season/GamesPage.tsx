@@ -132,8 +132,8 @@ interface Game {
 const rand = (max: number) => Math.floor(Math.random() * max);
 
 const generatePlayerStats = (): PlayerStat[] => {
-  const homePlayers = ["J. Smith", "M. Johnson", "R. Williams", "T. Brown", "D. Jones", "K. Davis"];
-  const awayPlayers = ["A. Wilson", "C. Martinez", "B. Anderson", "S. Taylor", "L. Thomas", "P. Garcia"];
+  const homePlayers = ["James Smith", "Marcus Johnson", "Ryan Williams", "Tyler Brown", "Derek Jones", "Kevin Davis"];
+  const awayPlayers = ["Aaron Wilson", "Carlos Martinez", "Brandon Anderson", "Sean Taylor", "Lucas Thomas", "Paul Garcia"];
 
   const makeStat = (name: string, team: "home" | "away", number: string): PlayerStat => {
     const stat: PlayerStat = { id: `${team[0]}${number}`, name, team, number };
