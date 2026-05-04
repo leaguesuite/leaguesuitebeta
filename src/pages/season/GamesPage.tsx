@@ -200,8 +200,10 @@ export default function GamesPage() {
   const [statsGame, setStatsGame] = useState<Game | null>(null);
   const [editingStats, setEditingStats] = useState(false);
   const [editedStats, setEditedStats] = useState<PlayerStat[]>([]);
+  const [editedPeriodScores, setEditedPeriodScores] = useState<{ home: number; away: number }[]>([]);
+  const [editedPeriodType, setEditedPeriodType] = useState<"halves" | "quarters">("quarters");
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
-  const [playerSort, setPlayerSort] = useState<"number" | "name">("number");
+  const [playerSort, setPlayerSort] = useState<"number" | "firstName" | "lastName">("number");
   const [importOpen, setImportOpen] = useState(false);
   const filtered = games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
@@ -245,8 +247,15 @@ export default function GamesPage() {
       stats = generatePlayerStats();
       setGames(prev => prev.map(g => g.id === game.id ? { ...g, playerStats: stats } : g));
     }
-    setStatsGame({ ...game, playerStats: stats });
+    const periodType = game.periodType ?? "quarters";
+    const defaultLen = periodType === "halves" ? 2 : 4;
+    const periodScores = game.periodScores && game.periodScores.length > 0
+      ? game.periodScores
+      : Array.from({ length: defaultLen }, () => ({ home: 0, away: 0 }));
+    setStatsGame({ ...game, playerStats: stats, periodScores, periodType });
     setEditedStats(stats.map(s => ({ ...s })));
+    setEditedPeriodScores(periodScores.map(p => ({ ...p })));
+    setEditedPeriodType(periodType);
     setEditingStats(false);
     setActiveStatCategory("passing");
   };
@@ -256,16 +265,45 @@ export default function GamesPage() {
     setEditedStats(prev => prev.map(s => s.id === playerId ? { ...s, [key]: v } : s));
   };
 
+  const updatePeriodScore = (idx: number, team: "home" | "away", value: string) => {
+    const v = parseInt(value) || 0;
+    setEditedPeriodScores(prev => prev.map((p, i) => i === idx ? { ...p, [team]: v } : p));
+  };
+
+  const changePeriodType = (type: "halves" | "quarters") => {
+    const len = type === "halves" ? 2 : 4;
+    setEditedPeriodType(type);
+    setEditedPeriodScores(prev => {
+      const next = [...prev];
+      while (next.length < len) next.push({ home: 0, away: 0 });
+      return next.slice(0, len);
+    });
+  };
+
   const saveStats = () => {
     if (!statsGame) return;
-    setGames(prev => prev.map(g => g.id === statsGame.id ? { ...g, playerStats: editedStats } : g));
-    setStatsGame(prev => prev ? { ...prev, playerStats: editedStats } : null);
+    const homeTotal = editedPeriodScores.reduce((s, p) => s + p.home, 0);
+    const awayTotal = editedPeriodScores.reduce((s, p) => s + p.away, 0);
+    setGames(prev => prev.map(g => g.id === statsGame.id ? {
+      ...g, playerStats: editedStats,
+      periodScores: editedPeriodScores, periodType: editedPeriodType,
+      homeScore: homeTotal, awayScore: awayTotal,
+    } : g));
+    setStatsGame(prev => prev ? {
+      ...prev, playerStats: editedStats,
+      periodScores: editedPeriodScores, periodType: editedPeriodType,
+      homeScore: homeTotal, awayScore: awayTotal,
+    } : null);
     setEditingStats(false);
     toast({ title: "Stats saved" });
   };
 
   const cancelStatsEdit = () => {
-    if (statsGame) setEditedStats(statsGame.playerStats.map(s => ({ ...s })));
+    if (statsGame) {
+      setEditedStats(statsGame.playerStats.map(s => ({ ...s })));
+      setEditedPeriodScores((statsGame.periodScores ?? []).map(p => ({ ...p })));
+      setEditedPeriodType(statsGame.periodType ?? "quarters");
+    }
     setEditingStats(false);
   };
 
@@ -283,7 +321,16 @@ export default function GamesPage() {
   const renderCategoryTable = (team: "home" | "away", teamName: string) => {
     const stats = editingStats ? editedStats : (statsGame?.playerStats || []);
     const teamStats = stats.filter(s => s.team === team).slice().sort((a, b) => {
-      if (playerSort === "name") return a.name.localeCompare(b.name);
+      if (playerSort === "firstName") {
+        const af = a.name.split(" ")[0] || "";
+        const bf = b.name.split(" ")[0] || "";
+        return af.localeCompare(bf);
+      }
+      if (playerSort === "lastName") {
+        const al = a.name.split(" ").slice(-1)[0] || "";
+        const bl = b.name.split(" ").slice(-1)[0] || "";
+        return al.localeCompare(bl);
+      }
       return (parseInt(a.number) || 0) - (parseInt(b.number) || 0);
     });
     const totals = getTeamTotals(stats, team, currentCategory.columns);
@@ -515,52 +562,96 @@ export default function GamesPage() {
             <div className="space-y-4 mt-2">
               {/* Score header */}
               <div className="py-4 rounded-lg bg-muted/50 border border-border">
-                <div className="flex items-center justify-center gap-6">
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
-                    <p className="text-3xl font-bold text-foreground">{statsGame.homeScore ?? "—"}</p>
-                  </div>
-                  <span className="text-lg font-bold text-muted-foreground">vs</span>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
-                    <p className="text-3xl font-bold text-foreground">{statsGame.awayScore ?? "—"}</p>
-                  </div>
-                </div>
+                {(() => {
+                  const showScores = editingStats ? editedPeriodScores : (statsGame.periodScores ?? []);
+                  const showType = editingStats ? editedPeriodType : (statsGame.periodType ?? "quarters");
+                  const homeTotal = editingStats
+                    ? editedPeriodScores.reduce((s, p) => s + p.home, 0)
+                    : (statsGame.homeScore ?? "—");
+                  const awayTotal = editingStats
+                    ? editedPeriodScores.reduce((s, p) => s + p.away, 0)
+                    : (statsGame.awayScore ?? "—");
+                  return (
+                    <>
+                      <div className="flex items-center justify-center gap-6">
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-muted-foreground">{statsGame.home}</p>
+                          <p className="text-3xl font-bold text-foreground">{homeTotal}</p>
+                        </div>
+                        <span className="text-lg font-bold text-muted-foreground">vs</span>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-muted-foreground">{statsGame.away}</p>
+                          <p className="text-3xl font-bold text-foreground">{awayTotal}</p>
+                        </div>
+                      </div>
 
-                {/* Period breakdown */}
-                {statsGame.periodScores && statsGame.periodScores.length > 0 && (
-                  <div className="mt-4 mx-auto max-w-md">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-muted-foreground">
-                          <th className="text-left font-medium py-1 px-2">Team</th>
-                          {statsGame.periodScores.map((_, i) => (
-                            <th key={i} className="text-center font-medium py-1 px-2">
-                              {statsGame.periodType === "halves" ? `H${i + 1}` : `Q${i + 1}`}
-                            </th>
-                          ))}
-                          <th className="text-center font-bold py-1 px-2">T</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-t border-border">
-                          <td className="py-1 px-2 font-medium">{statsGame.home}</td>
-                          {statsGame.periodScores.map((p, i) => (
-                            <td key={i} className="text-center py-1 px-2 font-mono">{p.home}</td>
-                          ))}
-                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.homeScore}</td>
-                        </tr>
-                        <tr className="border-t border-border">
-                          <td className="py-1 px-2 font-medium">{statsGame.away}</td>
-                          {statsGame.periodScores.map((p, i) => (
-                            <td key={i} className="text-center py-1 px-2 font-mono">{p.away}</td>
-                          ))}
-                          <td className="text-center py-1 px-2 font-bold font-mono">{statsGame.awayScore}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      {editingStats && (
+                        <div className="mt-3 flex items-center justify-center gap-2">
+                          <Label className="text-xs text-muted-foreground">Period type</Label>
+                          <Select value={editedPeriodType} onValueChange={(v) => changePeriodType(v as "halves" | "quarters")}>
+                            <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="quarters">Quarters</SelectItem>
+                              <SelectItem value="halves">Halves</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {showScores.length > 0 && (
+                        <div className="mt-4 mx-auto max-w-md">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="text-muted-foreground">
+                                <th className="text-left font-medium py-1 px-2">Team</th>
+                                {showScores.map((_, i) => (
+                                  <th key={i} className="text-center font-medium py-1 px-2">
+                                    {showType === "halves" ? `H${i + 1}` : `Q${i + 1}`}
+                                  </th>
+                                ))}
+                                <th className="text-center font-bold py-1 px-2">T</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-t border-border">
+                                <td className="py-1 px-2 font-medium">{statsGame.home}</td>
+                                {showScores.map((p, i) => (
+                                  <td key={i} className="text-center py-1 px-1 font-mono">
+                                    {editingStats ? (
+                                      <Input
+                                        type="number" min={0}
+                                        value={p.home}
+                                        onChange={e => updatePeriodScore(i, "home", e.target.value)}
+                                        className="h-7 w-14 text-center text-xs mx-auto"
+                                      />
+                                    ) : p.home}
+                                  </td>
+                                ))}
+                                <td className="text-center py-1 px-2 font-bold font-mono">{homeTotal}</td>
+                              </tr>
+                              <tr className="border-t border-border">
+                                <td className="py-1 px-2 font-medium">{statsGame.away}</td>
+                                {showScores.map((p, i) => (
+                                  <td key={i} className="text-center py-1 px-1 font-mono">
+                                    {editingStats ? (
+                                      <Input
+                                        type="number" min={0}
+                                        value={p.away}
+                                        onChange={e => updatePeriodScore(i, "away", e.target.value)}
+                                        className="h-7 w-14 text-center text-xs mx-auto"
+                                      />
+                                    ) : p.away}
+                                  </td>
+                                ))}
+                                <td className="text-center py-1 px-2 font-bold font-mono">{awayTotal}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Sort + Category tabs */}
@@ -576,11 +667,12 @@ export default function GamesPage() {
                   </TabsList>
                   <div className="flex items-center gap-2">
                     <Label className="text-xs text-muted-foreground">Sort by</Label>
-                    <Select value={playerSort} onValueChange={(v) => setPlayerSort(v as "number" | "name")}>
-                      <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                    <Select value={playerSort} onValueChange={(v) => setPlayerSort(v as "number" | "firstName" | "lastName")}>
+                      <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="number">Jersey #</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="firstName">First Name</SelectItem>
+                        <SelectItem value="lastName">Last Name</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
