@@ -283,7 +283,16 @@ export default function GamesPage() {
   const renderCategoryTable = (team: "home" | "away", teamName: string) => {
     const stats = editingStats ? editedStats : (statsGame?.playerStats || []);
     const teamStats = stats.filter(s => s.team === team).slice().sort((a, b) => {
-      if (playerSort === "name") return a.name.localeCompare(b.name);
+      if (playerSort === "firstName") {
+        const af = a.name.split(" ")[0] || "";
+        const bf = b.name.split(" ")[0] || "";
+        return af.localeCompare(bf);
+      }
+      if (playerSort === "lastName") {
+        const al = a.name.split(" ").slice(-1)[0] || "";
+        const bl = b.name.split(" ").slice(-1)[0] || "";
+        return al.localeCompare(bl);
+      }
       return (parseInt(a.number) || 0) - (parseInt(b.number) || 0);
     });
     const totals = getTeamTotals(stats, team, currentCategory.columns);
