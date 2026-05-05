@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { mockMembers, mockPlayers } from "@/data/mockMembers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
