@@ -17,13 +17,17 @@ interface Team {
   division: string;
   captain: string;
   coach: string;
+  logoUrl?: string;
+  teamPhotoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 const INITIAL_TEAMS: Team[] = [
-  { id: "1", name: "Eagles", division: "Division A", captain: "John Smith", coach: "N/A" },
-  { id: "2", name: "Tigers", division: "Division A", captain: "Emily Brown", coach: "Sarah Johnson" },
-  { id: "3", name: "Hawks", division: "Division B", captain: "Jessica Thomas", coach: "N/A" },
-  { id: "4", name: "Lions", division: "Division B", captain: "Kevin Garcia", coach: "N/A" },
+  { id: "1", name: "Eagles", division: "Division A", captain: "John Smith", coach: "N/A", primaryColor: "#1e40af", secondaryColor: "#fbbf24" },
+  { id: "2", name: "Tigers", division: "Division A", captain: "Emily Brown", coach: "Sarah Johnson", primaryColor: "#ea580c", secondaryColor: "#000000" },
+  { id: "3", name: "Hawks", division: "Division B", captain: "Jessica Thomas", coach: "N/A", primaryColor: "#059669", secondaryColor: "#ffffff" },
+  { id: "4", name: "Lions", division: "Division B", captain: "Kevin Garcia", coach: "N/A", primaryColor: "#7c3aed", secondaryColor: "#fde047" },
 ];
 
 const DIVISIONS = ["All Divisions", "Division A", "Division B"];
