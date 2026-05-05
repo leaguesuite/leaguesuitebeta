@@ -337,6 +337,17 @@ function EditTeamBody({ form, setForm }: EditTeamBodyProps) {
             <Label>Team Name</Label>
             <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
           </div>
+          <div className="space-y-2">
+            <Label>Division</Label>
+            <Select value={form.division} onValueChange={v => setForm({ ...form, division: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {DIVISIONS.filter(d => d !== "All Divisions").map(d => (
+                  <SelectItem key={d} value={d}>{d}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Captain</Label>
