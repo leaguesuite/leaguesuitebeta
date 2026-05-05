@@ -170,39 +170,11 @@ export default function TeamsRostersPage() {
 
         {/* Edit Team Dialog */}
         <Dialog open={editTeamOpen} onOpenChange={setEditTeamOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Edit Team</DialogTitle>
             </DialogHeader>
-            {editForm && (
-              <div className="space-y-4 py-2">
-                <div className="space-y-2">
-                  <Label>Team Name</Label>
-                  <Input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Division</Label>
-                  <Select value={editForm.division} onValueChange={v => setEditForm({ ...editForm, division: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {DIVISIONS.filter(d => d !== "All Divisions").map(d => (
-                        <SelectItem key={d} value={d}>{d}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Captain</Label>
-                    <Input value={editForm.captain} onChange={e => setEditForm({ ...editForm, captain: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Coach</Label>
-                    <Input value={editForm.coach} onChange={e => setEditForm({ ...editForm, coach: e.target.value })} />
-                  </div>
-                </div>
-              </div>
-            )}
+            {editForm && <EditTeamBody form={editForm} setForm={setEditForm} />}
             <DialogFooter>
               <Button variant="outline" onClick={() => setEditTeamOpen(false)}>Cancel</Button>
               <Button onClick={saveTeamEdit}>Save Changes</Button>
