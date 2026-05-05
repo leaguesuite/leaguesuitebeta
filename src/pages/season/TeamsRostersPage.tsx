@@ -303,3 +303,176 @@ export default function TeamsRostersPage() {
     </TooltipProvider>
   );
 }
+
+interface EditTeamBodyProps {
+  form: Team;
+  setForm: (t: Team) => void;
+}
+
+function EditTeamBody({ form, setForm }: EditTeamBodyProps) {
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (file: File | undefined, key: "logoUrl" | "teamPhotoUrl") => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm({ ...form, [key]: reader.result as string });
+    reader.readAsDataURL(file);
+  };
+
+  const primary = form.primaryColor || "#3b82f6";
+  const secondary = form.secondaryColor || "#ffffff";
+
+  return (
+    <div className="py-2">
+      <Tabs defaultValue="details">
+        <TabsList className="w-full">
+          <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
+          <TabsTrigger value="branding" className="flex-1">Branding</TabsTrigger>
+          <TabsTrigger value="media" className="flex-1">Media</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="details" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label>Team Name</Label>
+            <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Captain</Label>
+              <Input value={form.captain} onChange={e => setForm({ ...form, captain: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Coach</Label>
+              <Input value={form.coach} onChange={e => setForm({ ...form, coach: e.target.value })} />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="branding" className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Primary Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={primary}
+                  onChange={e => setForm({ ...form, primaryColor: e.target.value })}
+                  className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+                />
+                <Input
+                  value={primary}
+                  onChange={e => setForm({ ...form, primaryColor: e.target.value })}
+                  className="flex-1 font-mono text-sm"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Secondary Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={secondary}
+                  onChange={e => setForm({ ...form, secondaryColor: e.target.value })}
+                  className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+                />
+                <Input
+                  value={secondary}
+                  onChange={e => setForm({ ...form, secondaryColor: e.target.value })}
+                  className="flex-1 font-mono text-sm"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border p-4">
+            <Label className="text-xs text-muted-foreground mb-2 block">Preview</Label>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold shadow"
+                style={{ backgroundColor: primary, color: secondary }}
+              >
+                {form.name.charAt(0)}
+              </div>
+              <div>
+                <div className="font-semibold text-foreground">{form.name}</div>
+                <div className="h-1.5 w-24 rounded-full mt-1" style={{ background: `linear-gradient(90deg, ${primary}, ${secondary})` }} />
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="media" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label>Team Logo</Label>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => handleFile(e.target.files?.[0], "logoUrl")}
+            />
+            <div
+              onClick={() => logoInputRef.current?.click()}
+              className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+            >
+              {form.logoUrl ? (
+                <div className="flex flex-col items-center gap-2">
+                  <img src={form.logoUrl} alt="Logo" className="w-20 h-20 object-contain rounded-lg" />
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); logoInputRef.current?.click(); }}>
+                      <ImageIcon className="h-3.5 w-3.5 mr-1" /> Change
+                    </Button>
+                    <Button variant="ghost" size="sm" type="button" onClick={(e) => { e.stopPropagation(); setForm({ ...form, logoUrl: "" }); }}>
+                      <X className="h-3.5 w-3.5 mr-1" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Upload className="h-8 w-8" />
+                  <span className="text-sm">Click to upload logo</span>
+                  <span className="text-xs">PNG, SVG, or JPG (max 2MB)</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Team Photo</Label>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => handleFile(e.target.files?.[0], "teamPhotoUrl")}
+            />
+            <div
+              onClick={() => photoInputRef.current?.click()}
+              className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+            >
+              {form.teamPhotoUrl ? (
+                <div className="flex flex-col items-center gap-2">
+                  <img src={form.teamPhotoUrl} alt="Team" className="w-full h-32 object-cover rounded-lg" />
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); photoInputRef.current?.click(); }}>
+                      <ImageIcon className="h-3.5 w-3.5 mr-1" /> Change
+                    </Button>
+                    <Button variant="ghost" size="sm" type="button" onClick={(e) => { e.stopPropagation(); setForm({ ...form, teamPhotoUrl: "" }); }}>
+                      <X className="h-3.5 w-3.5 mr-1" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Camera className="h-8 w-8" />
+                  <span className="text-sm">Click to upload team photo</span>
+                  <span className="text-xs">JPG or PNG (max 5MB)</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
