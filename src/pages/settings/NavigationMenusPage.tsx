@@ -488,14 +488,8 @@ export default function NavigationMenusPage() {
               ? <img src={config.logoUrl} alt="Logo" className="h-7" />
               : <div className="w-7 h-7 rounded-full border-2 border-foreground/40 flex items-center justify-center text-[9px] font-bold text-foreground">LOGO</div>
           )}
-          {config.showSeasonSelector && (
-            <div className="text-xs px-3 py-1 border border-border rounded text-foreground bg-background">Winter 2025-26 ▾</div>
-          )}
           {config.showLeagueSwitcher && (
             <div className="text-xs px-3 py-1 border border-border rounded text-foreground bg-background">Switch League ▾</div>
-          )}
-          {config.showDivisionsSelector && (
-            <div className="text-xs px-3 py-1 text-foreground font-semibold">Divisions ▾</div>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -523,13 +517,23 @@ export default function NavigationMenusPage() {
   const MainMenuPreview = () => (
     <div className="px-5 py-3 bg-foreground">
       <nav className="flex items-center gap-1 justify-between">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           {config.mainMenu.filter(i => i.visible).map(item => (
-            <span key={item.id} className="px-3 py-1.5 rounded text-sm font-semibold text-background hover:bg-background/10 cursor-pointer flex items-center gap-1 uppercase tracking-wide">
+            <span key={item.id} className={`px-3 py-1.5 rounded text-sm font-semibold text-background hover:bg-background/10 cursor-pointer flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
               {item.label}
               {item.children.filter(c => c.visible).length > 0 && <ChevronDown className="h-3 w-3" />}
             </span>
           ))}
+          {config.showSeasonSelector && (
+            <span className={`px-3 py-1.5 rounded text-sm font-semibold text-background/90 bg-background/10 flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
+              Winter 2025-26 <ChevronDown className="h-3 w-3" />
+            </span>
+          )}
+          {config.showDivisionsSelector && (
+            <span className={`px-3 py-1.5 rounded text-sm font-semibold text-background/90 bg-background/10 flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
+              Divisions <ChevronDown className="h-3 w-3" />
+            </span>
+          )}
         </div>
         {config.showSearch && <Search className="h-4 w-4 text-background/70" />}
       </nav>
