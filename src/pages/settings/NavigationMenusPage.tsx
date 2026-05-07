@@ -670,9 +670,7 @@ export default function NavigationMenusPage() {
             <div className="p-5 space-y-3">
               {[
                 { key: "showLogo", label: "Logo" },
-                { key: "showSeasonSelector", label: "Season selector" },
                 { key: "showLeagueSwitcher", label: "Switch leagues dropdown (multi-league tenants)" },
-                { key: "showDivisionsSelector", label: "Divisions dropdown" },
                 { key: "showLanguagePicker", label: "Language picker" },
               ].map(o => (
                 <div key={o.key} className="flex items-center justify-between">
