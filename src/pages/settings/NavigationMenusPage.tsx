@@ -133,6 +133,8 @@ const INITIAL_CONFIG: NavConfig = {
     { id: "tb-news", label: "Latest News", url: "/news", visible: true, openInNewTab: false, children: [] },
   ],
   mainMenu: [
+    { id: "m-season", label: "Winter 2025-26", url: "#season", visible: true, openInNewTab: false, locked: true, lockedKind: "season", children: [] },
+    { id: "m-divisions", label: "Divisions", url: "#divisions", visible: true, openInNewTab: false, locked: true, lockedKind: "divisions", children: [] },
     { id: "m-home", label: "Home", url: "/", visible: true, openInNewTab: false, locked: true, children: [] },
     { id: "m-cal", label: "Calendar", url: "/calendar", visible: true, openInNewTab: false, locked: true, children: [] },
     { id: "m-acc", label: "Accolades", url: "/accolades", visible: true, openInNewTab: false, locked: true, children: [] },
