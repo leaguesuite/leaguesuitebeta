@@ -70,6 +70,12 @@ interface NavConfig {
   showDivisionsSelector: boolean;
   showSearch: boolean;
   mainMenuUppercase: boolean;
+  topBarBg: string;
+  topBarText: string;
+  mainMenuBg: string;
+  mainMenuText: string;
+  footerBg: string;
+  footerText: string;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
