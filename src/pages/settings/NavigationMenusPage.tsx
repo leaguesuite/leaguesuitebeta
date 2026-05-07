@@ -631,13 +631,28 @@ export default function NavigationMenusPage() {
 
           <div className="section-card">
             <div className="px-5 py-4 border-b border-border">
-              <h2 className="text-sm font-semibold text-foreground">Header Tools</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Toggle utilities locked to the main header bar.</p>
+              <h2 className="text-sm font-semibold text-foreground">Header Tools & Style</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Toggle utilities locked to the main header bar and adjust its appearance.</p>
             </div>
             <div className="p-5 space-y-3">
               <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2"><Lock className="h-3 w-3 text-muted-foreground" />Season selector</Label>
+                <Switch checked={config.showSeasonSelector} onCheckedChange={v => setConfig(p => ({ ...p, showSeasonSelector: v }))} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2"><Lock className="h-3 w-3 text-muted-foreground" />Divisions dropdown</Label>
+                <Switch checked={config.showDivisionsSelector} onCheckedChange={v => setConfig(p => ({ ...p, showDivisionsSelector: v }))} />
+              </div>
+              <div className="flex items-center justify-between">
                 <Label>Show search icon</Label>
                 <Switch checked={config.showSearch} onCheckedChange={v => setConfig(p => ({ ...p, showSearch: v }))} />
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <div>
+                  <Label>Uppercase menu labels</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">When off, labels display in their original casing.</p>
+                </div>
+                <Switch checked={config.mainMenuUppercase} onCheckedChange={v => setConfig(p => ({ ...p, mainMenuUppercase: v }))} />
               </div>
             </div>
           </div>
