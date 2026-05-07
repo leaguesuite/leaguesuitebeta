@@ -133,6 +133,8 @@ const INITIAL_CONFIG: NavConfig = {
     { id: "tb-news", label: "Latest News", url: "/news", visible: true, openInNewTab: false, children: [] },
   ],
   mainMenu: [
+    { id: "m-season", label: "Winter 2025-26", url: "#season", visible: true, openInNewTab: false, locked: true, lockedKind: "season", children: [] },
+    { id: "m-divisions", label: "Divisions", url: "#divisions", visible: true, openInNewTab: false, locked: true, lockedKind: "divisions", children: [] },
     { id: "m-home", label: "Home", url: "/", visible: true, openInNewTab: false, locked: true, children: [] },
     { id: "m-cal", label: "Calendar", url: "/calendar", visible: true, openInNewTab: false, locked: true, children: [] },
     { id: "m-acc", label: "Accolades", url: "/accolades", visible: true, openInNewTab: false, locked: true, children: [] },
@@ -518,22 +520,18 @@ export default function NavigationMenusPage() {
     <div className="px-5 py-3 bg-foreground">
       <nav className="flex items-center gap-1 justify-between">
         <div className="flex items-center gap-1 flex-wrap">
-          {config.mainMenu.filter(i => i.visible).map(item => (
-            <span key={item.id} className={`px-3 py-1.5 rounded text-sm font-semibold text-background hover:bg-background/10 cursor-pointer flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
-              {item.label}
-              {item.children.filter(c => c.visible).length > 0 && <ChevronDown className="h-3 w-3" />}
-            </span>
-          ))}
-          {config.showSeasonSelector && (
-            <span className={`px-3 py-1.5 rounded text-sm font-semibold text-background/90 bg-background/10 flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
-              Winter 2025-26 <ChevronDown className="h-3 w-3" />
-            </span>
-          )}
-          {config.showDivisionsSelector && (
-            <span className={`px-3 py-1.5 rounded text-sm font-semibold text-background/90 bg-background/10 flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
-              Divisions <ChevronDown className="h-3 w-3" />
-            </span>
-          )}
+          {config.mainMenu
+            .filter(i => i.visible)
+            .filter(i => (i.lockedKind === "season" ? config.showSeasonSelector : i.lockedKind === "divisions" ? config.showDivisionsSelector : true))
+            .map(item => {
+              const isSelector = item.lockedKind === "season" || item.lockedKind === "divisions";
+              return (
+                <span key={item.id} className={`px-3 py-1.5 rounded text-sm font-semibold cursor-pointer flex items-center gap-1 ${isSelector ? "text-background/90 bg-background/10" : "text-background hover:bg-background/10"} ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
+                  {item.label}
+                  {(isSelector || item.children.filter(c => c.visible).length > 0) && <ChevronDown className="h-3 w-3" />}
+                </span>
+              );
+            })}
         </div>
         {config.showSearch && <Search className="h-4 w-4 text-background/70" />}
       </nav>
