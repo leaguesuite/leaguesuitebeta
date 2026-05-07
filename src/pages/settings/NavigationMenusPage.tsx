@@ -836,6 +836,7 @@ export default function NavigationMenusPage() {
       {/* ─── FOOTER ──────────────────────────────────────────────────── */}
       {activeBar === "footer" && (
         <>
+          <ColorsCard title="Footer Colors" bgKey="footerBg" textKey="footerText" />
           <div className="section-card">
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <div>
