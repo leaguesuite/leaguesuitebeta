@@ -122,6 +122,12 @@ const INITIAL_CONFIG: NavConfig = {
   showDivisionsSelector: true,
   showSearch: true,
   mainMenuUppercase: true,
+  topBarBg: "#ffffff",
+  topBarText: "#1f2937",
+  mainMenuBg: "#0f172a",
+  mainMenuText: "#ffffff",
+  footerBg: "#0f172a",
+  footerText: "#ffffff",
   languages: [
     { code: "en", label: "English", enabled: true },
     { code: "fr", label: "Français", enabled: true },
