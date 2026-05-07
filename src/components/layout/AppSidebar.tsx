@@ -6,7 +6,7 @@ import {
   BarChart3, UserCheck, Download, Globe, Layers, FolderOpen, Zap,
   PlusCircle, Flag, GitBranch, BookOpen, Image, Menu as MenuIcon,
   ScrollText, CreditCard, Code, Share2, Bell, Lock, Palette, Link2, Bird,
-  Swords
+  Swords, LifeBuoy
 } from "lucide-react";
 
 interface NavItem {
@@ -260,6 +260,20 @@ export default function AppSidebar() {
           </div>
         ))}
       </nav>
+
+      <div className="px-2 py-2 border-t border-sidebar-border">
+        <Link
+          to="/support"
+          className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+            isActive("/support")
+              ? "bg-sidebar-accent text-sidebar-primary"
+              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          }`}
+        >
+          <LifeBuoy className="h-4 w-4 shrink-0" />
+          Support
+        </Link>
+      </div>
 
       <div className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-2.5 px-2">

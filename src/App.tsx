@@ -47,6 +47,7 @@ import PublicTeamPage from "@/pages/public/PublicTeamPage";
 import PublicPlayerPage from "@/pages/public/PublicPlayerPage";
 import PublicGamePage from "@/pages/public/PublicGamePage";
 import PublicStatsPage from "@/pages/public/PublicStatsPage";
+import SupportPage from "@/pages/SupportPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -128,6 +129,7 @@ const App = () => (
             <Route path="/settings/branding" element={<BrandingPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
             <Route path="/features/brackets" element={<BracketManagerPage />} />
+            <Route path="/support" element={<SupportPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
