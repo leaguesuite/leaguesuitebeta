@@ -69,6 +69,7 @@ interface NavConfig {
   showSeasonSelector: boolean;
   showDivisionsSelector: boolean;
   showSearch: boolean;
+  mainMenuUppercase: boolean;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -114,6 +115,7 @@ const INITIAL_CONFIG: NavConfig = {
   showSeasonSelector: true,
   showDivisionsSelector: true,
   showSearch: true,
+  mainMenuUppercase: true,
   languages: [
     { code: "en", label: "English", enabled: true },
     { code: "fr", label: "Français", enabled: true },
@@ -486,14 +488,8 @@ export default function NavigationMenusPage() {
               ? <img src={config.logoUrl} alt="Logo" className="h-7" />
               : <div className="w-7 h-7 rounded-full border-2 border-foreground/40 flex items-center justify-center text-[9px] font-bold text-foreground">LOGO</div>
           )}
-          {config.showSeasonSelector && (
-            <div className="text-xs px-3 py-1 border border-border rounded text-foreground bg-background">Winter 2025-26 ▾</div>
-          )}
           {config.showLeagueSwitcher && (
             <div className="text-xs px-3 py-1 border border-border rounded text-foreground bg-background">Switch League ▾</div>
-          )}
-          {config.showDivisionsSelector && (
-            <div className="text-xs px-3 py-1 text-foreground font-semibold">Divisions ▾</div>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -521,13 +517,23 @@ export default function NavigationMenusPage() {
   const MainMenuPreview = () => (
     <div className="px-5 py-3 bg-foreground">
       <nav className="flex items-center gap-1 justify-between">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           {config.mainMenu.filter(i => i.visible).map(item => (
-            <span key={item.id} className="px-3 py-1.5 rounded text-sm font-semibold text-background hover:bg-background/10 cursor-pointer flex items-center gap-1 uppercase tracking-wide">
+            <span key={item.id} className={`px-3 py-1.5 rounded text-sm font-semibold text-background hover:bg-background/10 cursor-pointer flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
               {item.label}
               {item.children.filter(c => c.visible).length > 0 && <ChevronDown className="h-3 w-3" />}
             </span>
           ))}
+          {config.showSeasonSelector && (
+            <span className={`px-3 py-1.5 rounded text-sm font-semibold text-background/90 bg-background/10 flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
+              Winter 2025-26 <ChevronDown className="h-3 w-3" />
+            </span>
+          )}
+          {config.showDivisionsSelector && (
+            <span className={`px-3 py-1.5 rounded text-sm font-semibold text-background/90 bg-background/10 flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
+              Divisions <ChevronDown className="h-3 w-3" />
+            </span>
+          )}
         </div>
         {config.showSearch && <Search className="h-4 w-4 text-background/70" />}
       </nav>
@@ -625,13 +631,28 @@ export default function NavigationMenusPage() {
 
           <div className="section-card">
             <div className="px-5 py-4 border-b border-border">
-              <h2 className="text-sm font-semibold text-foreground">Header Tools</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Toggle utilities locked to the main header bar.</p>
+              <h2 className="text-sm font-semibold text-foreground">Header Tools & Style</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Toggle utilities locked to the main header bar and adjust its appearance.</p>
             </div>
             <div className="p-5 space-y-3">
               <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2"><Lock className="h-3 w-3 text-muted-foreground" />Season selector</Label>
+                <Switch checked={config.showSeasonSelector} onCheckedChange={v => setConfig(p => ({ ...p, showSeasonSelector: v }))} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2"><Lock className="h-3 w-3 text-muted-foreground" />Divisions dropdown</Label>
+                <Switch checked={config.showDivisionsSelector} onCheckedChange={v => setConfig(p => ({ ...p, showDivisionsSelector: v }))} />
+              </div>
+              <div className="flex items-center justify-between">
                 <Label>Show search icon</Label>
                 <Switch checked={config.showSearch} onCheckedChange={v => setConfig(p => ({ ...p, showSearch: v }))} />
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <div>
+                  <Label>Uppercase menu labels</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">When off, labels display in their original casing.</p>
+                </div>
+                <Switch checked={config.mainMenuUppercase} onCheckedChange={v => setConfig(p => ({ ...p, mainMenuUppercase: v }))} />
               </div>
             </div>
           </div>
@@ -649,9 +670,7 @@ export default function NavigationMenusPage() {
             <div className="p-5 space-y-3">
               {[
                 { key: "showLogo", label: "Logo" },
-                { key: "showSeasonSelector", label: "Season selector" },
                 { key: "showLeagueSwitcher", label: "Switch leagues dropdown (multi-league tenants)" },
-                { key: "showDivisionsSelector", label: "Divisions dropdown" },
                 { key: "showLanguagePicker", label: "Language picker" },
               ].map(o => (
                 <div key={o.key} className="flex items-center justify-between">
