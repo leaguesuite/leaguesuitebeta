@@ -115,6 +115,7 @@ const INITIAL_CONFIG: NavConfig = {
   showSeasonSelector: true,
   showDivisionsSelector: true,
   showSearch: true,
+  mainMenuUppercase: true,
   languages: [
     { code: "en", label: "English", enabled: true },
     { code: "fr", label: "Français", enabled: true },
