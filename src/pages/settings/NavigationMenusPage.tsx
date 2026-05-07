@@ -593,6 +593,31 @@ export default function NavigationMenusPage() {
     { id: "footer", name: "Footer" },
   ];
 
+  const ColorsCard = ({ title, bgKey, textKey }: { title: string; bgKey: keyof NavConfig; textKey: keyof NavConfig }) => (
+    <div className="section-card">
+      <div className="px-5 py-4 border-b border-border">
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">Customize background and text color. Tip: pick a contrasting text color so labels stay readable.</p>
+      </div>
+      <div className="p-5 grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs">Background</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={config[bgKey] as string} onChange={e => setConfig(p => ({ ...p, [bgKey]: e.target.value } as NavConfig))} className="h-9 w-12 rounded border border-border cursor-pointer" />
+            <Input value={config[bgKey] as string} onChange={e => setConfig(p => ({ ...p, [bgKey]: e.target.value } as NavConfig))} className="h-9 text-xs font-mono" />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Text</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={config[textKey] as string} onChange={e => setConfig(p => ({ ...p, [textKey]: e.target.value } as NavConfig))} className="h-9 w-12 rounded border border-border cursor-pointer" />
+            <Input value={config[textKey] as string} onChange={e => setConfig(p => ({ ...p, [textKey]: e.target.value } as NavConfig))} className="h-9 text-xs font-mono" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
