@@ -702,6 +702,7 @@ export default function NavigationMenusPage() {
       {/* ─── TOP BAR ─────────────────────────────────────────────────── */}
       {activeBar === "topbar" && (
         <>
+          <ColorsCard title="Top Bar Colors" bgKey="topBarBg" textKey="topBarText" />
           <div className="section-card">
             <div className="px-5 py-4 border-b border-border">
               <h2 className="text-sm font-semibold text-foreground">Locked Top Bar Tools</h2>
