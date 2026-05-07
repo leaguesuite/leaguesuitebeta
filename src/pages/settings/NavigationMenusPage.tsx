@@ -70,6 +70,12 @@ interface NavConfig {
   showDivisionsSelector: boolean;
   showSearch: boolean;
   mainMenuUppercase: boolean;
+  topBarBg: string;
+  topBarText: string;
+  mainMenuBg: string;
+  mainMenuText: string;
+  footerBg: string;
+  footerText: string;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -116,6 +122,12 @@ const INITIAL_CONFIG: NavConfig = {
   showDivisionsSelector: true,
   showSearch: true,
   mainMenuUppercase: true,
+  topBarBg: "#ffffff",
+  topBarText: "#1f2937",
+  mainMenuBg: "#0f172a",
+  mainMenuText: "#ffffff",
+  footerBg: "#0f172a",
+  footerText: "#ffffff",
   languages: [
     { code: "en", label: "English", enabled: true },
     { code: "fr", label: "Français", enabled: true },
@@ -482,34 +494,34 @@ export default function NavigationMenusPage() {
   // ─── Previews ──────────────────────────────────────────────────────────
 
   const TopBarPreview = () => (
-    <div className="px-5 py-2.5 bg-card border-b border-border">
+    <div className="px-5 py-2.5 border-b border-border" style={{ background: config.topBarBg, color: config.topBarText }}>
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {config.showLogo && (
             config.logoUrl
               ? <img src={config.logoUrl} alt="Logo" className="h-7" />
-              : <div className="w-7 h-7 rounded-full border-2 border-foreground/40 flex items-center justify-center text-[9px] font-bold text-foreground">LOGO</div>
+              : <div className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-[9px] font-bold" style={{ borderColor: config.topBarText, color: config.topBarText }}>LOGO</div>
           )}
           {config.showLeagueSwitcher && (
-            <div className="text-xs px-3 py-1 border border-border rounded text-foreground bg-background">Switch League ▾</div>
+            <div className="text-xs px-3 py-1 border rounded" style={{ borderColor: `${config.topBarText}33`, color: config.topBarText }}>Switch League ▾</div>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" style={{ color: config.topBarText }}>
           {config.topBar.filter(p => p.visible).map(p => (
-            <span key={p.id} className="text-xs text-foreground/70 hover:text-foreground cursor-pointer flex items-center gap-1">
+            <span key={p.id} className="text-xs cursor-pointer flex items-center gap-1 opacity-80 hover:opacity-100">
               {p.label}{p.children.length > 0 && <ChevronDown className="h-3 w-3" />}
             </span>
           ))}
           {config.showLanguagePicker && (
-            <div className="flex items-center gap-1 text-xs text-foreground/70">
+            <div className="flex items-center gap-1 text-xs opacity-80">
               <Globe className="h-3 w-3" />
               {config.languages.filter(l => l.enabled).map(l => l.code.toUpperCase()).join(" / ")}
             </div>
           )}
-          <span className="w-px h-4 bg-border" />
+          <span className="w-px h-4" style={{ background: `${config.topBarText}33` }} />
           {config.socialLinks.filter(s => s.visible).map(s => {
             const I = getSocialIcon(s.platform);
-            return <I key={s.id} className="h-3.5 w-3.5 text-foreground/60 hover:text-foreground cursor-pointer" />;
+            return <I key={s.id} className="h-3.5 w-3.5 opacity-70 hover:opacity-100 cursor-pointer" />;
           })}
         </div>
       </div>
@@ -517,7 +529,7 @@ export default function NavigationMenusPage() {
   );
 
   const MainMenuPreview = () => (
-    <div className="px-5 py-3 bg-foreground">
+    <div className="px-5 py-3" style={{ background: config.mainMenuBg, color: config.mainMenuText }}>
       <nav className="flex items-center gap-1 justify-between">
         <div className="flex items-center gap-1 flex-wrap">
           {config.mainMenu
@@ -526,45 +538,49 @@ export default function NavigationMenusPage() {
             .map(item => {
               const isSelector = item.lockedKind === "season" || item.lockedKind === "divisions";
               return (
-                <span key={item.id} className={`px-3 py-1.5 rounded text-sm font-semibold cursor-pointer flex items-center gap-1 ${isSelector ? "text-background/90 bg-background/10" : "text-background hover:bg-background/10"} ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}>
+                <span
+                  key={item.id}
+                  className={`px-3 py-1.5 rounded text-sm font-semibold cursor-pointer flex items-center gap-1 ${config.mainMenuUppercase ? "uppercase tracking-wide" : ""}`}
+                  style={{ color: config.mainMenuText, background: isSelector ? `${config.mainMenuText}1a` : "transparent" }}
+                >
                   {item.label}
                   {(isSelector || item.children.filter(c => c.visible).length > 0) && <ChevronDown className="h-3 w-3" />}
                 </span>
               );
             })}
         </div>
-        {config.showSearch && <Search className="h-4 w-4 text-background/70" />}
+        {config.showSearch && <Search className="h-4 w-4 opacity-70" />}
       </nav>
     </div>
   );
 
   const FooterPreview = () => (
-    <div className="px-5 py-6 bg-foreground text-background space-y-4">
+    <div className="px-5 py-6 space-y-4" style={{ background: config.footerBg, color: config.footerText }}>
       <div className={`grid gap-6`} style={{ gridTemplateColumns: `repeat(${config.footer.columns.length || 1}, minmax(0, 1fr))` }}>
         {config.footer.columns.map(col => (
           <div key={col.id} className="space-y-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-background">{col.heading}</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider">{col.heading}</h4>
             <div className="space-y-1">
               {col.items.filter(i => i.visible).map(i => (
-                <div key={i.id} className="text-xs text-background/70 hover:text-background cursor-pointer">{i.label}</div>
+                <div key={i.id} className="text-xs cursor-pointer opacity-70 hover:opacity-100">{i.label}</div>
               ))}
             </div>
           </div>
         ))}
       </div>
       {config.footer.showSocial && (
-        <div className="flex items-center gap-3 pt-3 border-t border-background/10">
+        <div className="flex items-center gap-3 pt-3 border-t" style={{ borderColor: `${config.footerText}1a` }}>
           {config.socialLinks.filter(s => s.visible).map(s => {
             const I = getSocialIcon(s.platform);
-            return <I key={s.id} className="h-4 w-4 text-background/60 hover:text-background cursor-pointer" />;
+            return <I key={s.id} className="h-4 w-4 opacity-60 hover:opacity-100 cursor-pointer" />;
           })}
         </div>
       )}
       {config.footer.showCopyright && (
-        <div className="text-[11px] text-background/50">{config.footer.copyrightText}</div>
+        <div className="text-[11px] opacity-50">{config.footer.copyrightText}</div>
       )}
       {config.footer.showPoweredBy && (
-        <div className="text-[11px] text-background/40">Powered by LeagueSuite</div>
+        <div className="text-[11px] opacity-40">Powered by LeagueSuite</div>
       )}
     </div>
   );
@@ -576,6 +592,31 @@ export default function NavigationMenusPage() {
     { id: "topbar", name: "Top Bar (Secondary)" },
     { id: "footer", name: "Footer" },
   ];
+
+  const ColorsCard = ({ title, bgKey, textKey }: { title: string; bgKey: keyof NavConfig; textKey: keyof NavConfig }) => (
+    <div className="section-card">
+      <div className="px-5 py-4 border-b border-border">
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">Customize background and text color. Tip: pick a contrasting text color so labels stay readable.</p>
+      </div>
+      <div className="p-5 grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs">Background</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={config[bgKey] as string} onChange={e => setConfig(p => ({ ...p, [bgKey]: e.target.value } as NavConfig))} className="h-9 w-12 rounded border border-border cursor-pointer" />
+            <Input value={config[bgKey] as string} onChange={e => setConfig(p => ({ ...p, [bgKey]: e.target.value } as NavConfig))} className="h-9 text-xs font-mono" />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Text</Label>
+          <div className="flex items-center gap-2">
+            <input type="color" value={config[textKey] as string} onChange={e => setConfig(p => ({ ...p, [textKey]: e.target.value } as NavConfig))} className="h-9 w-12 rounded border border-border cursor-pointer" />
+            <Input value={config[textKey] as string} onChange={e => setConfig(p => ({ ...p, [textKey]: e.target.value } as NavConfig))} className="h-9 text-xs font-mono" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -654,12 +695,14 @@ export default function NavigationMenusPage() {
               </div>
             </div>
           </div>
+          <ColorsCard title="Main Menu Colors" bgKey="mainMenuBg" textKey="mainMenuText" />
         </>
       )}
 
       {/* ─── TOP BAR ─────────────────────────────────────────────────── */}
       {activeBar === "topbar" && (
         <>
+          <ColorsCard title="Top Bar Colors" bgKey="topBarBg" textKey="topBarText" />
           <div className="section-card">
             <div className="px-5 py-4 border-b border-border">
               <h2 className="text-sm font-semibold text-foreground">Locked Top Bar Tools</h2>
@@ -793,6 +836,7 @@ export default function NavigationMenusPage() {
       {/* ─── FOOTER ──────────────────────────────────────────────────── */}
       {activeBar === "footer" && (
         <>
+          <ColorsCard title="Footer Colors" bgKey="footerBg" textKey="footerText" />
           <div className="section-card">
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <div>
