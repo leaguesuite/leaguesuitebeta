@@ -695,6 +695,7 @@ export default function NavigationMenusPage() {
               </div>
             </div>
           </div>
+          <ColorsCard title="Main Menu Colors" bgKey="mainMenuBg" textKey="mainMenuText" />
         </>
       )}
 
