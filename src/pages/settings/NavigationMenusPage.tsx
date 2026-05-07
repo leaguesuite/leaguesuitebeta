@@ -69,6 +69,7 @@ interface NavConfig {
   showSeasonSelector: boolean;
   showDivisionsSelector: boolean;
   showSearch: boolean;
+  mainMenuUppercase: boolean;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
