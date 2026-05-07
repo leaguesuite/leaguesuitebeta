@@ -1,51 +1,70 @@
+# Navigation & Menus — Header, Top Bar, Footer Builder
 
+Rebuild `src/pages/settings/NavigationMenusPage.tsx` so admins can fully customize the public site's two header bars and the footer, matching the structure shown in the reference screenshot (white secondary bar on top, black main bar below).
 
-## Client Onboarding Portal
+## Three editable zones
 
-### Overview
-Build a new "Client Onboarding" section under Features in the sidebar that lets you create onboarding packages for new clients. Each package contains three documents: a Pre-Deployment Form (questionnaire), a Master Service Agreement (e-sign), and an Order Sheet (e-sign). You can generate a package per client, track status, and collect e-signatures.
+Tabs at the top of the page:
 
-### What gets built
+1. **Top Bar (Secondary)** — white bar
+2. **Main Menu (Header)** — black bar
+3. **Footer**
 
-**1. Database tables (3 new tables)**
-- `onboarding_packages` -- one row per client onboarding (client name, email, status, created_at, org_id)
-- `onboarding_documents` -- one row per document in a package (package_id, doc_type enum [pre_deployment_form, service_agreement, order_sheet], status [draft, sent, viewed, signed], signature_data jsonb, signed_at, custom_fields jsonb)
-- `onboarding_form_responses` -- stores answers to the pre-deployment questionnaire (document_id, responses jsonb, submitted_at)
+Each zone shows a live preview at the top and an item list below.
 
-**2. Pages & Components**
+## Locked vs. movable items
 
-- **Onboarding Dashboard** (`/onboarding`) -- lists all client packages with status indicators (draft, sent, partially signed, complete). "New Package" button opens a creation dialog.
-- **New Package Dialog** -- enter client name, email, company; auto-generates the three documents. Pre-fill order sheet fields (pricing, dates). Preview before sending.
-- **Package Detail Page** (`/onboarding/:id`) -- shows the three documents as cards with individual status. Actions: edit, send/resend, view responses, download signed copies.
-- **Pre-Deployment Form Builder** -- a configured questionnaire (league name, expected teams, divisions, scoring preferences, etc.) rendered as a form. Stored as JSON config so questions can evolve.
-- **E-Signature Component** -- canvas-based signature pad for the MSA and Order Sheet. Captures signature as base64 image, stores timestamp and IP. Uses a simple draw-on-canvas approach (no third-party e-sign service needed initially).
-- **Public Signing Pages** (`/sign/:token`) -- unauthenticated routes where clients can view documents, fill the questionnaire, and sign. Token-based access via a unique link per package.
+Items have a `locked` flag indicating which bar they belong to permanently. Locked items can be hidden, reordered, and renamed, but cannot be deleted or moved to another bar.
 
-**3. Sidebar addition**
-- Add "Client Onboarding" under Features with a `ClipboardList` or `ScrollText` icon, linking to `/onboarding`.
+- **Locked to Main Menu:** Home, Calendar, Accolades, Roster Verification
+- **Locked to Top Bar:** Social media icons, Language selector, Switch Leagues dropdown (shown only for multi-league tenants), Season selector, Divisions selector, Search
 
-**4. Routes**
-- `/onboarding` -- dashboard (admin, inside AppLayout)
-- `/onboarding/:id` -- package detail (admin)
-- `/sign/:token` -- public signing page (outside AppLayout, no auth required)
+Custom items (CMS pages, external links, dropdowns) are **movable** — each row gets a "Move to…" action in its row menu listing the other zones it can be sent to (Top Bar ↔ Main Menu ↔ Footer-only).
 
-### Technical details
+## Dropdowns / submenus
 
-- **Signature pad**: Use an HTML canvas element for drawing signatures. Store as base64 PNG in `signature_data` jsonb column. No external library needed.
-- **Token-based public access**: Generate a UUID token per package stored in `onboarding_packages.access_token`. The `/sign/:token` route fetches package data via the token with anon RLS policy.
-- **Document templates**: MSA content stored as a rich text template in the codebase (can later move to DB). Order sheet is a form with editable pricing/date fields.
-- **RLS**: Admin org members can CRUD packages/documents. Anon users can SELECT and UPDATE documents matched by access_token only.
-- **Email sending**: For now, display a "copy link" button for the signing URL. Email integration can be added later.
+Any non-locked item (and Main Menu locked items) can hold child items, rendered as a hover/click dropdown on the public site. Editor supports:
 
-### Files to create/modify
-- Migration: 3 new tables + RLS policies
-- `src/pages/onboarding/OnboardingDashboard.tsx`
-- `src/pages/onboarding/OnboardingPackageDetail.tsx`
-- `src/pages/onboarding/PublicSigningPage.tsx`
-- `src/components/onboarding/NewPackageDialog.tsx`
-- `src/components/onboarding/SignaturePad.tsx`
-- `src/components/onboarding/PreDeploymentForm.tsx`
-- `src/components/onboarding/DocumentCard.tsx`
-- Update `AppSidebar.tsx` -- add nav item
-- Update `App.tsx` -- add routes
+- Expand/collapse parent rows (already partially implemented)
+- "Add sub-item" action on every parent row in Top Bar and Main Menu (today only Main Menu allows this)
+- Two-level depth max
 
+## Footer editor
+
+New Footer tab replaces the existing simple list with a **column-based site map**:
+
+- Up to 4 footer columns, each with a heading and a list of links
+- "Add column", "Rename column", "Delete column", reorder columns left/right
+- Inside each column: add link, reorder, hide, delete, edit URL/label/new-tab
+- Footer-exclusive links: any link added in the footer has a "Show only in footer" toggle (default on); turning it off lets the admin also surface it in Top Bar or Main Menu
+- Footer-level toggles: show social icons, show copyright line (editable text), show "Powered by" line
+
+## Per-item edit dialog
+
+Extends the existing dialog with:
+
+- Label, URL (page picker + custom URL), Open in new tab, Visible
+- **Bar assignment** dropdown (Top Bar / Main Menu / Footer) — disabled for locked items
+- **Style** (link / button / dropdown parent)
+- **Show only in footer** checkbox (footer items)
+
+## Live previews
+
+- Top Bar preview: white background, left = logo + league switcher + season/divisions selectors, right = custom pages + language + social icons (mirrors screenshot)
+- Main Menu preview: black background bar showing locked + custom items in order, with dropdown indicators
+- Footer preview: column grid with headings + links, social row, copyright line
+
+## Technical notes
+
+- Extend `MenuItem` with `locked: boolean`, `bar: 'topbar' | 'main' | 'footer'`, `footerOnly?: boolean`, `style?: 'link' | 'button' | 'dropdown'`.
+- Replace `INITIAL_MENUS` / `INITIAL_TOPBAR` with a single `NavConfig` object holding `topBar`, `mainMenu`, `footer` (with `columns: FooterColumn[]`, `showSocial`, `copyrightText`, etc.).
+- Add helpers `moveItemToBar(itemId, targetBar)` and guard against moving locked items.
+- Reuse existing `renderItem`, social link, and language picker logic; generalize so it works for any bar.
+- `PublicLayout.tsx` is **not** modified in this step — this task only builds the admin editor. Wiring the public site to this config is a follow-up.
+- All styling via existing semantic tokens (`bg-foreground`, `bg-card`, `text-muted-foreground`, etc.); no hard-coded colors.
+
+## Out of scope
+
+- Persisting to backend (state stays local with mock initial data, matching current page)
+- Rendering the new config on the actual public site (`PublicLayout.tsx`)
+- Per-role visibility rules
