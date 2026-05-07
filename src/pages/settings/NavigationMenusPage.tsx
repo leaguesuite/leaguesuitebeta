@@ -730,23 +730,21 @@ export default function NavigationMenusPage() {
             <div className="section-card">
               <div className="px-5 py-4 border-b border-border">
                 <h2 className="text-sm font-semibold text-foreground">League Logo</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Displayed at the left of the top bar.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage your league logo from <a href="/settings/branding" className="text-primary hover:underline">Settings → Branding</a>. The same logo is used here in the top bar.
+                </p>
               </div>
-              <div className="p-5">
-                <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  {config.logoUrl ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <img src={config.logoUrl} alt="Logo" className="h-12 object-contain" />
-                      <Button variant="ghost" size="sm" onClick={() => setConfig(p => ({ ...p, logoUrl: "" }))}>Remove</Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Upload className="h-8 w-8" />
-                      <span className="text-sm">Click to upload logo</span>
-                      <span className="text-xs">PNG, SVG, or JPG</span>
-                    </div>
-                  )}
-                </div>
+              <div className="p-5 flex items-center gap-4">
+                {config.logoUrl ? (
+                  <img src={config.logoUrl} alt="Logo" className="h-12 object-contain" />
+                ) : (
+                  <div className="h-12 w-12 rounded border border-dashed border-border flex items-center justify-center text-muted-foreground">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                )}
+                <Button variant="outline" size="sm" asChild>
+                  <a href="/settings/branding">Manage in Branding</a>
+                </Button>
               </div>
             </div>
           )}
