@@ -55,21 +55,30 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Configuration",
     items: [
       {
-        label: "League Structure", icon: Layers,
+        label: "Competition Structure", icon: Trophy,
         children: [
           { label: "Leagues", path: "/structure/leagues" },
-          { label: "Seasons", path: "/setup/seasons" },
-          { label: "Tournaments", path: "/setup/tournaments" },
-          { label: "Categories", path: "/structure/categories" },
-          { label: "Divisions", path: "/structure/divisions" },
-          { label: "Conferences", path: "/structure/conferences" },
-          { label: "Subdivisions", path: "/structure/subdivisions" },
-          { label: "Locations & Fields", path: "/structure/locations" },
           { label: "Phases", path: "/structure/competition-names" },
           { label: "Playoff Rounds", path: "/structure/playoff-rounds" },
         ],
       },
-    
+      {
+        label: "Grouping Structure", icon: Layers,
+        children: [
+          { label: "Categories", path: "/structure/categories" },
+          { label: "Divisions", path: "/structure/divisions" },
+          { label: "Conferences", path: "/structure/conferences" },
+          { label: "Subdivisions", path: "/structure/subdivisions" },
+        ],
+      },
+      {
+        label: "Event Management", icon: CalendarDays,
+        children: [
+          { label: "Seasons", path: "/setup/seasons" },
+          { label: "Tournaments", path: "/setup/tournaments" },
+          { label: "Locations & Fields", path: "/structure/locations" },
+        ],
+      },
     ],
   },
   {
