@@ -83,7 +83,7 @@ export default function NewSeasonWizard() {
             <p className="text-sm text-muted-foreground">Define the season details and structure event format.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="text-sm font-medium text-foreground">Season Name</label>
+                <label className="text-sm font-medium text-foreground">Event Name</label>
                 <input type="text" defaultValue="Spring 2025" className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
               </div>
               <div>
