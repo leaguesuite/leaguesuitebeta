@@ -219,6 +219,33 @@ export default function GamesPage() {
   const [playerSort, setPlayerSort] = useState<"number" | "firstName" | "lastName">("number");
   const [importOpen, setImportOpen] = useState(false);
 
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkAction, setBulkAction] = useState<null | "delete" | "clear">(null);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const confirmBulk = () => {
+    const ids = Array.from(selectedIds);
+    if (bulkAction === "delete") {
+      setGames(prev => prev.filter(g => !selectedIds.has(g.id)));
+      toast({ title: `${ids.length} game${ids.length !== 1 ? "s" : ""} deleted` });
+    } else if (bulkAction === "clear") {
+      setGames(prev => prev.map(g => selectedIds.has(g.id)
+        ? { ...g, homeScore: null, awayScore: null, periodScores: undefined, playerStats: [], status: "upcoming" }
+        : g));
+      toast({ title: `Cleared data for ${ids.length} game${ids.length !== 1 ? "s" : ""}` });
+    }
+    setSelectedIds(new Set());
+    setBulkAction(null);
+  };
+
   // Add game
   const emptyAddForm = {
     hideFromSchedule: false, date: "", time: "", week: "", field: "", fieldNumber: "",
