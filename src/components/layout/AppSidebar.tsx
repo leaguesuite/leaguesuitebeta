@@ -55,7 +55,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Configuration",
     items: [
       {
-        label: "Competition Structure", icon: Trophy,
+        label: "League Structure", icon: Trophy,
         children: [
           { label: "Leagues", path: "/structure/leagues" },
           { label: "Phases", path: "/structure/competition-names" },
