@@ -65,7 +65,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Conferences", path: "/structure/conferences" },
           { label: "Subdivisions", path: "/structure/subdivisions" },
           { label: "Locations & Fields", path: "/structure/locations" },
-          { label: "Competition Names", path: "/structure/competition-names" },
+          { label: "Phases", path: "/structure/competition-names" },
           { label: "Playoff Rounds", path: "/structure/playoff-rounds" },
         ],
       },
