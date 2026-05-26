@@ -3,7 +3,7 @@ import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, 
 
 const steps = [
   { id: 1, label: "Select League", icon: Trophy },
-  { id: 2, label: "Name & Format", icon: CalendarDays },
+  { id: 2, label: "Name & Event Format", icon: CalendarDays },
   { id: 3, label: "Categories & Divisions", icon: Layers },
   { id: 4, label: "Conferences", icon: Zap },
   { id: 5, label: "Locations & Fields", icon: MapPin },
@@ -79,15 +79,15 @@ export default function NewSeasonWizard() {
 
         {currentStep === 2 && (
           <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-foreground">Name & Format</h2>
-            <p className="text-sm text-muted-foreground">Define the season details and structure format.</p>
+            <h2 className="text-lg font-semibold text-foreground">Name & Event Format</h2>
+            <p className="text-sm text-muted-foreground">Define the season details and structure event format.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="text-sm font-medium text-foreground">Season Name</label>
                 <input type="text" defaultValue="Spring 2025" className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Format</label>
+                <label className="text-sm font-medium text-foreground">Event Format</label>
                 <select className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20">
                   <option>Season + Playoffs</option>
                   <option>Tournament</option>
@@ -216,7 +216,7 @@ export default function NewSeasonWizard() {
               {[
                 { label: "League", value: "Metro Flag Football League" },
                 { label: "Season", value: "Spring 2025" },
-                { label: "Format", value: "Regular Season" },
+                { label: "Event Format", value: "Regular Season" },
                 { label: "Categories", value: "Men's, Women's, Co-Ed" },
                 { label: "Divisions", value: "5 divisions selected" },
                 { label: "Locations", value: "3 locations, 6 fields" },

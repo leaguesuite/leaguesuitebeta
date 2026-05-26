@@ -110,7 +110,7 @@ export default function TournamentsPage() {
                     <Badge className="bg-primary text-primary-foreground text-[10px]">In Progress</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {activeTournament.league} · {activeTournament.teams} teams · {activeTournament.format}
+                    {activeTournament.league} · {activeTournament.teams} teams · Event Format: {activeTournament.format}
                   </p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function TournamentsPage() {
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-center">Date</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead className="text-center">Format</TableHead>
+                  <TableHead className="text-center">Event Format</TableHead>
                   <TableHead className="text-center">Teams</TableHead>
                   <TableHead>Champion</TableHead>
                   <TableHead className="text-right w-[100px]"></TableHead>
