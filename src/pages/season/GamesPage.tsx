@@ -14,8 +14,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, Download, Search, MapPin, Clock, ChevronLeft, ChevronRight,
-  Edit, Save, X, BarChart3, Pencil, Upload,
+  Edit, Save, X, BarChart3, Pencil, Upload, Trash2, Eraser,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -214,6 +218,33 @@ export default function GamesPage() {
   const [activeStatCategory, setActiveStatCategory] = useState("passing");
   const [playerSort, setPlayerSort] = useState<"number" | "firstName" | "lastName">("number");
   const [importOpen, setImportOpen] = useState(false);
+
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkAction, setBulkAction] = useState<null | "delete" | "clear">(null);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const confirmBulk = () => {
+    const ids = Array.from(selectedIds);
+    if (bulkAction === "delete") {
+      setGames(prev => prev.filter(g => !selectedIds.has(g.id)));
+      toast({ title: `${ids.length} game${ids.length !== 1 ? "s" : ""} deleted` });
+    } else if (bulkAction === "clear") {
+      setGames(prev => prev.map(g => selectedIds.has(g.id)
+        ? { ...g, homeScore: null, awayScore: null, periodScores: undefined, playerStats: [], status: "upcoming" }
+        : g));
+      toast({ title: `Cleared data for ${ids.length} game${ids.length !== 1 ? "s" : ""}` });
+    }
+    setSelectedIds(new Set());
+    setBulkAction(null);
+  };
 
   // Add game
   const emptyAddForm = {
@@ -481,12 +512,44 @@ export default function GamesPage() {
         </div>
       </div>
 
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="section-card p-3 flex items-center justify-between bg-primary/5 border-primary/30">
+          <div className="text-sm font-medium">
+            {selectedIds.size} game{selectedIds.size !== 1 ? "s" : ""} selected
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())}>Cancel</Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setBulkAction("clear")}>
+              <Eraser className="h-3.5 w-3.5" /> Clear Data
+            </Button>
+            <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setBulkAction("delete")}>
+              <Trash2 className="h-3.5 w-3.5" /> Delete
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Games Table */}
       <div className="section-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/50">
+                <th className="table-header px-5 py-3 w-10">
+                  <Checkbox
+                    checked={filtered.length > 0 && filtered.every(g => selectedIds.has(g.id))}
+                    onCheckedChange={(checked) => {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (checked) filtered.forEach(g => next.add(g.id));
+                        else filtered.forEach(g => next.delete(g.id));
+                        return next;
+                      });
+                    }}
+                    aria-label="Select all"
+                  />
+                </th>
                 <th className="table-header text-left px-5 py-3">Date / Time</th>
                 <th className="table-header text-left px-5 py-3">Matchup</th>
                 <th className="table-header text-left px-5 py-3">Division</th>
@@ -499,7 +562,14 @@ export default function GamesPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.map(game => (
-                <tr key={game.id} className="hover:bg-secondary/30 transition-colors">
+                <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
+                  <td className="px-5 py-3.5">
+                    <Checkbox
+                      checked={selectedIds.has(game.id)}
+                      onCheckedChange={() => toggleSelect(game.id)}
+                      aria-label={`Select ${game.home} vs ${game.away}`}
+                    />
+                  </td>
                   <td className="px-5 py-3.5">
                     <div className="text-sm font-medium text-foreground">{game.date}</div>
                     <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3" /> {game.time}</div>
@@ -978,6 +1048,30 @@ export default function GamesPage() {
           setGames(prev => [...prev, ...newGames]);
         }}
       />
+
+      <AlertDialog open={!!bulkAction} onOpenChange={(o) => !o && setBulkAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction === "delete" ? "Delete selected games?" : "Clear data for selected games?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction === "delete"
+                ? `This will permanently remove ${selectedIds.size} game${selectedIds.size !== 1 ? "s" : ""} from the schedule.`
+                : `This will reset scores, period scores, and player stats for ${selectedIds.size} game${selectedIds.size !== 1 ? "s" : ""}, and mark them as upcoming. The game entries will be kept.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulk}
+              className={bulkAction === "delete" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            >
+              {bulkAction === "delete" ? "Delete" : "Clear Data"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
