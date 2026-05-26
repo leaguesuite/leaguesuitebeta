@@ -14,8 +14,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, Download, Search, MapPin, Clock, ChevronLeft, ChevronRight,
-  Edit, Save, X, BarChart3, Pencil, Upload,
+  Edit, Save, X, BarChart3, Pencil, Upload, Trash2, Eraser,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
