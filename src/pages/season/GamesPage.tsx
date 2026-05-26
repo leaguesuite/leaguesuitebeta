@@ -1048,6 +1048,30 @@ export default function GamesPage() {
           setGames(prev => [...prev, ...newGames]);
         }}
       />
+
+      <AlertDialog open={!!bulkAction} onOpenChange={(o) => !o && setBulkAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction === "delete" ? "Delete selected games?" : "Clear data for selected games?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction === "delete"
+                ? `This will permanently remove ${selectedIds.size} game${selectedIds.size !== 1 ? "s" : ""} from the schedule.`
+                : `This will reset scores, period scores, and player stats for ${selectedIds.size} game${selectedIds.size !== 1 ? "s" : ""}, and mark them as upcoming. The game entries will be kept.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulk}
+              className={bulkAction === "delete" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            >
+              {bulkAction === "delete" ? "Delete" : "Clear Data"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
