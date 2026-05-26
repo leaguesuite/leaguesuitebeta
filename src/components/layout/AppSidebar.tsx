@@ -45,7 +45,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Setup",
     items: [
       {
-        label: "New Competition Wizard", icon: PlusCircle,
+        label: "New Event Wizard", icon: PlusCircle,
         path: "/setup/new-season",
       },
       { label: "Registration", icon: ClipboardList, path: "/registration" },
