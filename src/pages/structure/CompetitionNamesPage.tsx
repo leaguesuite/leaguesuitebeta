@@ -10,41 +10,44 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 
 type PhaseGroup = "season" | "tournament";
+type Numbering = "weeks" | "rounds";
 
 type Phase = {
   id: number;
   name: string;
   description: string;
   group: PhaseGroup;
+  numbering: Numbering;
   status: "active" | "archived";
 };
 
 const initial: Phase[] = [
-  { id: 1, name: "Regular Season", description: "Standard weekly league play used for standings.", group: "season", status: "active" },
-  { id: 2, name: "Pre-Season", description: "Warm-up games before the regular season.", group: "season", status: "active" },
-  { id: 3, name: "Playoffs", description: "Post-season elimination rounds.", group: "season", status: "active" },
-  { id: 4, name: "Opening Round", description: "Initial tournament games.", group: "tournament", status: "active" },
-  { id: 5, name: "Round Robin", description: "Pool play where teams face each opponent.", group: "tournament", status: "active" },
-  { id: 6, name: "Elimination Round", description: "Knockout stage to determine champion.", group: "tournament", status: "active" },
+  { id: 1, name: "Regular Season", description: "Standard weekly league play used for standings.", group: "season", numbering: "weeks", status: "active" },
+  { id: 2, name: "Pre-Season", description: "Warm-up games before the regular season.", group: "season", numbering: "weeks", status: "active" },
+  { id: 3, name: "Playoffs", description: "Post-season elimination rounds.", group: "season", numbering: "rounds", status: "active" },
+  { id: 4, name: "Opening Round", description: "Initial tournament games.", group: "tournament", numbering: "rounds", status: "active" },
+  { id: 5, name: "Round Robin", description: "Pool play where teams face each opponent.", group: "tournament", numbering: "rounds", status: "active" },
+  { id: 6, name: "Elimination Round", description: "Knockout stage to determine champion.", group: "tournament", numbering: "rounds", status: "active" },
 ];
 
 export default function CompetitionNamesPage() {
   const [items, setItems] = useState<Phase[]>(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Phase | null>(null);
-  const [form, setForm] = useState<{ name: string; description: string; group: PhaseGroup }>({ name: "", description: "", group: "season" });
+  const [form, setForm] = useState<{ name: string; description: string; group: PhaseGroup; numbering: Numbering }>({ name: "", description: "", group: "season", numbering: "weeks" });
 
   const openNew = (group: PhaseGroup) => {
     setEditing(null);
-    setForm({ name: "", description: "", group });
+    setForm({ name: "", description: "", group, numbering: "weeks" });
     setOpen(true);
   };
 
   const openEdit = (p: Phase) => {
     setEditing(p);
-    setForm({ name: p.name, description: p.description, group: p.group });
+    setForm({ name: p.name, description: p.description, group: p.group, numbering: p.numbering });
     setOpen(true);
   };
+
 
   const save = () => {
     if (!form.name.trim()) {
@@ -56,7 +59,7 @@ export default function CompetitionNamesPage() {
       toast({ title: "Phase updated" });
     } else {
       const id = Math.max(0, ...items.map(i => i.id)) + 1;
-      setItems(prev => [...prev, { id, name: form.name, description: form.description, group: form.group, status: "active" }]);
+      setItems(prev => [...prev, { id, name: form.name, description: form.description, group: form.group, numbering: form.numbering, status: "active" }]);
       toast({ title: "Phase added" });
     }
     setOpen(false);
@@ -152,6 +155,20 @@ export default function CompetitionNamesPage() {
               <Label className="text-xs">Description</Label>
               <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 placeholder="Short description" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Numbering</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant={form.numbering === "weeks" ? "default" : "outline"} size="sm"
+                  onClick={() => setForm(f => ({ ...f, numbering: "weeks" }))} className="flex-1">Week Numbers</Button>
+                <Button type="button" variant={form.numbering === "rounds" ? "default" : "outline"} size="sm"
+                  onClick={() => setForm(f => ({ ...f, numbering: "rounds" }))} className="flex-1">Round Names</Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {form.numbering === "weeks"
+                  ? "Games will be grouped and labeled by week number (e.g. Week 1, Week 2)."
+                  : "Games will be grouped and labeled by round name (e.g. Quarterfinals, Semifinals)."}
+              </p>
             </div>
           </div>
           <DialogFooter>
