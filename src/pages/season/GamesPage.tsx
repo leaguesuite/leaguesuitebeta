@@ -250,7 +250,7 @@ export default function GamesPage() {
   const emptyAddForm = {
     hideFromSchedule: false, date: "", time: "", week: "", field: "", fieldNumber: "",
     status: "upcoming", shortNotesHome: "", shortNotesVisitor: "", interdivision: false,
-    division: "", exhibition: false, phase: "Regular Season" as Competition,
+    division: "", exhibition: false, phase: "Regular Season" as Phase,
     home: "", away: "",
   };
   const [addOpen, setAddOpen] = useState(false);
@@ -864,7 +864,7 @@ export default function GamesPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-xs">Competition <span className="text-destructive">*</span></Label>
+                <Label className="text-xs">Phase <span className="text-destructive">*</span></Label>
                 <Select value={addForm.phase} onValueChange={v => setAddForm(f => ({ ...f, phase: v as Phase }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
