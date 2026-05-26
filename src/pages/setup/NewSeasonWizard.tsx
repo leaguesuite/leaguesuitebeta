@@ -80,7 +80,7 @@ export default function NewSeasonWizard() {
         {currentStep === 2 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Name & Event Format</h2>
-            <p className="text-sm text-muted-foreground">Define the season details and structure event format.</p>
+            <p className="text-sm text-muted-foreground">Define the season or tournament details and structure event format.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="text-sm font-medium text-foreground">Event Name</label>
