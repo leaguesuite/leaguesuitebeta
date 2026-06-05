@@ -72,14 +72,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Subdivisions", path: "/structure/subdivisions" },
         ],
       },
-      {
-        label: "Event Management", icon: CalendarDays,
-        children: [
-          { label: "Seasons", path: "/setup/seasons" },
-          { label: "Tournaments", path: "/setup/tournaments" },
-          { label: "Locations & Fields", path: "/structure/locations" },
-        ],
-      },
+      { label: "Locations & Fields", icon: MapPin, path: "/structure/locations" },
     ],
   },
   {
