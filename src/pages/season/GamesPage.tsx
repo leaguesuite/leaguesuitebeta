@@ -684,39 +684,45 @@ export default function GamesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map(game => (
-                <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
-                  <td className="px-5 py-3.5">
-                    <Checkbox
-                      checked={selectedIds.has(game.id)}
-                      onCheckedChange={() => toggleSelect(game.id)}
-                      aria-label={`Select ${game.home} vs ${game.away}`}
-                    />
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="text-sm font-medium text-foreground">{game.date}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3" /> {game.time}</div>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className="font-semibold text-foreground text-sm">{game.home}</span>
-                    <span className="mx-2 text-xs text-muted-foreground font-bold">VS</span>
-                    <span className="font-semibold text-foreground text-sm">{game.away}</span>
-                  </td>
-                  <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
-                  <td className="px-5 py-3.5"><Badge variant={game.phase === "Playoffs" ? "default" : "outline"} className="text-xs">{game.phase}</Badge></td>
-                  <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {game.field}</div></td>
-                  <td className="px-5 py-3.5">
-                    <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
-                  </td>
-                  <td className="px-5 py-3.5"><StatusBadge status={game.status} /></td>
-                  <td className="px-5 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openEditGame(game)}><Edit className="h-3 w-3" /> Edit</Button>
-                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openStats(game)}><BarChart3 className="h-3 w-3" /> Stats</Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {displayedGames.map(game => {
+                const { location, fieldNumber } = parseField(game.field);
+                return (
+                  <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
+                    <td className="px-5 py-3.5">
+                      <Checkbox
+                        checked={selectedIds.has(game.id)}
+                        onCheckedChange={() => toggleSelect(game.id)}
+                        aria-label={`Select ${game.home} vs ${game.away}`}
+                      />
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="text-sm font-medium text-foreground">{game.date}</div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {game.time}</div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="font-semibold text-foreground text-sm">{game.home}</span>
+                      <span className="mx-2 text-xs text-muted-foreground font-bold">VS</span>
+                      <span className="font-semibold text-foreground text-sm">{game.away}</span>
+                    </td>
+                    <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
+                    <td className="px-5 py-3.5"><Badge variant={game.phase === "Playoffs" ? "default" : "outline"} className="text-xs">{game.phase}</Badge></td>
+                    <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {location}</div></td>
+                    <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground">{fieldNumber || "—"}</div></td>
+                    <td className="px-5 py-3.5">
+                      <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
+                    </td>
+                    <td className="px-5 py-3.5"><StatusBadge status={game.status} /></td>
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openEditGame(game)}><Edit className="h-3 w-3" /> Edit</Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openStats(game)}><BarChart3 className="h-3 w-3" /> Stats</Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
