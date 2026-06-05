@@ -216,6 +216,9 @@ export default function TeamsRostersPage() {
               {selectedTeamIds.length} team{selectedTeamIds.length === 1 ? "" : "s"} selected
             </span>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMessageOpen(true)}>
+                <Mail className="h-4 w-4" /> Message
+              </Button>
               <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMoveOpen(true)}>
                 <ArrowRightLeft className="h-4 w-4" /> Move to division
               </Button>
