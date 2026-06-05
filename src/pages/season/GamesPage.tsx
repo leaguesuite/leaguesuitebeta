@@ -241,6 +241,7 @@ export default function GamesPage() {
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [bulkAction, setBulkAction] = useState<null | "delete" | "clear">(null);
+  const [messageOpen, setMessageOpen] = useState(false);
 
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
