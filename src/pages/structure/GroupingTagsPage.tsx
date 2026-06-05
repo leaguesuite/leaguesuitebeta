@@ -73,11 +73,11 @@ export default function GroupingTagsPage() {
     }
     if (editing) {
       setItems(prev => prev.map(t => t.id === editing.id ? { ...t, ...form } : t));
-      toast({ title: "Grouping tag updated" });
+      toast({ title: "Tag updated" });
     } else {
       const id = Math.max(0, ...items.map(i => i.id)) + 1;
       setItems(prev => [...prev, { id, ...form }]);
-      toast({ title: "Grouping tag added" });
+      toast({ title: "Tag added" });
     }
     setOpen(false);
   };
@@ -109,7 +109,7 @@ export default function GroupingTagsPage() {
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Grouping Tags</h1>
+          <h1 className="text-2xl font-bold text-foreground">Tags</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Tags used to group games within each phase. Defaults are provided per event type.
           </p>
@@ -176,7 +176,7 @@ export default function GroupingTagsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Grouping Tag" : "New Grouping Tag"}</DialogTitle>
+            <DialogTitle>{editing ? "Edit Tag" : "New Tag"}</DialogTitle>
             <DialogDescription>
               Tags appear in the Add Game dialog to group games within a phase.
             </DialogDescription>
