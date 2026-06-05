@@ -659,23 +659,25 @@ export default function GamesPage() {
               <tr className="border-b border-border bg-secondary/50">
                 <th className="table-header px-5 py-3 w-10">
                   <Checkbox
-                    checked={filtered.length > 0 && filtered.every(g => selectedIds.has(g.id))}
+                    checked={displayedGames.length > 0 && displayedGames.every(g => selectedIds.has(g.id))}
                     onCheckedChange={(checked) => {
                       setSelectedIds(prev => {
                         const next = new Set(prev);
-                        if (checked) filtered.forEach(g => next.add(g.id));
-                        else filtered.forEach(g => next.delete(g.id));
+                        if (checked) displayedGames.forEach(g => next.add(g.id));
+                        else displayedGames.forEach(g => next.delete(g.id));
                         return next;
                       });
                     }}
                     aria-label="Select all"
                   />
                 </th>
-                <th className="table-header text-left px-5 py-3">Date / Time</th>
+                <SortHeader column="date">Date</SortHeader>
+                <SortHeader column="time">Time</SortHeader>
                 <th className="table-header text-left px-5 py-3">Matchup</th>
                 <th className="table-header text-left px-5 py-3">Division</th>
                 <th className="table-header text-left px-5 py-3">Phase</th>
-                <th className="table-header text-left px-5 py-3">Location</th>
+                <SortHeader column="location">Location</SortHeader>
+                <SortHeader column="field">Field</SortHeader>
                 <th className="table-header text-left px-5 py-3">Score</th>
                 <th className="table-header text-left px-5 py-3">Status</th>
                 <th className="table-header text-right px-5 py-3">Actions</th>
