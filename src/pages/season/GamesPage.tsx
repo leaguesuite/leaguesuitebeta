@@ -315,6 +315,96 @@ export default function GamesPage() {
 
   const formatScore = (g: Game) => g.homeScore === null || g.awayScore === null ? "-" : `${g.homeScore}-${g.awayScore}`;
 
+  // Parse location and field number from combined field string
+  const parseField = (field: string): { location: string; fieldNumber: string } => {
+    if (!field || field === "TBD") return { location: field || "TBD", fieldNumber: "" };
+    const match = field.match(/^(.+)\s+(\d+|[A-Za-z])$/);
+    if (match) return { location: match[1].trim(), fieldNumber: match[2] };
+    return { location: field, fieldNumber: "" };
+  };
+
+  const timeToMinutes = (time: string): number => {
+    const match = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return 0;
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const period = match[3].toUpperCase();
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const sortGames = (gamesToSort: Game[]): Game[] => {
+    if (!sortColumn) return gamesToSort;
+    const sorted = [...gamesToSort];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      switch (sortColumn) {
+        case "date": {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          cmp = da - db;
+          if (cmp === 0) cmp = timeToMinutes(a.time) - timeToMinutes(b.time);
+          break;
+        }
+        case "time": {
+          cmp = timeToMinutes(a.time) - timeToMinutes(b.time);
+          if (cmp === 0) cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        }
+        case "location": {
+          const fa = parseField(a.field);
+          const fb = parseField(b.field);
+          cmp = fa.location.localeCompare(fb.location);
+          if (cmp === 0) {
+            const na = parseInt(fa.fieldNumber) || fa.fieldNumber;
+            const nb = parseInt(fb.fieldNumber) || fb.fieldNumber;
+            if (typeof na === "number" && typeof nb === "number") cmp = na - nb;
+            else cmp = String(na).localeCompare(String(nb));
+          }
+          break;
+        }
+        case "field": {
+          const fa = parseField(a.field);
+          const fb = parseField(b.field);
+          const na = parseInt(fa.fieldNumber) || fa.fieldNumber;
+          const nb = parseInt(fb.fieldNumber) || fb.fieldNumber;
+          if (typeof na === "number" && typeof nb === "number") cmp = na - nb;
+          else cmp = String(na).localeCompare(String(nb));
+          if (cmp === 0) cmp = fa.location.localeCompare(fb.location);
+          break;
+        }
+      }
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortHeader = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => (
+    <th
+      className="table-header text-left px-5 py-3 cursor-pointer select-none hover:text-foreground transition-colors"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1.5">
+        {children}
+        {sortColumn === column ? (
+          sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 text-muted-foreground/50" />
+        )}
+      </div>
+    </th>
+  );
+
   // ─── Edit Game ──────────────────────────────────────────────────────────
 
   const openEditGame = (game: Game) => {
