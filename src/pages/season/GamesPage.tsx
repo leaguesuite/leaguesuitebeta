@@ -305,13 +305,13 @@ export default function GamesPage() {
     toast({ title: "Game added", description: `${newGame.home} vs ${newGame.away}` });
   };
 
-  const filtered = games.filter(g => {
+  const filtered = sortGames(games.filter(g => {
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
     if (selectedPhase !== "All Phases" && g.phase !== selectedPhase) return false;
     if (search && !g.home.toLowerCase().includes(search.toLowerCase()) && !g.away.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
-  });
+  }));
 
   const formatScore = (g: Game) => g.homeScore === null || g.awayScore === null ? "-" : `${g.homeScore}-${g.awayScore}`;
 
