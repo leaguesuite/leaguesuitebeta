@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   Plus, Download, Search, MapPin, Clock, ChevronLeft, ChevronRight,
   Edit, Save, X, BarChart3, Pencil, Upload, Trash2, Eraser, Mail,
+  ArrowUpDown, ArrowUp, ArrowDown,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -243,6 +244,11 @@ export default function GamesPage() {
   const [bulkAction, setBulkAction] = useState<null | "delete" | "clear">(null);
   const [messageOpen, setMessageOpen] = useState(false);
 
+  // Sorting
+  type SortColumn = "date" | "time" | "location" | "field" | null;
+  const [sortColumn, setSortColumn] = useState<SortColumn>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -308,6 +314,98 @@ export default function GamesPage() {
   });
 
   const formatScore = (g: Game) => g.homeScore === null || g.awayScore === null ? "-" : `${g.homeScore}-${g.awayScore}`;
+
+  // Parse location and field number from combined field string
+  const parseField = (field: string): { location: string; fieldNumber: string } => {
+    if (!field || field === "TBD") return { location: field || "TBD", fieldNumber: "" };
+    const match = field.match(/^(.+)\s+(\d+|[A-Za-z])$/);
+    if (match) return { location: match[1].trim(), fieldNumber: match[2] };
+    return { location: field, fieldNumber: "" };
+  };
+
+  const timeToMinutes = (time: string): number => {
+    const match = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return 0;
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const period = match[3].toUpperCase();
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const sortGames = (gamesToSort: Game[]): Game[] => {
+    if (!sortColumn) return gamesToSort;
+    const sorted = [...gamesToSort];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      switch (sortColumn) {
+        case "date": {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          cmp = da - db;
+          if (cmp === 0) cmp = timeToMinutes(a.time) - timeToMinutes(b.time);
+          break;
+        }
+        case "time": {
+          cmp = timeToMinutes(a.time) - timeToMinutes(b.time);
+          if (cmp === 0) cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        }
+        case "location": {
+          const fa = parseField(a.field);
+          const fb = parseField(b.field);
+          cmp = fa.location.localeCompare(fb.location);
+          if (cmp === 0) {
+            const na = parseInt(fa.fieldNumber) || fa.fieldNumber;
+            const nb = parseInt(fb.fieldNumber) || fb.fieldNumber;
+            if (typeof na === "number" && typeof nb === "number") cmp = na - nb;
+            else cmp = String(na).localeCompare(String(nb));
+          }
+          break;
+        }
+        case "field": {
+          const fa = parseField(a.field);
+          const fb = parseField(b.field);
+          const na = parseInt(fa.fieldNumber) || fa.fieldNumber;
+          const nb = parseInt(fb.fieldNumber) || fb.fieldNumber;
+          if (typeof na === "number" && typeof nb === "number") cmp = na - nb;
+          else cmp = String(na).localeCompare(String(nb));
+          if (cmp === 0) cmp = fa.location.localeCompare(fb.location);
+          break;
+        }
+      }
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortHeader = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => (
+    <th
+      className="table-header text-left px-5 py-3 cursor-pointer select-none hover:text-foreground transition-colors"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1.5">
+        {children}
+        {sortColumn === column ? (
+          sortDirection === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 text-muted-foreground/50" />
+        )}
+      </div>
+    </th>
+  );
+
+  const displayedGames = sortGames(filtered);
 
   // ─── Edit Game ──────────────────────────────────────────────────────────
 
@@ -528,7 +626,7 @@ export default function GamesPage() {
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {weeks.map(w => <option key={w}>{w}</option>)}
           </select>
-          <div className="ml-auto text-sm text-muted-foreground">{filtered.length} game{filtered.length !== 1 ? "s" : ""}</div>
+          <div className="ml-auto text-sm text-muted-foreground">{displayedGames.length} game{displayedGames.length !== 1 ? "s" : ""}</div>
         </div>
       </div>
 
@@ -561,67 +659,75 @@ export default function GamesPage() {
               <tr className="border-b border-border bg-secondary/50">
                 <th className="table-header px-5 py-3 w-10">
                   <Checkbox
-                    checked={filtered.length > 0 && filtered.every(g => selectedIds.has(g.id))}
+                    checked={displayedGames.length > 0 && displayedGames.every(g => selectedIds.has(g.id))}
                     onCheckedChange={(checked) => {
                       setSelectedIds(prev => {
                         const next = new Set(prev);
-                        if (checked) filtered.forEach(g => next.add(g.id));
-                        else filtered.forEach(g => next.delete(g.id));
+                        if (checked) displayedGames.forEach(g => next.add(g.id));
+                        else displayedGames.forEach(g => next.delete(g.id));
                         return next;
                       });
                     }}
                     aria-label="Select all"
                   />
                 </th>
-                <th className="table-header text-left px-5 py-3">Date / Time</th>
+                <SortHeader column="date">Date</SortHeader>
+                <SortHeader column="time">Time</SortHeader>
                 <th className="table-header text-left px-5 py-3">Matchup</th>
                 <th className="table-header text-left px-5 py-3">Division</th>
                 <th className="table-header text-left px-5 py-3">Phase</th>
-                <th className="table-header text-left px-5 py-3">Location</th>
+                <SortHeader column="location">Location</SortHeader>
+                <SortHeader column="field">Field</SortHeader>
                 <th className="table-header text-left px-5 py-3">Score</th>
                 <th className="table-header text-left px-5 py-3">Status</th>
                 <th className="table-header text-right px-5 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map(game => (
-                <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
-                  <td className="px-5 py-3.5">
-                    <Checkbox
-                      checked={selectedIds.has(game.id)}
-                      onCheckedChange={() => toggleSelect(game.id)}
-                      aria-label={`Select ${game.home} vs ${game.away}`}
-                    />
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="text-sm font-medium text-foreground">{game.date}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3" /> {game.time}</div>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className="font-semibold text-foreground text-sm">{game.home}</span>
-                    <span className="mx-2 text-xs text-muted-foreground font-bold">VS</span>
-                    <span className="font-semibold text-foreground text-sm">{game.away}</span>
-                  </td>
-                  <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
-                  <td className="px-5 py-3.5"><Badge variant={game.phase === "Playoffs" ? "default" : "outline"} className="text-xs">{game.phase}</Badge></td>
-                  <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {game.field}</div></td>
-                  <td className="px-5 py-3.5">
-                    <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
-                  </td>
-                  <td className="px-5 py-3.5"><StatusBadge status={game.status} /></td>
-                  <td className="px-5 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openEditGame(game)}><Edit className="h-3 w-3" /> Edit</Button>
-                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openStats(game)}><BarChart3 className="h-3 w-3" /> Stats</Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {displayedGames.map(game => {
+                const { location, fieldNumber } = parseField(game.field);
+                return (
+                  <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
+                    <td className="px-5 py-3.5">
+                      <Checkbox
+                        checked={selectedIds.has(game.id)}
+                        onCheckedChange={() => toggleSelect(game.id)}
+                        aria-label={`Select ${game.home} vs ${game.away}`}
+                      />
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="text-sm font-medium text-foreground">{game.date}</div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {game.time}</div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="font-semibold text-foreground text-sm">{game.home}</span>
+                      <span className="mx-2 text-xs text-muted-foreground font-bold">VS</span>
+                      <span className="font-semibold text-foreground text-sm">{game.away}</span>
+                    </td>
+                    <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
+                    <td className="px-5 py-3.5"><Badge variant={game.phase === "Playoffs" ? "default" : "outline"} className="text-xs">{game.phase}</Badge></td>
+                    <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {location}</div></td>
+                    <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground">{fieldNumber || "—"}</div></td>
+                    <td className="px-5 py-3.5">
+                      <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
+                    </td>
+                    <td className="px-5 py-3.5"><StatusBadge status={game.status} /></td>
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openEditGame(game)}><Edit className="h-3 w-3" /> Edit</Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openStats(game)}><BarChart3 className="h-3 w-3" /> Stats</Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
         <div className="px-5 py-3 border-t border-border flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Showing {filtered.length} of {games.length} games</span>
+          <span className="text-xs text-muted-foreground">Showing {displayedGames.length} of {games.length} games</span>
           <div className="flex items-center gap-1">
             <button className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><ChevronLeft className="h-4 w-4" /></button>
             <button className="px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium">1</button>
