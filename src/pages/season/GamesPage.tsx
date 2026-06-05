@@ -197,6 +197,24 @@ const teamsByDivision: Record<string, string[]> = {
 const allTeams = Object.values(teamsByDivision).flat();
 const weeks = ["All Weeks", "Week 8", "Week 9", "Week 10"];
 
+// Mock team -> captain contact (would come from teams data in real app)
+const teamCaptains: Record<string, { name: string; email: string }> = {
+  "Thunder Hawks": { name: "Mike Thompson", email: "mike.thompson@example.com" },
+  "Iron Eagles": { name: "John Smith", email: "john.smith@example.com" },
+  "Storm Riders": { name: "Alex Rivera", email: "alex.rivera@example.com" },
+  "Blaze FC": { name: "Sam Carter", email: "sam.carter@example.com" },
+  "Phoenix Rising": { name: "Jessica Thomas", email: "jessica.thomas@example.com" },
+  "Steel Wolves": { name: "Daniel Park", email: "daniel.park@example.com" },
+  "Crimson Tide": { name: "Emily Brown", email: "emily.brown@example.com" },
+  "Blue Lightning": { name: "Tyler Brooks", email: "tyler.brooks@example.com" },
+  "Night Owls": { name: "Kevin Garcia", email: "kevin.garcia@example.com" },
+  "Silver Sharks": { name: "Lauren Wells", email: "lauren.wells@example.com" },
+  "Golden Bears": { name: "Chris Yang", email: "chris.yang@example.com" },
+  "Red Rockets": { name: "Priya Patel", email: "priya.patel@example.com" },
+  "Viper Squad": { name: "Morgan Lee", email: "morgan.lee@example.com" },
+  "Arctic Wolves": { name: "Jamie Cole", email: "jamie.cole@example.com" },
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function GamesPage() {
