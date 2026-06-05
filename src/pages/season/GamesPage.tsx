@@ -727,7 +727,7 @@ export default function GamesPage() {
           </table>
         </div>
         <div className="px-5 py-3 border-t border-border flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Showing {filtered.length} of {games.length} games</span>
+          <span className="text-xs text-muted-foreground">Showing {displayedGames.length} of {games.length} games</span>
           <div className="flex items-center gap-1">
             <button className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><ChevronLeft className="h-4 w-4" /></button>
             <button className="px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium">1</button>
