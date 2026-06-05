@@ -68,6 +68,7 @@ export default function TeamsRostersPage() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
   const [bulkMoveTarget, setBulkMoveTarget] = useState<string>(DIVISIONS[0]);
+  const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
 
   const allDivisionsSelected = selectedDivisions.length === DIVISIONS.length;
 
