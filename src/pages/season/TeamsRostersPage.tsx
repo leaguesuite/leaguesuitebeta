@@ -304,6 +304,22 @@ export default function TeamsRostersPage() {
           </Table>
         </div>
 
+        {/* Bulk Message Dialog */}
+        <BulkMessageDialog
+          open={bulkMessageOpen}
+          onOpenChange={setBulkMessageOpen}
+          title="Message Team Captains"
+          description="Compose a message that will be sent to the captain of each selected team."
+          recipients={teams
+            .filter(t => selectedTeamIds.includes(t.id))
+            .map(t => ({
+              id: t.id,
+              name: t.captain || t.name,
+              email: t.captainEmail || "",
+              context: t.division,
+            }))}
+        />
+
         {/* Bulk Delete Confirm */}
         <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
           <AlertDialogContent>
