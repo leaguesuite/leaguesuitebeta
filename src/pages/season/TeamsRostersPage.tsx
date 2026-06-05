@@ -21,9 +21,10 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft } from "lucide-react";
+import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft, Mail } from "lucide-react";
 
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
+import BulkMessageDialog from "@/components/shared/BulkMessageDialog";
 
 interface Team {
   id: string;
@@ -67,6 +68,7 @@ export default function TeamsRostersPage() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
   const [bulkMoveTarget, setBulkMoveTarget] = useState<string>(DIVISIONS[0]);
+  const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
 
   const allDivisionsSelected = selectedDivisions.length === DIVISIONS.length;
 
@@ -214,6 +216,9 @@ export default function TeamsRostersPage() {
               {selectedTeamIds.length} team{selectedTeamIds.length === 1 ? "" : "s"} selected
             </span>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMessageOpen(true)}>
+                <Mail className="h-4 w-4" /> Message
+              </Button>
               <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMoveOpen(true)}>
                 <ArrowRightLeft className="h-4 w-4" /> Move to division
               </Button>
@@ -298,6 +303,22 @@ export default function TeamsRostersPage() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Bulk Message Dialog */}
+        <BulkMessageDialog
+          open={bulkMessageOpen}
+          onOpenChange={setBulkMessageOpen}
+          title="Message Team Captains"
+          description="Compose a message that will be sent to the captain of each selected team."
+          recipients={teams
+            .filter(t => selectedTeamIds.includes(t.id))
+            .map(t => ({
+              id: t.id,
+              name: t.captain || t.name,
+              email: t.captainEmail || "",
+              context: t.division,
+            }))}
+        />
 
         {/* Bulk Delete Confirm */}
         <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>

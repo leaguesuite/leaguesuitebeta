@@ -14,13 +14,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, Download, Search, MapPin, Clock, ChevronLeft, ChevronRight,
-  Edit, Save, X, BarChart3, Pencil, Upload, Trash2, Eraser,
+  Edit, Save, X, BarChart3, Pencil, Upload, Trash2, Eraser, Mail,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
+import BulkMessageDialog from "@/components/shared/BulkMessageDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -196,6 +197,24 @@ const teamsByDivision: Record<string, string[]> = {
 const allTeams = Object.values(teamsByDivision).flat();
 const weeks = ["All Weeks", "Week 8", "Week 9", "Week 10"];
 
+// Mock team -> captain contact (would come from teams data in real app)
+const teamCaptains: Record<string, { name: string; email: string }> = {
+  "Thunder Hawks": { name: "Mike Thompson", email: "mike.thompson@example.com" },
+  "Iron Eagles": { name: "John Smith", email: "john.smith@example.com" },
+  "Storm Riders": { name: "Alex Rivera", email: "alex.rivera@example.com" },
+  "Blaze FC": { name: "Sam Carter", email: "sam.carter@example.com" },
+  "Phoenix Rising": { name: "Jessica Thomas", email: "jessica.thomas@example.com" },
+  "Steel Wolves": { name: "Daniel Park", email: "daniel.park@example.com" },
+  "Crimson Tide": { name: "Emily Brown", email: "emily.brown@example.com" },
+  "Blue Lightning": { name: "Tyler Brooks", email: "tyler.brooks@example.com" },
+  "Night Owls": { name: "Kevin Garcia", email: "kevin.garcia@example.com" },
+  "Silver Sharks": { name: "Lauren Wells", email: "lauren.wells@example.com" },
+  "Golden Bears": { name: "Chris Yang", email: "chris.yang@example.com" },
+  "Red Rockets": { name: "Priya Patel", email: "priya.patel@example.com" },
+  "Viper Squad": { name: "Morgan Lee", email: "morgan.lee@example.com" },
+  "Arctic Wolves": { name: "Jamie Cole", email: "jamie.cole@example.com" },
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function GamesPage() {
@@ -222,6 +241,7 @@ export default function GamesPage() {
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [bulkAction, setBulkAction] = useState<null | "delete" | "clear">(null);
+  const [messageOpen, setMessageOpen] = useState(false);
 
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
@@ -520,6 +540,9 @@ export default function GamesPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())}>Cancel</Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setMessageOpen(true)}>
+              <Mail className="h-3.5 w-3.5" /> Message Captains
+            </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setBulkAction("clear")}>
               <Eraser className="h-3.5 w-3.5" /> Clear Data
             </Button>
@@ -1072,6 +1095,32 @@ export default function GamesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Message Dialog */}
+      <BulkMessageDialog
+        open={messageOpen}
+        onOpenChange={setMessageOpen}
+        title="Message Game Captains"
+        description="Notify the captains of the selected games (e.g., rainout, schedule change)."
+        recipients={(() => {
+          const seen = new Set<string>();
+          const list: { id: string; name: string; email: string; context?: string }[] = [];
+          games.filter(g => selectedIds.has(g.id)).forEach(g => {
+            [g.home, g.away].forEach(team => {
+              if (seen.has(team)) return;
+              seen.add(team);
+              const cap = teamCaptains[team];
+              list.push({
+                id: team,
+                name: cap ? `${cap.name} — ${team}` : team,
+                email: cap?.email || "",
+                context: g.division,
+              });
+            });
+          });
+          return list;
+        })()}
+      />
     </div>
   );
 }
