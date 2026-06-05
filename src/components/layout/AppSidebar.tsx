@@ -60,7 +60,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "Leagues", path: "/structure/leagues" },
           { label: "Events", path: "/structure/events" },
           { label: "Phases", path: "/structure/competition-names" },
-          { label: "Playoff Rounds", path: "/structure/playoff-rounds" },
+          { label: "Grouping Tags", path: "/structure/grouping-tags" },
         ],
       },
       {
