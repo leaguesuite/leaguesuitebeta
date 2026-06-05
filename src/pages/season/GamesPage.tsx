@@ -405,6 +405,8 @@ export default function GamesPage() {
     </th>
   );
 
+  const displayedGames = sortGames(filtered);
+
   // ─── Edit Game ──────────────────────────────────────────────────────────
 
   const openEditGame = (game: Game) => {
