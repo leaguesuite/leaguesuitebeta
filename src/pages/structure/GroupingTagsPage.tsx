@@ -109,7 +109,7 @@ export default function GroupingTagsPage() {
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Grouping Tags</h1>
+          <h1 className="text-2xl font-bold text-foreground">Tags</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Tags used to group games within each phase. Defaults are provided per event type.
           </p>
