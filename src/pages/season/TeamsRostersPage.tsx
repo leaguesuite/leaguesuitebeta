@@ -4,12 +4,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon } from "lucide-react";
+import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft } from "lucide-react";
 
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
 
@@ -18,6 +30,7 @@ interface Team {
   name: string;
   division: string;
   captain: string;
+  captainEmail: string;
   coach: string;
   logoUrl?: string;
   teamPhotoUrl?: string;
@@ -26,20 +39,20 @@ interface Team {
 }
 
 const INITIAL_TEAMS: Team[] = [
-  { id: "1", name: "Eagles", division: "Division A", captain: "John Smith", coach: "N/A", primaryColor: "#1e40af", secondaryColor: "#fbbf24" },
-  { id: "2", name: "Tigers", division: "Division A", captain: "Emily Brown", coach: "Sarah Johnson", primaryColor: "#ea580c", secondaryColor: "#000000" },
-  { id: "3", name: "Hawks", division: "Division B", captain: "Jessica Thomas", coach: "N/A", primaryColor: "#059669", secondaryColor: "#ffffff" },
-  { id: "4", name: "Lions", division: "Division B", captain: "Kevin Garcia", coach: "N/A", primaryColor: "#7c3aed", secondaryColor: "#fde047" },
+  { id: "1", name: "Eagles", division: "Division A", captain: "John Smith", captainEmail: "john.smith@example.com", coach: "N/A", primaryColor: "#1e40af", secondaryColor: "#fbbf24" },
+  { id: "2", name: "Tigers", division: "Division A", captain: "Emily Brown", captainEmail: "emily.brown@example.com", coach: "Sarah Johnson", primaryColor: "#ea580c", secondaryColor: "#000000" },
+  { id: "3", name: "Hawks", division: "Division B", captain: "Jessica Thomas", captainEmail: "jessica.thomas@example.com", coach: "N/A", primaryColor: "#059669", secondaryColor: "#ffffff" },
+  { id: "4", name: "Lions", division: "Division B", captain: "Kevin Garcia", captainEmail: "kevin.garcia@example.com", coach: "N/A", primaryColor: "#7c3aed", secondaryColor: "#fde047" },
 ];
 
-const DIVISIONS = ["All Divisions", "Division A", "Division B"];
+const DIVISIONS = ["Division A", "Division B"];
 
 type SortKey = "name" | "division" | "captain";
 type SortDir = "asc" | "desc";
 
 export default function TeamsRostersPage() {
   const [teams, setTeams] = useState<Team[]>(INITIAL_TEAMS);
-  const [divisionFilter, setDivisionFilter] = useState("All Divisions");
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([...DIVISIONS]);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
@@ -49,8 +62,16 @@ export default function TeamsRostersPage() {
   const [editForm, setEditForm] = useState<Team | null>(null);
   const [importOpen, setImportOpen] = useState(false);
 
+  // Bulk selection state
+  const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
+  const [bulkMoveTarget, setBulkMoveTarget] = useState<string>(DIVISIONS[0]);
+
+  const allDivisionsSelected = selectedDivisions.length === DIVISIONS.length;
+
   const filteredTeams = useMemo(() => {
-    const list = divisionFilter === "All Divisions" ? teams : teams.filter(t => t.division === divisionFilter);
+    const list = teams.filter(t => selectedDivisions.includes(t.division));
     return [...list].sort((a, b) => {
       const av = (a[sortKey] || "").toString().toLowerCase();
       const bv = (b[sortKey] || "").toString().toLowerCase();
@@ -58,11 +79,49 @@ export default function TeamsRostersPage() {
       if (av > bv) return sortDir === "asc" ? 1 : -1;
       return 0;
     });
-  }, [teams, divisionFilter, sortKey, sortDir]);
+  }, [teams, selectedDivisions, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
+  };
+
+  const toggleDivision = (d: string) => {
+    setSelectedDivisions(prev =>
+      prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]
+    );
+  };
+
+  const toggleAllDivisions = () => {
+    setSelectedDivisions(allDivisionsSelected ? [] : [...DIVISIONS]);
+  };
+
+  const visibleIds = filteredTeams.map(t => t.id);
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedTeamIds.includes(id));
+  const someVisibleSelected = visibleIds.some(id => selectedTeamIds.includes(id));
+
+  const toggleSelectAllVisible = () => {
+    if (allVisibleSelected) {
+      setSelectedTeamIds(prev => prev.filter(id => !visibleIds.includes(id)));
+    } else {
+      setSelectedTeamIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
+  const toggleSelectTeam = (id: string) => {
+    setSelectedTeamIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const confirmBulkDelete = () => {
+    setTeams(prev => prev.filter(t => !selectedTeamIds.includes(t.id)));
+    setSelectedTeamIds([]);
+    setBulkDeleteOpen(false);
+  };
+
+  const confirmBulkMove = () => {
+    setTeams(prev => prev.map(t => selectedTeamIds.includes(t.id) ? { ...t, division: bulkMoveTarget } : t));
+    setSelectedTeamIds([]);
+    setBulkMoveOpen(false);
   };
 
   const getTeamRoster = (teamName: string) =>
@@ -93,6 +152,14 @@ export default function TeamsRostersPage() {
     </button>
   );
 
+  const divisionLabel = allDivisionsSelected
+    ? "All Divisions"
+    : selectedDivisions.length === 0
+      ? "No divisions"
+      : selectedDivisions.length === 1
+        ? selectedDivisions[0]
+        : `${selectedDivisions.length} divisions`;
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -106,36 +173,99 @@ export default function TeamsRostersPage() {
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4" /> Import CSV
             </Button>
-            <Select value={divisionFilter} onValueChange={setDivisionFilter}>
-              <SelectTrigger className="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DIVISIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 min-w-44 justify-between">
+                  <span className="inline-flex items-center gap-2">
+                    <Filter className="h-4 w-4" /> {divisionLabel}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-2">
+                <div className="space-y-1">
+                  <button
+                    onClick={toggleAllDivisions}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-sm"
+                  >
+                    <Checkbox checked={allDivisionsSelected} />
+                    <span className="font-medium">All Divisions</span>
+                  </button>
+                  <div className="h-px bg-border my-1" />
+                  {DIVISIONS.map(d => (
+                    <button
+                      key={d}
+                      onClick={() => toggleDivision(d)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-sm"
+                    >
+                      <Checkbox checked={selectedDivisions.includes(d)} />
+                      <span>{d}</span>
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
+
+        {/* Bulk actions bar */}
+        {selectedTeamIds.length > 0 && (
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-2">
+            <span className="text-sm text-foreground">
+              {selectedTeamIds.length} team{selectedTeamIds.length === 1 ? "" : "s"} selected
+            </span>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMoveOpen(true)}>
+                <ArrowRightLeft className="h-4 w-4" /> Move to division
+              </Button>
+              <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBulkDeleteOpen(true)}>
+                <Trash2 className="h-4 w-4" /> Delete
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedTeamIds([])}>Clear</Button>
+            </div>
+          </div>
+        )}
 
         {/* Teams Table */}
         <div className="section-card overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
+                    onCheckedChange={toggleSelectAllVisible}
+                    aria-label="Select all"
+                  />
+                </TableHead>
                 <TableHead><SortHeader k="name" label="Team Name" /></TableHead>
                 <TableHead><SortHeader k="division" label="Division" /></TableHead>
                 <TableHead><SortHeader k="captain" label="Captain" /></TableHead>
+                <TableHead>Captain Email</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredTeams.map(team => (
-                <TableRow key={team.id}>
+                <TableRow key={team.id} data-state={selectedTeamIds.includes(team.id) ? "selected" : undefined}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedTeamIds.includes(team.id)}
+                      onCheckedChange={() => toggleSelectTeam(team.id)}
+                      aria-label={`Select ${team.name}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium text-foreground">{team.name}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="text-xs">{team.division}</Badge>
                   </TableCell>
                   <TableCell className="text-sm text-foreground">{team.captain || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {team.captainEmail ? (
+                      <a href={`mailto:${team.captainEmail}`} className="hover:text-foreground hover:underline">
+                        {team.captainEmail}
+                      </a>
+                    ) : "—"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="inline-flex items-center gap-1">
                       <Tooltip>
@@ -160,7 +290,7 @@ export default function TeamsRostersPage() {
               ))}
               {filteredTeams.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No teams found.
                   </TableCell>
                 </TableRow>
@@ -168,6 +298,49 @@ export default function TeamsRostersPage() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Bulk Delete Confirm */}
+        <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {selectedTeamIds.length} team{selectedTeamIds.length === 1 ? "" : "s"}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove the selected teams from this season. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmBulkDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Bulk Move Dialog */}
+        <Dialog open={bulkMoveOpen} onOpenChange={setBulkMoveOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Move teams to division</DialogTitle>
+              <DialogDescription>
+                Move {selectedTeamIds.length} selected team{selectedTeamIds.length === 1 ? "" : "s"} to a different division.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-2">
+              <Label>Target Division</Label>
+              <Select value={bulkMoveTarget} onValueChange={setBulkMoveTarget}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {DIVISIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBulkMoveOpen(false)}>Cancel</Button>
+              <Button onClick={confirmBulkMove}>Move teams</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Edit Team Dialog */}
         <Dialog open={editTeamOpen} onOpenChange={setEditTeamOpen}>
@@ -277,10 +450,10 @@ export default function TeamsRostersPage() {
           onOpenChange={setImportOpen}
           title="Import Teams & Rosters"
           description="Upload a CSV to bulk-import teams and roster assignments."
-          expectedColumns={["team_name", "division", "captain", "coach"]}
+          expectedColumns={["team_name", "division", "captain", "captain_email", "coach"]}
           sampleRows={[
-            ["Eagles", "Division A", "John Smith", "N/A"],
-            ["Tigers", "Division A", "Emily Brown", "Sarah Johnson"],
+            ["Eagles", "Division A", "John Smith", "john.smith@example.com", "N/A"],
+            ["Tigers", "Division A", "Emily Brown", "emily.brown@example.com", "Sarah Johnson"],
           ]}
           onImport={(rows) => {
             const newTeams: Team[] = [];
@@ -292,6 +465,7 @@ export default function TeamsRostersPage() {
                   name: r.team_name,
                   division: r.division || "Division A",
                   captain: r.captain || "",
+                  captainEmail: r.captain_email || "",
                   coach: r.coach || "N/A",
                 });
               }
@@ -342,7 +516,7 @@ function EditTeamBody({ form, setForm }: EditTeamBodyProps) {
             <Select value={form.division} onValueChange={v => setForm({ ...form, division: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {DIVISIONS.filter(d => d !== "All Divisions").map(d => (
+                {DIVISIONS.map(d => (
                   <SelectItem key={d} value={d}>{d}</SelectItem>
                 ))}
               </SelectContent>
@@ -354,9 +528,13 @@ function EditTeamBody({ form, setForm }: EditTeamBodyProps) {
               <Input value={form.captain} onChange={e => setForm({ ...form, captain: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label>Coach</Label>
-              <Input value={form.coach} onChange={e => setForm({ ...form, coach: e.target.value })} />
+              <Label>Captain Email</Label>
+              <Input type="email" value={form.captainEmail} onChange={e => setForm({ ...form, captainEmail: e.target.value })} />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Coach</Label>
+            <Input value={form.coach} onChange={e => setForm({ ...form, coach: e.target.value })} />
           </div>
         </TabsContent>
 
