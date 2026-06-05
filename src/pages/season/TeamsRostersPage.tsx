@@ -21,9 +21,10 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft } from "lucide-react";
+import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft, Mail } from "lucide-react";
 
 import CsvImportDialog from "@/components/shared/CsvImportDialog";
+import BulkMessageDialog from "@/components/shared/BulkMessageDialog";
 
 interface Team {
   id: string;
