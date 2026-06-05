@@ -23,6 +23,7 @@ import SeasonsPage from "@/pages/structure/SeasonsPage";
 import TournamentsPage from "@/pages/structure/TournamentsPage";
 import CompetitionNamesPage from "@/pages/structure/CompetitionNamesPage";
 import PlayoffRoundsPage from "@/pages/structure/PlayoffRoundsPage";
+import EventsPage from "@/pages/structure/EventsPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
@@ -89,6 +90,7 @@ const App = () => (
             <Route path="/setup/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences and subdivisions." />} />
             <Route path="/setup/scheduling" element={<PlaceholderPage title="Scheduling Setup" description="Configure scheduling rules and constraints." />} />
             <Route path="/structure/leagues" element={<LeaguesPage />} />
+            <Route path="/structure/events" element={<EventsPage />} />
             <Route path="/structure/categories" element={<CategoriesPage />} />
             <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
             <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
