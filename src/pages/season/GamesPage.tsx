@@ -1095,6 +1095,32 @@ export default function GamesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Message Dialog */}
+      <BulkMessageDialog
+        open={messageOpen}
+        onOpenChange={setMessageOpen}
+        title="Message Game Captains"
+        description="Notify the captains of the selected games (e.g., rainout, schedule change)."
+        recipients={(() => {
+          const seen = new Set<string>();
+          const list: { id: string; name: string; email: string; context?: string }[] = [];
+          games.filter(g => selectedIds.has(g.id)).forEach(g => {
+            [g.home, g.away].forEach(team => {
+              if (seen.has(team)) return;
+              seen.add(team);
+              const cap = teamCaptains[team];
+              list.push({
+                id: team,
+                name: cap ? `${cap.name} — ${team}` : team,
+                email: cap?.email || "",
+                context: g.division,
+              });
+            });
+          });
+          return list;
+        })()}
+      />
     </div>
   );
 }
