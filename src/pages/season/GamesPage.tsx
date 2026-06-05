@@ -244,6 +244,11 @@ export default function GamesPage() {
   const [bulkAction, setBulkAction] = useState<null | "delete" | "clear">(null);
   const [messageOpen, setMessageOpen] = useState(false);
 
+  // Sorting
+  type SortColumn = "date" | "time" | "location" | "field" | null;
+  const [sortColumn, setSortColumn] = useState<SortColumn>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
