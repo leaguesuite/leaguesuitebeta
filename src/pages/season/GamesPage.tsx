@@ -626,7 +626,7 @@ export default function GamesPage() {
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {weeks.map(w => <option key={w}>{w}</option>)}
           </select>
-          <div className="ml-auto text-sm text-muted-foreground">{filtered.length} game{filtered.length !== 1 ? "s" : ""}</div>
+          <div className="ml-auto text-sm text-muted-foreground">{displayedGames.length} game{displayedGames.length !== 1 ? "s" : ""}</div>
         </div>
       </div>
 
