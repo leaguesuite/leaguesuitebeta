@@ -539,6 +539,9 @@ export default function GamesPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())}>Cancel</Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setMessageOpen(true)}>
+              <Mail className="h-3.5 w-3.5" /> Message Captains
+            </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setBulkAction("clear")}>
               <Eraser className="h-3.5 w-3.5" /> Clear Data
             </Button>
