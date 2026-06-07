@@ -176,11 +176,15 @@ function BracketPreviewSVG({ teamCount, height = 220 }: { teamCount: number; hei
     try {
       const structure = generateBracketStructure(Math.max(2, Math.min(32, teamCount)));
       const cw = containerRef.current.clientWidth;
-      const ch = containerRef.current.clientHeight;
       const maxR = structure.length;
       const colW = cw / (maxR + 0.5);
       const tH = 24;
       const gap = 12;
+      const firstRoundLen = structure[0]?.length ?? 1;
+      const contentH = firstRoundLen * tH + (firstRoundLen - 1) * gap + 16;
+      const ch = contentH;
+      svg.setAttribute("viewBox", `0 0 ${cw} ${contentH}`);
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
       structure.forEach((round, ri) => {
         const totalH = round.length * tH + (round.length - 1) * gap;
