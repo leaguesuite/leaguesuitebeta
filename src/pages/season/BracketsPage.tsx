@@ -16,6 +16,12 @@ import { RollbackDialog } from "@/components/playoffs/RollbackDialog";
 import { PlayoffWizard } from "@/components/playoffs/PlayoffWizard";
 import { MOCK_PLAYOFF_GAMES, type MockPlayoffGame } from "@/data/mockPlayoffs";
 
+// Map round-match labels (QF1, SF2, F) to canonical game IDs in mock data
+const LABEL_TO_ID: Record<string, string> = {
+  QF1: "G-201", QF2: "G-202", QF3: "G-203", QF4: "G-204",
+  SF1: "G-210", SF2: "G-211", F: "G-220",
+};
+
 const BracketsPage = () => {
   const [view, setView] = useState<"wizard" | "bracket">("wizard");
   const [advanceOpen, setAdvanceOpen] = useState(false);
