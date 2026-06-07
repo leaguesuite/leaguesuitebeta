@@ -1,70 +1,76 @@
-# Navigation & Menus — Header, Top Bar, Footer Builder
+# Playoff & Bracket Manager — Wizard + Advancement Overhaul
 
-Rebuild `src/pages/settings/NavigationMenusPage.tsx` so admins can fully customize the public site's two header bars and the footer, matching the structure shown in the reference screenshot (white secondary bar on top, black main bar below).
+Replace the current `src/pages/season/BracketsPage.tsx` flow with an interactive, mock-data-backed Playoff Wizard and supporting bracket controls. All work stays in frontend/presentation (no API changes).
 
-## Three editable zones
+## Scope (chosen by user)
 
-Tabs at the top of the page:
+**Core advancement set**
+1. Bracket ↔ Schedule visual link (per match: game ID, date, time, field, status)
+2. Pending advancement state (greyed feeder slots + per-round "Awaiting results" banner for reseeding)
+3. Rollback / unadvance action (cascade preview before applying)
+4. Advancement confirmation modal — review proposed advancers, then Apply (mobile-friendly)
+5. Scorekeeper sync banner across the bracket view
 
-1. **Top Bar (Secondary)** — white bar
-2. **Main Menu (Header)** — black bar
-3. **Footer**
+**Setup & safety set**
+6. Seed source selector per division/split (standings-as-of timestamp vs manual)
+7. Bracket templates (save/load named configurations)
+8. Public visibility toggle per round
+9. Conflict warnings step in wizard (field / referee / team double-book detection)
 
-Each zone shows a live preview at the top and an item list below.
+## New entry point
 
-## Locked vs. movable items
+`/season/brackets` is rebuilt around the wizard. Existing manual bracket UI is preserved internally and surfaced as the wizard's final "Review & Edit" step.
 
-Items have a `locked` flag indicating which bar they belong to permanently. Locked items can be hidden, reordered, and renamed, but cannot be deleted or moved to another bar.
+## File changes
 
-- **Locked to Main Menu:** Home, Calendar, Accolades, Roster Verification
-- **Locked to Top Bar:** Social media icons, Language selector, Switch Leagues dropdown (shown only for multi-league tenants), Season selector, Divisions selector, Search
+**Replaced**
+- `src/pages/season/BracketsPage.tsx` — becomes a shell that hosts `PlayoffWizard` (default view) and the existing manual editor (post-publish view).
 
-Custom items (CMS pages, external links, dropdowns) are **movable** — each row gets a "Move to…" action in its row menu listing the other zones it can be sent to (Top Bar ↔ Main Menu ↔ Footer-only).
+**New under `src/components/playoffs/`**
+- `PlayoffWizard.tsx` — multi-step wrapper, mock state in component
+- `steps/FormatStep.tsx` — team count, bracket type (fixed / reseeding / pool-crossover), round count + names, bronze game toggle
+- `steps/SeedSourceStep.tsx` — per-division: "Use standings as of [datetime]" or "Manual entry"; ties detected → tiebreaker note (no modal in this scope)
+- `steps/PreviewStep.tsx` — renders full bracket with placeholder seed labels, public-visibility toggle per round
+- `steps/ConflictsStep.tsx` — runs mock detector over scheduled games and lists field/team/ref overlaps with severity chips
+- `steps/TemplatesPanel.tsx` — save current config as template, load existing (localStorage-backed mock)
+- `AdvancementConfirmDialog.tsx` — modal showing proposed advancers from completed games + Apply / Cancel; responsive layout
+- `RollbackDialog.tsx` — pick a match, shows downstream cascade list, Confirm rollback
+- `BracketGameLinkBadge.tsx` — small chip on each match: `Game #G-128 · Sat 7:00 PM · Field 2 · Final`
+- `PendingFeederSlot.tsx` — greyed "Winner of Game #G-118" slot styling + tooltip
+- `ReseedingBanner.tsx` — round-level "Awaiting all QF results to reseed" banner
+- `ScorekeeperSyncBanner.tsx` — sticky top banner: "Scorekeeper app last synced 2m ago · Re-sync"
 
-## Dropdowns / submenus
+**New mock data**
+- `src/data/mockPlayoffs.ts` — divisions, scheduled playoff games (with mock conflicts), template presets
 
-Any non-locked item (and Main Menu locked items) can hold child items, rendered as a hover/click dropdown on the public site. Editor supports:
+## Wizard flow
 
-- Expand/collapse parent rows (already partially implemented)
-- "Add sub-item" action on every parent row in Top Bar and Main Menu (today only Main Menu allows this)
-- Two-level depth max
+```text
+1. Format        → teams, type, rounds, bronze
+2. Seed Source   → per division/split
+3. Preview       → bracket with placeholders + per-round public toggle
+4. Conflicts     → list with severity chips, "Acknowledge & continue"
+5. Templates     → optional save
+6. Publish       → returns to bracket view with new bracket loaded
+```
 
-## Footer editor
+Templates panel is also accessible as a side button on step 1 (Load template).
 
-New Footer tab replaces the existing simple list with a **column-based site map**:
+## Bracket view additions (post-publish)
 
-- Up to 4 footer columns, each with a heading and a list of links
-- "Add column", "Rename column", "Delete column", reorder columns left/right
-- Inside each column: add link, reorder, hide, delete, edit URL/label/new-tab
-- Footer-exclusive links: any link added in the footer has a "Show only in footer" toggle (default on); turning it off lets the admin also surface it in Top Bar or Main Menu
-- Footer-level toggles: show social icons, show copyright line (editable text), show "Powered by" line
+- `ScorekeeperSyncBanner` at top
+- Each `MatchCard` gains `BracketGameLinkBadge` and `PendingFeederSlot` rendering
+- Round headers gain `ReseedingBanner` when bracket is reseeding and prior round incomplete
+- Toolbar buttons: **Advance from results** (opens `AdvancementConfirmDialog`), **Rollback** (opens `RollbackDialog`), **Public visibility** (per-round toggles in popover)
 
-## Per-item edit dialog
+## Technical details
 
-Extends the existing dialog with:
+- Pure frontend. State held in `useState`/`useReducer` inside `PlayoffWizard` and `BracketsPage`. Templates use `localStorage` key `playoff_templates_v1`.
+- Conflict detector: pure function over mock schedule comparing `(field, datetime±90min)`, `(team, date)`, `(referee, datetime±90min)`.
+- Reuses `Dialog`, `Card`, `Button`, `Switch`, `Select`, `Tabs`, `Badge`, `Tooltip` from `@/components/ui/*`. Reuses existing `MatchCard` and `bracketGenerator` utils.
+- Styling follows the `section-card` admin pattern from memory; semantic tokens only.
+- No routing changes; `/season/brackets` continues to mount `BracketsPage`.
 
-- Label, URL (page picker + custom URL), Open in new tab, Visible
-- **Bar assignment** dropdown (Top Bar / Main Menu / Footer) — disabled for locked items
-- **Style** (link / button / dropdown parent)
-- **Show only in footer** checkbox (footer items)
+## Out of scope (deferred items the user didn't pick)
 
-## Live previews
-
-- Top Bar preview: white background, left = logo + league switcher + season/divisions selectors, right = custom pages + language + social icons (mirrors screenshot)
-- Main Menu preview: black background bar showing locked + custom items in order, with dropdown indicators
-- Footer preview: column grid with headings + links, social row, copyright line
-
-## Technical notes
-
-- Extend `MenuItem` with `locked: boolean`, `bar: 'topbar' | 'main' | 'footer'`, `footerOnly?: boolean`, `style?: 'link' | 'button' | 'dropdown'`.
-- Replace `INITIAL_MENUS` / `INITIAL_TOPBAR` with a single `NavConfig` object holding `topBar`, `mainMenu`, `footer` (with `columns: FooterColumn[]`, `showSocial`, `copyrightText`, etc.).
-- Add helpers `moveItemToBar(itemId, targetBar)` and guard against moving locked items.
-- Reuse existing `renderItem`, social link, and language picker logic; generalize so it works for any bar.
-- `PublicLayout.tsx` is **not** modified in this step — this task only builds the admin editor. Wiring the public site to this config is a follow-up.
-- All styling via existing semantic tokens (`bg-foreground`, `bg-card`, `text-muted-foreground`, etc.); no hard-coded colors.
-
-## Out of scope
-
-- Persisting to backend (state stays local with mock initial data, matching current page)
-- Rendering the new config on the actual public site (`PublicLayout.tsx`)
-- Per-role visibility rules
+Change log, notification triggers, tiebreaker modal, forfeit/DQ outcome — not built now; can be added later.
