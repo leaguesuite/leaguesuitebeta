@@ -176,47 +176,20 @@ function BracketPreviewSVG({ teamCount, height = 220 }: { teamCount: number; hei
     try {
       const structure = generateBracketStructure(Math.max(2, Math.min(32, teamCount)));
       const cw = containerRef.current.clientWidth;
-      const ch = containerRef.current.clientHeight;
       const maxR = structure.length;
       const colW = cw / (maxR + 0.5);
       const tH = 24;
       const gap = 12;
+      const firstRoundLen = structure[0]?.length ?? 1;
+      const contentH = firstRoundLen * tH + (firstRoundLen - 1) * gap + 16;
+      const ch = contentH;
+      svg.setAttribute("viewBox", `0 0 ${cw} ${contentH}`);
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
       structure.forEach((round, ri) => {
         const totalH = round.length * tH + (round.length - 1) * gap;
         const startY = (ch - totalH) / 2;
-
-        round.forEach((m, mi) => {
-          const y = startY + mi * (tH + gap);
-          const x = ri * colW + 12;
-          const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-          rect.setAttribute("x", String(x)); rect.setAttribute("y", String(y));
-          rect.setAttribute("width", String(colW - 24)); rect.setAttribute("height", String(tH));
-          rect.setAttribute("rx", "3");
-          rect.setAttribute("fill", m.bye ? "hsl(var(--muted))" : "hsl(var(--primary) / 0.08)");
-          rect.setAttribute("stroke", m.bye ? "hsl(var(--border))" : "hsl(var(--primary) / 0.2)");
-          svg.appendChild(rect);
-
-          const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          txt.setAttribute("x", String(x + (colW - 24) / 2)); txt.setAttribute("y", String(y + tH / 2 + 4));
-          txt.setAttribute("text-anchor", "middle"); txt.setAttribute("font-size", "9");
-          txt.setAttribute("fill", "hsl(var(--muted-foreground))");
-          txt.textContent = m.bye ? `Bye` : `#${m.seeds[0]} v #${m.seeds[1]}`;
-          svg.appendChild(txt);
-
-          if (ri < maxR - 1) {
-            const nr = structure[ri + 1];
-            const nmi = Math.floor(mi / 2);
-            if (nmi >= nr.length) return;
-            const nTotalH = nr.length * tH + (nr.length - 1) * gap;
-            const nStartY = (ch - nTotalH) / 2;
-            const ny = nStartY + nmi * (tH + gap);
-            const sx = x + colW - 24; const sy = y + tH / 2;
-            const ex = (ri + 1) * colW + 12; const ey = ny + tH / 2;
-            const mx = (sx + ex) / 2;
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", `M${sx} ${sy} L${mx} ${sy} L${mx} ${ey} L${ex} ${ey}`);
-            path.setAttribute("stroke", "hsl(var(--border))"); path.setAttribute("fill", "none");
+...
             svg.appendChild(path);
           }
         });
