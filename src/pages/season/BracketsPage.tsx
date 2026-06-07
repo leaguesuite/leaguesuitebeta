@@ -16,6 +16,12 @@ import { RollbackDialog } from "@/components/playoffs/RollbackDialog";
 import { PlayoffWizard } from "@/components/playoffs/PlayoffWizard";
 import { MOCK_PLAYOFF_GAMES, type MockPlayoffGame } from "@/data/mockPlayoffs";
 
+// Map round-match labels (QF1, SF2, F) to canonical game IDs in mock data
+const LABEL_TO_ID: Record<string, string> = {
+  QF1: "G-201", QF2: "G-202", QF3: "G-203", QF4: "G-204",
+  SF1: "G-210", SF2: "G-211", F: "G-220",
+};
+
 const BracketsPage = () => {
   const [view, setView] = useState<"wizard" | "bracket">("wizard");
   const [advanceOpen, setAdvanceOpen] = useState(false);
@@ -127,15 +133,45 @@ const BracketsPage = () => {
                       <Badge variant="secondary">{roundGames.length} game{roundGames.length === 1 ? "" : "s"}</Badge>
                     </div>
                     {showReseedBanner && <ReseedingBanner round={round} remaining={remaining} />}
-                    {roundGames.map((g) => {
+                    {roundGames.map((g, gIdx) => {
                       const pending1 = g.team1.startsWith("Winner ");
                       const pending2 = g.team2.startsWith("Winner ");
                       const winnerIsT1 = g.score ? g.score.t1 >= g.score.t2 : false;
+                      const feeder = (slotIdx: 0 | 1, sourceLabel: string) => {
+                        // sourceLabel like "QF1"
+                        const id = LABEL_TO_ID[sourceLabel] ?? sourceLabel;
+                        if (!reseeding) {
+                          return {
+                            label: `Winner of #${id}`,
+                            tooltip: `Advances from game #${id} (${sourceLabel})`,
+                          };
+                        }
+                        // Reseeding: use range of feeder games from previous round
+                        const prevRound = Object.keys(byRound)[rIdx - 1];
+                        const prevGames = prevRound ? byRound[prevRound] : [];
+                        const range = prevGames.length
+                          ? `#${prevGames[0].id}–#${prevGames[prevGames.length - 1].id}`
+                          : `#${id}`;
+                        const rankWords = ["Highest", "2nd highest", "3rd highest", "4th highest"];
+                        // slot 0 in match gIdx → rank gIdx; slot 1 → mirrored from bottom
+                        const rank =
+                          slotIdx === 0
+                            ? rankWords[gIdx] ?? `${gIdx + 1}th highest`
+                            : `${rankWords[gIdx]?.toLowerCase() ?? `${gIdx + 1}th`} lowest`.replace("highest ", "");
+                        const label =
+                          slotIdx === 0
+                            ? `${rankWords[gIdx] ?? `#${gIdx + 1}`} remaining seed`
+                            : `${["Lowest", "2nd lowest", "3rd lowest", "4th lowest"][gIdx] ?? `#${gIdx + 1}`} remaining seed`;
+                        return {
+                          label: `${label} from ${range}`,
+                          tooltip: `Reseed rule: ${rank} advancing seed out of feeder games ${range}`,
+                        };
+                      };
                       return (
                         <Card key={g.id} className="overflow-hidden">
                           <CardContent className="space-y-2 p-3">
                             {pending1 ? (
-                              <PendingFeederSlot label={g.team1} gameId={g.team1.replace("Winner ", "")} />
+                              <PendingFeederSlot {...feeder(0, g.team1.replace("Winner ", ""))} />
                             ) : (
                               <div className={`flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm ${g.status === "final" && winnerIsT1 ? "bg-emerald-500/10 font-semibold" : ""}`}>
                                 <span>{g.team1}</span>
@@ -143,7 +179,7 @@ const BracketsPage = () => {
                               </div>
                             )}
                             {pending2 ? (
-                              <PendingFeederSlot label={g.team2} gameId={g.team2.replace("Winner ", "")} />
+                              <PendingFeederSlot {...feeder(1, g.team2.replace("Winner ", ""))} />
                             ) : (
                               <div className={`flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm ${g.status === "final" && !winnerIsT1 ? "bg-emerald-500/10 font-semibold" : ""}`}>
                                 <span>{g.team2}</span>
