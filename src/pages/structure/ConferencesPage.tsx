@@ -1,29 +1,29 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2, Layers, Users, ChevronDown, ChevronRight, Pencil, Library, Calendar, X, Check, Info } from "lucide-react";
+import { Plus, Trash2, Layers, ChevronDown, ChevronRight, Library, Calendar, X, Check, Info, Users, ArrowRight } from "lucide-react";
 
 /**
  * Conferences & Subgroups
  *
  * Concept:
- *  - League maintains a LIBRARY of reusable conferences (AFC, NFC, Eastern, ...).
- *  - Each conference can contain optional subgroups (East, West, North, South).
- *  - When setting up a season, an admin assigns conferences to a Division.
- *    Teams in that division are then placed into a conference (and optionally a subgroup).
- *  - All of this is OPTIONAL — divisions can run with no conferences at all.
+ *  - League maintains a LIBRARY of reusable conferences (AFC, NFC, ...).
+ *  - Each conference has its own library of optional subgroups (East, West, ...).
+ *  - When setting up a season, an admin assigns conferences to a Division,
+ *    then optionally enables subgroups within each assigned conference.
+ *  - Team placement into conferences/subgroups happens in the Teams section.
  */
 
 // ----- Mock types -----
 type Subgroup = { id: string; name: string };
 type Conference = { id: string; name: string; abbrev: string; subgroups: Subgroup[] };
 
-type Team = { id: string; name: string; conferenceId?: string; subgroupId?: string };
 type Division = {
   id: string;
   name: string;
   category: string;
-  // ordered list of conference IDs assigned to this division in the current season
+  teamCount: number;
   conferenceIds: string[];
-  teams: Team[];
+  // per-conference list of active subgroup IDs in this division/season
+  subgroupIdsByConference: Record<string, string[]>;
 };
 
 // ----- Mock seed data -----
@@ -48,36 +48,22 @@ const initialLibrary: Conference[] = [
 
 const initialDivisions: Division[] = [
   {
-    id: "d-mens-1", name: "Men's Division 1", category: "Men's",
+    id: "d-mens-1", name: "Men's Division 1", category: "Men's", teamCount: 8,
     conferenceIds: ["c-afc", "c-nfc"],
-    teams: [
-      { id: "t1", name: "Thunderbolts", conferenceId: "c-afc", subgroupId: "sg-afc-e" },
-      { id: "t2", name: "Storm Chasers", conferenceId: "c-afc", subgroupId: "sg-afc-e" },
-      { id: "t3", name: "Riptide", conferenceId: "c-afc", subgroupId: "sg-afc-w" },
-      { id: "t4", name: "Outlaws", conferenceId: "c-afc", subgroupId: "sg-afc-w" },
-      { id: "t5", name: "Mustangs", conferenceId: "c-nfc", subgroupId: "sg-nfc-e" },
-      { id: "t6", name: "Coyotes", conferenceId: "c-nfc", subgroupId: "sg-nfc-w" },
-      { id: "t7", name: "Renegades" }, // unassigned
-      { id: "t8", name: "Falcons" },
-    ],
+    subgroupIdsByConference: {
+      "c-afc": ["sg-afc-e", "sg-afc-w"],
+      "c-nfc": ["sg-nfc-e", "sg-nfc-w"],
+    },
   },
   {
-    id: "d-womens-1", name: "Women's Division 1", category: "Women's",
+    id: "d-womens-1", name: "Women's Division 1", category: "Women's", teamCount: 4,
     conferenceIds: ["c-eastern", "c-western"],
-    teams: [
-      { id: "tw1", name: "Aurora", conferenceId: "c-eastern" },
-      { id: "tw2", name: "Comets", conferenceId: "c-eastern" },
-      { id: "tw3", name: "Velocity", conferenceId: "c-western" },
-      { id: "tw4", name: "Wildfire", conferenceId: "c-western" },
-    ],
+    subgroupIdsByConference: {},
   },
   {
-    id: "d-coed-open", name: "Co-Ed Open", category: "Co-Ed",
+    id: "d-coed-open", name: "Co-Ed Open", category: "Co-Ed", teamCount: 4,
     conferenceIds: [],
-    teams: [
-      { id: "tc1", name: "Sunset FC" }, { id: "tc2", name: "Harbor Crew" },
-      { id: "tc3", name: "Park Rangers" }, { id: "tc4", name: "Night Owls" },
-    ],
+    subgroupIdsByConference: {},
   },
 ];
 
@@ -93,7 +79,7 @@ export default function ConferencesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Conferences & Subgroups</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Optional groupings inside a division. Maintain a reusable library at the league level, then assign conferences (and place teams into subgroups) per season.
+            Optional groupings inside a division. Maintain a reusable library at the league level, then enable conferences and subgroups per season.
           </p>
         </div>
       </div>
@@ -126,7 +112,7 @@ export default function ConferencesPage() {
 }
 
 // ============================================================
-// LIBRARY TAB — manage reusable conferences & their subgroups
+// LIBRARY TAB
 // ============================================================
 
 function LibraryTab({ library, setLibrary }: { library: Conference[]; setLibrary: (c: Conference[]) => void }) {
@@ -160,7 +146,7 @@ function LibraryTab({ library, setLibrary }: { library: Conference[]; setLibrary
       <div className="section-card p-4 bg-primary/5 border-primary/20 flex items-start gap-3">
         <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
         <p className="text-sm text-foreground">
-          The library is league-wide. Conferences and subgroups defined here can be re-used across multiple seasons without re-creating them each time.
+          The library is league-wide. Conferences and their subgroups defined here can be re-used across multiple seasons without re-creating them each time.
         </p>
       </div>
 
@@ -266,7 +252,7 @@ function SubgroupEditor({ subgroups, onAdd, onRemove }: { subgroups: Subgroup[];
 }
 
 // ============================================================
-// SEASON TAB — assign conferences to divisions & place teams
+// SEASON TAB — assign conferences & subgroups to a division
 // ============================================================
 
 function SeasonTab({ library, divisions, setDivisions }: { library: Conference[]; divisions: Division[]; setDivisions: (d: Division[]) => void }) {
@@ -279,27 +265,33 @@ function SeasonTab({ library, divisions, setDivisions }: { library: Conference[]
   const toggleConference = (cid: string) => {
     const has = active.conferenceIds.includes(cid);
     if (has) {
-      // remove + clear team assignments tied to it
+      const next = { ...active.subgroupIdsByConference };
+      delete next[cid];
       updateActive({
         conferenceIds: active.conferenceIds.filter(x => x !== cid),
-        teams: active.teams.map(t => t.conferenceId === cid ? { ...t, conferenceId: undefined, subgroupId: undefined } : t),
+        subgroupIdsByConference: next,
       });
     } else {
       updateActive({ conferenceIds: [...active.conferenceIds, cid] });
     }
   };
 
-  const assignTeam = (teamId: string, conferenceId?: string, subgroupId?: string) => {
-    updateActive({
-      teams: active.teams.map(t => t.id === teamId ? { ...t, conferenceId, subgroupId: conferenceId ? subgroupId : undefined } : t),
-    });
+  const toggleSubgroup = (cid: string, sid: string) => {
+    const current = active.subgroupIdsByConference[cid] ?? [];
+    const has = current.includes(sid);
+    const next = {
+      ...active.subgroupIdsByConference,
+      [cid]: has ? current.filter(x => x !== sid) : [...current, sid],
+    };
+    updateActive({ subgroupIdsByConference: next });
   };
 
   const assignedConfs = useMemo(
     () => active.conferenceIds.map(id => library.find(c => c.id === id)).filter(Boolean) as Conference[],
     [active.conferenceIds, library]
   );
-  const unassignedTeams = active.teams.filter(t => !t.conferenceId);
+
+  const totalSubgroups = Object.values(active.subgroupIdsByConference).reduce((n, arr) => n + arr.length, 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
@@ -310,36 +302,55 @@ function SeasonTab({ library, divisions, setDivisions }: { library: Conference[]
           <span className="text-[10px] text-muted-foreground">Spring 2026</span>
         </div>
         <div className="space-y-1">
-          {divisions.map(d => (
-            <button
-              key={d.id}
-              onClick={() => setActiveDivId(d.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
-                d.id === activeDivId ? "bg-primary/10 text-primary" : "hover:bg-secondary text-foreground"
-              }`}
-            >
-              <div className="text-sm font-medium">{d.name}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-2">
-                <span>{d.teams.length} teams</span>
-                <span>·</span>
-                <span>{d.conferenceIds.length === 0 ? "No conferences" : `${d.conferenceIds.length} conf.`}</span>
-              </div>
-            </button>
-          ))}
+          {divisions.map(d => {
+            const sgCount = Object.values(d.subgroupIdsByConference).reduce((n, arr) => n + arr.length, 0);
+            return (
+              <button
+                key={d.id}
+                onClick={() => setActiveDivId(d.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors ${
+                  d.id === activeDivId ? "bg-primary/10 text-primary" : "hover:bg-secondary text-foreground"
+                }`}
+              >
+                <div className="text-sm font-medium">{d.name}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
+                  <span>{d.teamCount} teams</span>
+                  <span>·</span>
+                  <span>{d.conferenceIds.length === 0 ? "No conferences" : `${d.conferenceIds.length} conf.`}</span>
+                  {sgCount > 0 && <><span>·</span><span>{sgCount} subgroups</span></>}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </aside>
 
       {/* Detail */}
       <section className="space-y-5">
-        {/* Conferences in use */}
+        {/* Info banner about team placement */}
+        <div className="section-card p-4 bg-primary/5 border-primary/20 flex items-start gap-3">
+          <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm text-foreground">
+              Define the segments for <span className="font-semibold">{active.name}</span> here. Teams are placed into conferences and subgroups from the Teams section.
+            </p>
+          </div>
+          <a href="/season/teams" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline shrink-0">
+            <Users className="h-3.5 w-3.5" /> Go to Teams <ArrowRight className="h-3 w-3" />
+          </a>
+        </div>
+
+        {/* Conferences box */}
         <div className="section-card p-5">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary" /> Conferences in {active.name}
             </h2>
-            <span className="text-xs text-muted-foreground">{active.conferenceIds.length === 0 ? "Optional — leave empty to run flat" : `${active.conferenceIds.length} active`}</span>
+            <span className="text-xs text-muted-foreground">
+              {active.conferenceIds.length === 0 ? "Optional — leave empty to run flat" : `${active.conferenceIds.length} active`}
+            </span>
           </div>
-          <p className="text-xs text-muted-foreground mb-4">Pick from the league library. Standings, schedule generation, and playoffs can use these groupings.</p>
+          <p className="text-xs text-muted-foreground mb-4">Pick conferences from the league library to enable in this season.</p>
 
           <div className="flex flex-wrap gap-2">
             {library.map(c => {
@@ -363,173 +374,78 @@ function SeasonTab({ library, divisions, setDivisions }: { library: Conference[]
           </div>
         </div>
 
-        {/* Team placement */}
-        {assignedConfs.length === 0 ? (
-          <div className="section-card p-10 text-center">
-            <Layers className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm font-medium text-foreground">No conferences for this division</p>
-            <p className="text-xs text-muted-foreground mt-1">Select one or more above to start grouping teams. Or leave empty to run the division flat.</p>
+        {/* Subgroups box */}
+        <div className="section-card p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" /> Subgroups
+            </h2>
+            <span className="text-xs text-muted-foreground">
+              {assignedConfs.length === 0
+                ? "Add a conference first"
+                : totalSubgroups === 0 ? "Optional — leave empty to skip" : `${totalSubgroups} active`}
+            </span>
           </div>
-        ) : (
-          <>
-            {/* Unassigned bench */}
-            {unassignedTeams.length > 0 && (
-              <div className="section-card p-4 border-dashed">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Unassigned Teams</div>
-                  <span className="text-xs text-warning">{unassignedTeams.length} need placement</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {unassignedTeams.map(t => (
-                    <TeamChip key={t.id} team={t} conferences={assignedConfs} onAssign={assignTeam} />
-                  ))}
-                </div>
-              </div>
-            )}
+          <p className="text-xs text-muted-foreground mb-4">
+            Within each conference, pick which subgroups (from its library) are in play this season.
+          </p>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              {assignedConfs.map(conf => (
-                <ConferenceColumn
-                  key={conf.id}
-                  conference={conf}
-                  teams={active.teams.filter(t => t.conferenceId === conf.id)}
-                  allConferences={assignedConfs}
-                  onAssign={assignTeam}
-                />
-              ))}
+          {assignedConfs.length === 0 ? (
+            <div className="rounded-xl border-2 border-dashed border-border p-8 text-center">
+              <Layers className="h-7 w-7 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm font-medium text-foreground">No conferences selected</p>
+              <p className="text-xs text-muted-foreground mt-1">Enable a conference above to choose its subgroups.</p>
             </div>
-          </>
-        )}
-      </section>
-    </div>
-  );
-}
+          ) : (
+            <div className="space-y-3">
+              {assignedConfs.map(conf => {
+                const active_sgs = active.subgroupIdsByConference[conf.id] ?? [];
+                return (
+                  <div key={conf.id} className="rounded-xl border border-border bg-secondary/20 p-3">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-primary">{conf.abbrev}</span>
+                        </div>
+                        <div className="text-sm font-semibold text-foreground">{conf.name}</div>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground">
+                        {conf.subgroups.length === 0
+                          ? "No subgroups in library"
+                          : `${active_sgs.length} of ${conf.subgroups.length} active`}
+                      </span>
+                    </div>
 
-function ConferenceColumn({ conference, teams, allConferences, onAssign }: {
-  conference: Conference;
-  teams: Team[];
-  allConferences: Conference[];
-  onAssign: (teamId: string, conferenceId?: string, subgroupId?: string) => void;
-}) {
-  const hasSubgroups = conference.subgroups.length > 0;
-
-  return (
-    <div className="section-card p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-xs font-bold text-primary">{conference.abbrev}</span>
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-foreground">{conference.name}</div>
-            <div className="text-[11px] text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {teams.length} teams</div>
-          </div>
-        </div>
-      </div>
-
-      {hasSubgroups ? (
-        <div className="space-y-3">
-          {conference.subgroups.map(sg => {
-            const sgTeams = teams.filter(t => t.subgroupId === sg.id);
-            return (
-              <div key={sg.id} className="rounded-lg border border-border bg-secondary/30 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs font-semibold text-foreground">{sg.name}</div>
-                  <span className="text-[10px] text-muted-foreground">{sgTeams.length} teams</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {sgTeams.length === 0 && <span className="text-[11px] italic text-muted-foreground">No teams yet</span>}
-                  {sgTeams.map(t => (
-                    <TeamChip key={t.id} team={t} conferences={allConferences} onAssign={onAssign} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          {/* No-subgroup bucket inside conference */}
-          {teams.filter(t => !t.subgroupId).length > 0 && (
-            <div className="rounded-lg border border-dashed border-warning/50 bg-warning/5 p-3">
-              <div className="text-xs font-semibold text-warning mb-2">In conference, no subgroup</div>
-              <div className="flex flex-wrap gap-1.5">
-                {teams.filter(t => !t.subgroupId).map(t => (
-                  <TeamChip key={t.id} team={t} conferences={allConferences} onAssign={onAssign} />
-                ))}
-              </div>
+                    {conf.subgroups.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic px-1">
+                        This conference has no subgroups defined in the library. Add some in the League Library tab.
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {conf.subgroups.map(sg => {
+                          const on = active_sgs.includes(sg.id);
+                          return (
+                            <button
+                              key={sg.id}
+                              onClick={() => toggleSubgroup(conf.id, sg.id)}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border-2 text-xs transition-all ${
+                                on ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-foreground hover:border-primary/30"
+                              }`}
+                            >
+                              {sg.name}
+                              {on && <Check className="h-3 w-3" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
-      ) : (
-        <div className="flex flex-wrap gap-1.5">
-          {teams.length === 0 && <span className="text-[11px] italic text-muted-foreground">No teams yet</span>}
-          {teams.map(t => (
-            <TeamChip key={t.id} team={t} conferences={allConferences} onAssign={onAssign} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function TeamChip({ team, conferences, onAssign }: {
-  team: Team;
-  conferences: Conference[];
-  onAssign: (teamId: string, conferenceId?: string, subgroupId?: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-1.5 pl-2.5 pr-2 py-1 rounded-md bg-card border border-border hover:border-primary/40 text-xs"
-      >
-        <span className="font-medium text-foreground">{team.name}</span>
-        <Pencil className="h-3 w-3 text-muted-foreground" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute z-20 mt-1 w-64 rounded-lg border border-border bg-popover shadow-lg p-2 space-y-1">
-            <div className="px-2 py-1 text-[10px] uppercase tracking-wide font-semibold text-muted-foreground">Move {team.name} to</div>
-            <button
-              onClick={() => { onAssign(team.id, undefined); setOpen(false); }}
-              className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-secondary text-muted-foreground"
-            >
-              Unassigned
-            </button>
-            {conferences.map(c => (
-              <div key={c.id}>
-                {c.subgroups.length === 0 ? (
-                  <button
-                    onClick={() => { onAssign(team.id, c.id); setOpen(false); }}
-                    className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-secondary text-foreground font-medium"
-                  >
-                    {c.abbrev} — {c.name}
-                  </button>
-                ) : (
-                  <div>
-                    <div className="px-2 pt-1.5 pb-0.5 text-[10px] uppercase tracking-wide font-semibold text-muted-foreground">{c.abbrev}</div>
-                    <button
-                      onClick={() => { onAssign(team.id, c.id); setOpen(false); }}
-                      className="w-full text-left px-2 py-1 rounded text-[11px] hover:bg-secondary text-muted-foreground italic"
-                    >
-                      (no subgroup)
-                    </button>
-                    {c.subgroups.map(sg => (
-                      <button
-                        key={sg.id}
-                        onClick={() => { onAssign(team.id, c.id, sg.id); setOpen(false); }}
-                        className="w-full text-left px-2 py-1 rounded text-xs hover:bg-secondary text-foreground"
-                      >
-                        {sg.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      </section>
     </div>
   );
 }
