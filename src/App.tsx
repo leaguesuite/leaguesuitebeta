@@ -24,6 +24,7 @@ import TournamentsPage from "@/pages/structure/TournamentsPage";
 import CompetitionNamesPage from "@/pages/structure/CompetitionNamesPage";
 import GroupingTagsPage from "@/pages/structure/GroupingTagsPage";
 import EventsPage from "@/pages/structure/EventsPage";
+import ConferencesPage from "@/pages/structure/ConferencesPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
 import AccoladesPage from "@/pages/accolades/AccoladesPage";
 import MembersPage from "@/pages/members/MembersPage";
@@ -93,8 +94,9 @@ const App = () => (
             <Route path="/structure/events" element={<EventsPage />} />
             <Route path="/structure/categories" element={<CategoriesPage />} />
             <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
-            <Route path="/structure/conferences" element={<PlaceholderPage title="Conferences" description="Configure conferences." />} />
-            <Route path="/structure/subdivisions" element={<PlaceholderPage title="Subdivisions" description="Manage conference subdivisions." />} />
+            <Route path="/structure/conferences" element={<ConferencesPage />} />
+            <Route path="/structure/subdivisions" element={<ConferencesPage />} />
+
             <Route path="/structure/locations" element={<LocationsPage />} />
             <Route path="/structure/competition-names" element={<CompetitionNamesPage />} />
             <Route path="/structure/grouping-tags" element={<GroupingTagsPage />} />

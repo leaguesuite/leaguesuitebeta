@@ -68,8 +68,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         children: [
           { label: "Categories", path: "/structure/categories" },
           { label: "Divisions", path: "/structure/divisions" },
-          { label: "Conferences", path: "/structure/conferences" },
-          { label: "Subdivisions", path: "/structure/subdivisions" },
+          { label: "Conferences & Subgroups", path: "/structure/conferences" },
         ],
       },
       { label: "Locations & Fields", icon: MapPin, path: "/structure/locations" },
