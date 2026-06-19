@@ -23,6 +23,9 @@ const initialSettings: GeneralSettings = {
   showRegistration: true,
   use24HourClock: false,
   useFourQuarters: true,
+  tracksYards: true,
+  usesPlayerRatings: true,
+  singleDivision: false,
 };
 
 export default function GeneralSettingsPage() {
