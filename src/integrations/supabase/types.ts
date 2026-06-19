@@ -1228,6 +1228,84 @@ export type Database = {
           },
         ]
       }
+      scorekeeper_categories: {
+        Row: {
+          allow_live_scoring: boolean
+          created_at: string
+          downs: number
+          female_additional_points: number
+          female_switch: boolean
+          field_size: number
+          format: string
+          id: string
+          league_type: string
+          name: string
+          number_of_periods: number
+          ocur_plays_off: number
+          onside_plays_relative_default_position: number
+          period_length: number
+          possession_start_relative_default_position: number
+          red_zone_yards: number
+          touchdown_points: number
+          updated_at: string
+          use_air_yards: boolean
+          use_fumble: boolean
+          use_lateral: boolean
+          use_pass_direction: boolean
+          use_yards_after_catch: boolean
+        }
+        Insert: {
+          allow_live_scoring?: boolean
+          created_at?: string
+          downs?: number
+          female_additional_points?: number
+          female_switch?: boolean
+          field_size?: number
+          format?: string
+          id?: string
+          league_type?: string
+          name: string
+          number_of_periods?: number
+          ocur_plays_off?: number
+          onside_plays_relative_default_position?: number
+          period_length?: number
+          possession_start_relative_default_position?: number
+          red_zone_yards?: number
+          touchdown_points?: number
+          updated_at?: string
+          use_air_yards?: boolean
+          use_fumble?: boolean
+          use_lateral?: boolean
+          use_pass_direction?: boolean
+          use_yards_after_catch?: boolean
+        }
+        Update: {
+          allow_live_scoring?: boolean
+          created_at?: string
+          downs?: number
+          female_additional_points?: number
+          female_switch?: boolean
+          field_size?: number
+          format?: string
+          id?: string
+          league_type?: string
+          name?: string
+          number_of_periods?: number
+          ocur_plays_off?: number
+          onside_plays_relative_default_position?: number
+          period_length?: number
+          possession_start_relative_default_position?: number
+          red_zone_yards?: number
+          touchdown_points?: number
+          updated_at?: string
+          use_air_yards?: boolean
+          use_fumble?: boolean
+          use_lateral?: boolean
+          use_pass_direction?: boolean
+          use_yards_after_catch?: boolean
+        }
+        Relationships: []
+      }
       seasons: {
         Row: {
           created_at: string
