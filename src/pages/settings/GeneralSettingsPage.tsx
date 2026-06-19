@@ -4,7 +4,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Settings2, Clock, Trophy, Users, Eye, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Settings2, Clock, Trophy, Users, Eye, ShieldCheck, BarChart3, Star, LayoutGrid } from "lucide-react";
 
 interface GeneralSettings {
   supportSpecialTeams: boolean;
