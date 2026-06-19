@@ -93,15 +93,16 @@ const navSections: { title: string; items: NavItem[] }[] = [
           { label: "External Tools", path: "/integrations/tools" },
         ],
       },
-      {
-        label: "Settings", icon: Settings,
-        children: [
-          { label: "Branding", path: "/settings/branding" },
-          { label: "Navigation & Menus", path: "/settings/navigation" },
-          { label: "Domains", path: "/settings/domains" },
-          { label: "Languages", path: "/settings/languages" },
-        ],
-      },
+        {
+          label: "Settings", icon: Settings,
+          children: [
+            { label: "General", path: "/settings/general" },
+            { label: "Branding", path: "/settings/branding" },
+            { label: "Navigation & Menus", path: "/settings/navigation" },
+            { label: "Domains", path: "/settings/domains" },
+            { label: "Languages", path: "/settings/languages" },
+          ],
+        },
     ],
   },
   {

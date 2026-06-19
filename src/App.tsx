@@ -42,6 +42,7 @@ import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
 import BracketManagerPage from "@/pages/features/BracketManagerPage";
 import BrandingPage from "@/pages/settings/BrandingPage";
+import GeneralSettingsPage from "@/pages/settings/GeneralSettingsPage";
 import PublicHomePage from "@/pages/public/PublicHomePage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
 import PublicSchedulePage from "@/pages/public/PublicSchedulePage";
@@ -130,6 +131,7 @@ const App = () => (
             <Route path="/admin/permissions" element={<PlaceholderPage title="Permission Groups" description="Configure granular permission groups." />} />
             <Route path="/admin/access" element={<PlaceholderPage title="App Access Controls" description="Manage application-level access." />} />
             <Route path="/integrations/*" element={<PlaceholderPage title="Integrations" description="Manage third-party integrations." />} />
+            <Route path="/settings/general" element={<GeneralSettingsPage />} />
             <Route path="/settings/navigation" element={<NavigationMenusPage />} />
             <Route path="/settings/domains" element={<DomainsPage />} />
             <Route path="/settings/branding" element={<BrandingPage />} />
