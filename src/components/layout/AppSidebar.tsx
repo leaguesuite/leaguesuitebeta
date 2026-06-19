@@ -72,6 +72,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         ],
       },
       { label: "Locations & Fields", icon: MapPin, path: "/structure/locations" },
+      { label: "Scorekeeper Categories", icon: ScrollText, path: "/scorekeeper/categories" },
     ],
   },
   {
