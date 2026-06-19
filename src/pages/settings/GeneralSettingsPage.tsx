@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Settings2, Clock, Trophy, Users, Eye, ShieldCheck, BarChart3, Star, LayoutGrid } from "lucide-react";
 
-interface GeneralSettings {
+class GeneralSettings {
   supportSpecialTeams: boolean;
   showRosterVerification: boolean;
   showRegistration: boolean;
   use24HourClock: boolean;
   useFourQuarters: boolean;
+  tracksYards: boolean;
+  usesPlayerRatings: boolean;
+  singleDivision: boolean;
 }
 
 const initialSettings: GeneralSettings = {
