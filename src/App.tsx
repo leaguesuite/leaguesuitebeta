@@ -13,6 +13,7 @@ import BracketsPage from "@/pages/season/BracketsPage";
 import ReportsPage from "@/pages/season/ReportsPage";
 import StatsPage from "@/pages/season/StatsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
+import ScorekeeperCategoriesPage from "@/pages/scorekeeper/ScorekeeperCategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
@@ -134,6 +135,7 @@ const App = () => (
             <Route path="/settings/branding" element={<BrandingPage />} />
             <Route path="/settings/*" element={<PlaceholderPage title="Settings" description="League settings and configuration." />} />
             <Route path="/features/brackets" element={<BracketManagerPage />} />
+            <Route path="/scorekeeper/categories" element={<ScorekeeperCategoriesPage />} />
             <Route path="/support" element={<SupportPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
