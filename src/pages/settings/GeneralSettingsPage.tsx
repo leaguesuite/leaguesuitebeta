@@ -4,7 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Settings2, Clock, Trophy, Users, Eye, ShieldCheck } from "lucide-react";
+import { Settings2, Clock, Trophy, Users, Eye, ShieldCheck, BarChart3, Star, LayoutGrid } from "lucide-react";
 
 interface GeneralSettings {
   supportSpecialTeams: boolean;
@@ -12,6 +12,9 @@ interface GeneralSettings {
   showRegistration: boolean;
   use24HourClock: boolean;
   useFourQuarters: boolean;
+  tracksYards: boolean;
+  usesPlayerRatings: boolean;
+  singleDivision: boolean;
 }
 
 const initialSettings: GeneralSettings = {
@@ -20,6 +23,9 @@ const initialSettings: GeneralSettings = {
   showRegistration: true,
   use24HourClock: false,
   useFourQuarters: true,
+  tracksYards: true,
+  usesPlayerRatings: true,
+  singleDivision: false,
 };
 
 export default function GeneralSettingsPage() {
@@ -68,6 +74,24 @@ export default function GeneralSettingsPage() {
       label: "Use 4 Quarters",
       description: "Structure games as 4 quarters instead of 2 halves.",
       icon: Eye,
+    },
+    {
+      key: "tracksYards" as const,
+      label: "League Tracks Yards",
+      description: "Enable yardage tracking for rushing, receiving, and passing stats.",
+      icon: BarChart3,
+    },
+    {
+      key: "usesPlayerRatings" as const,
+      label: "League Uses Player Ratings",
+      description: "Enable the player ratings system (OFF/DEF/QB scores) for this league.",
+      icon: Star,
+    },
+    {
+      key: "singleDivision" as const,
+      label: "League Is Single Division",
+      description: "The league operates as one division with no conference or subgroup splits.",
+      icon: LayoutGrid,
     },
   ];
 
