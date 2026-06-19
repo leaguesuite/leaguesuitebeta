@@ -75,6 +75,24 @@ export default function GeneralSettingsPage() {
       description: "Structure games as 4 quarters instead of 2 halves.",
       icon: Eye,
     },
+    {
+      key: "tracksYards" as const,
+      label: "League Tracks Yards",
+      description: "Enable yardage tracking for rushing, receiving, and passing stats.",
+      icon: BarChart3,
+    },
+    {
+      key: "usesPlayerRatings" as const,
+      label: "League Uses Player Ratings",
+      description: "Enable the player ratings system (OFF/DEF/QB scores) for this league.",
+      icon: Star,
+    },
+    {
+      key: "singleDivision" as const,
+      label: "League Is Single Division",
+      description: "The league operates as one division with no conference or subgroup splits.",
+      icon: LayoutGrid,
+    },
   ];
 
   return (
