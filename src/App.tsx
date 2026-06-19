@@ -42,6 +42,7 @@ import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
 import BracketManagerPage from "@/pages/features/BracketManagerPage";
 import BrandingPage from "@/pages/settings/BrandingPage";
+import GeneralSettingsPage from "@/pages/settings/GeneralSettingsPage";
 import PublicHomePage from "@/pages/public/PublicHomePage";
 import PublicStandingsPage from "@/pages/public/PublicStandingsPage";
 import PublicSchedulePage from "@/pages/public/PublicSchedulePage";
