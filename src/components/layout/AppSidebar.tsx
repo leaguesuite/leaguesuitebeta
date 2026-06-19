@@ -96,7 +96,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         {
           label: "Settings", icon: Settings,
           children: [
-            { label: "General", path: ​ "/settings/general" },
+            { label: "General", path: "/settings/general" },
             { label: "Branding", path: "/settings/branding" },
             { label: "Navigation & Menus", path: "/settings/navigation" },
             { label: "Domains", path: "/settings/domains" },
