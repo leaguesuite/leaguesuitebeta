@@ -1,45 +1,163 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Settings, ChevronRight, Users, Layers, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, ChevronRight, Users, Layers, Edit, Trash2, Eye } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
-const categories = [
+type Division = {
+  id: number;
+  name: string;
+  teamCap: number;
+  qbCap: number;
+  teams: number;
+  status: "active" | "draft";
+};
+
+type Category = {
+  id: number;
+  name: string;
+  description: string;
+  divisions: number;
+  rules: { fieldLength: string; downs: number; rushCount: number; playersPerSide: number };
+  divisionsList: Division[];
+};
+
+const initialCategories: Category[] = [
   {
     id: 1, name: "Men's", description: "Adult men's flag football leagues", divisions: 3,
     rules: { fieldLength: "80 yards", downs: 4, rushCount: 7, playersPerSide: 7 },
     divisionsList: [
-      { id: 1, name: "Division 1", teamCap: 8, qbCap: 2, teams: 8, status: "active" as const },
-      { id: 2, name: "Division 2", teamCap: 10, qbCap: 2, teams: 7, status: "active" as const },
-      { id: 3, name: "Division 3", teamCap: 12, qbCap: 3, teams: 5, status: "active" as const },
+      { id: 1, name: "Division 1", teamCap: 8, qbCap: 2, teams: 8, status: "active" },
+      { id: 2, name: "Division 2", teamCap: 10, qbCap: 2, teams: 7, status: "active" },
+      { id: 3, name: "Division 3", teamCap: 12, qbCap: 3, teams: 5, status: "active" },
     ],
   },
   {
     id: 2, name: "Women's", description: "Adult women's flag football leagues", divisions: 2,
     rules: { fieldLength: "70 yards", downs: 4, rushCount: 7, playersPerSide: 7 },
     divisionsList: [
-      { id: 4, name: "Division 1", teamCap: 8, qbCap: 2, teams: 6, status: "active" as const },
-      { id: 5, name: "Division 2", teamCap: 10, qbCap: 2, teams: 4, status: "active" as const },
+      { id: 4, name: "Division 1", teamCap: 8, qbCap: 2, teams: 6, status: "active" },
+      { id: 5, name: "Division 2", teamCap: 10, qbCap: 2, teams: 4, status: "active" },
     ],
   },
   {
     id: 3, name: "Co-Ed", description: "Mixed gender flag football", divisions: 1,
     rules: { fieldLength: "80 yards", downs: 4, rushCount: 7, playersPerSide: 8 },
     divisionsList: [
-      { id: 6, name: "Open", teamCap: 12, qbCap: 2, teams: 7, status: "active" as const },
+      { id: 6, name: "Open", teamCap: 12, qbCap: 2, teams: 7, status: "active" },
     ],
   },
   {
     id: 4, name: "Youth", description: "Youth flag football under 18", divisions: 2,
     rules: { fieldLength: "60 yards", downs: 4, rushCount: 5, playersPerSide: 5 },
     divisionsList: [
-      { id: 7, name: "U16", teamCap: 10, qbCap: 2, teams: 0, status: "draft" as const },
-      { id: 8, name: "U12", teamCap: 12, qbCap: 2, teams: 0, status: "draft" as const },
+      { id: 7, name: "U16", teamCap: 10, qbCap: 2, teams: 0, status: "draft" },
+      { id: 8, name: "U12", teamCap: 12, qbCap: 2, teams: 0, status: "draft" },
     ],
   },
 ];
 
 export default function CategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [expandedCategory, setExpandedCategory] = useState<number | null>(1);
   const [search, setSearch] = useState("");
+
+  // New Category dialog
+  const [catOpen, setCatOpen] = useState(false);
+  const [catName, setCatName] = useState("");
+  const [catDesc, setCatDesc] = useState("");
+  const [catFieldLength, setCatFieldLength] = useState("80 yards");
+  const [catDowns, setCatDowns] = useState(4);
+  const [catRushCount, setCatRushCount] = useState(7);
+  const [catPlayers, setCatPlayers] = useState(7);
+
+  // Add Division dialog
+  const [divOpen, setDivOpen] = useState(false);
+  const [divCategoryId, setDivCategoryId] = useState<string>("");
+  const [divName, setDivName] = useState("");
+  const [divTeamCap, setDivTeamCap] = useState(10);
+  const [divQbCap, setDivQbCap] = useState(2);
+
+  const resetCat = () => {
+    setCatName(""); setCatDesc("");
+    setCatFieldLength("80 yards"); setCatDowns(4);
+    setCatRushCount(7); setCatPlayers(7);
+  };
+  const resetDiv = () => {
+    setDivCategoryId(""); setDivName("");
+    setDivTeamCap(10); setDivQbCap(2);
+  };
+
+  const handleCreateCategory = () => {
+    if (!catName.trim()) { toast.error("Category name is required"); return; }
+    const newCat: Category = {
+      id: Date.now(),
+      name: catName.trim(),
+      description: catDesc.trim() || "—",
+      divisions: 0,
+      rules: {
+        fieldLength: catFieldLength,
+        downs: catDowns,
+        rushCount: catRushCount,
+        playersPerSide: catPlayers,
+      },
+      divisionsList: [],
+    };
+    setCategories(prev => [...prev, newCat]);
+    setExpandedCategory(newCat.id);
+    toast.success(`Category "${newCat.name}" created`);
+    setCatOpen(false);
+    resetCat();
+  };
+
+  const handleAddDivision = () => {
+    if (!divCategoryId) { toast.error("Select a category"); return; }
+    if (!divName.trim()) { toast.error("Division name is required"); return; }
+    const cid = Number(divCategoryId);
+    setCategories(prev => prev.map(c => {
+      if (c.id !== cid) return c;
+      const newDiv: Division = {
+        id: Date.now(),
+        name: divName.trim(),
+        teamCap: divTeamCap,
+        qbCap: divQbCap,
+        teams: 0,
+        status: "draft",
+      };
+      return {
+        ...c,
+        divisions: c.divisions + 1,
+        divisionsList: [...c.divisionsList, newDiv],
+      };
+    }));
+    setExpandedCategory(cid);
+    toast.success(`Division "${divName}" added`);
+    setDivOpen(false);
+    resetDiv();
+  };
+
+  const openAddDivisionFor = (id: number) => {
+    resetDiv();
+    setDivCategoryId(String(id));
+    setDivOpen(true);
+  };
 
   const filtered = categories.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase())
@@ -53,10 +171,16 @@ export default function CategoriesPage() {
           <p className="text-sm text-muted-foreground mt-1">Manage reusable league structure templates with rules and division configurations.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="h-9 px-4 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary transition-colors flex items-center gap-2">
+          <button
+            onClick={() => { resetDiv(); setDivOpen(true); }}
+            className="h-9 px-4 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" /> Add Division
           </button>
-          <button className="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+          <button
+            onClick={() => { resetCat(); setCatOpen(true); }}
+            className="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" /> New Category
           </button>
         </div>
@@ -102,9 +226,16 @@ export default function CategoriesPage() {
 
             {expandedCategory === cat.id && (
               <div className="border-t border-border">
-                {/* Rule Settings */}
                 <div className="px-5 py-4 bg-secondary/30">
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Rule Configuration</div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rule Configuration</div>
+                    <button
+                      onClick={() => openAddDivisionFor(cat.id)}
+                      className="h-7 px-3 rounded-md border border-border bg-card text-xs font-medium hover:bg-secondary flex items-center gap-1.5"
+                    >
+                      <Plus className="h-3 w-3" /> Add Division
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {Object.entries(cat.rules).map(([key, val]) => (
                       <div key={key} className="bg-card rounded-lg border border-border px-3 py-2.5">
@@ -115,7 +246,6 @@ export default function CategoriesPage() {
                   </div>
                 </div>
 
-                {/* Divisions Table */}
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border bg-secondary/30">
@@ -128,6 +258,13 @@ export default function CategoriesPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
+                    {cat.divisionsList.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-5 py-6 text-center text-sm text-muted-foreground">
+                          No divisions yet. Click “Add Division” to create one.
+                        </td>
+                      </tr>
+                    )}
                     {cat.divisionsList.map(div => (
                       <tr key={div.id} className="hover:bg-secondary/20 transition-colors">
                         <td className="px-5 py-3">
@@ -162,6 +299,89 @@ export default function CategoriesPage() {
           </div>
         ))}
       </div>
+
+      {/* New Category Dialog */}
+      <Dialog open={catOpen} onOpenChange={setCatOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>New Category</DialogTitle>
+            <DialogDescription>Create a reusable league structure template.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="cat-name">Name</Label>
+              <Input id="cat-name" value={catName} onChange={e => setCatName(e.target.value)} placeholder="e.g. Masters 40+" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cat-desc">Description</Label>
+              <Input id="cat-desc" value={catDesc} onChange={e => setCatDesc(e.target.value)} placeholder="Short description" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="cat-field">Field Length</Label>
+                <Input id="cat-field" value={catFieldLength} onChange={e => setCatFieldLength(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cat-downs">Downs</Label>
+                <Input id="cat-downs" type="number" value={catDowns} onChange={e => setCatDowns(Number(e.target.value))} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cat-rush">Rush Count</Label>
+                <Input id="cat-rush" type="number" value={catRushCount} onChange={e => setCatRushCount(Number(e.target.value))} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cat-players">Players / Side</Label>
+                <Input id="cat-players" type="number" value={catPlayers} onChange={e => setCatPlayers(Number(e.target.value))} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCatOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateCategory}>Create Category</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Division Dialog */}
+      <Dialog open={divOpen} onOpenChange={setDivOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Division</DialogTitle>
+            <DialogDescription>Add a new division to a category.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={divCategoryId} onValueChange={setDivCategoryId}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map(c => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="div-name">Division Name</Label>
+              <Input id="div-name" value={divName} onChange={e => setDivName(e.target.value)} placeholder="e.g. Division 4, U14" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="div-cap">Team Cap</Label>
+                <Input id="div-cap" type="number" value={divTeamCap} onChange={e => setDivTeamCap(Number(e.target.value))} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="div-qb">QB Cap</Label>
+                <Input id="div-qb" type="number" value={divQbCap} onChange={e => setDivQbCap(Number(e.target.value))} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDivOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddDivision}>Add Division</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
