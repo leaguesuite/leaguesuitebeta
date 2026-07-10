@@ -15,7 +15,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  CalendarDays, Trophy, Plus, Pencil, Trash2, Search, Eye, Play,
+  CalendarDays, Trophy, Pencil, Trash2, Search, Eye, Play,
   CheckCircle2, Clock, Archive, Users, MapPin, GitBranch,
 } from "lucide-react";
 
@@ -130,15 +130,6 @@ export default function EventsPage() {
 
   const leagues = [...new Set(events.map(e => e.league))];
 
-  const openNew = (type: EventType) => {
-    setEditing(null);
-    setForm({
-      name: "", type, league: leagues[0] ?? "", status: "draft",
-      year: new Date().getFullYear(),
-      startDate: "", endDate: "", date: "", location: "", format: "",
-    });
-    setDialogOpen(true);
-  };
 
   const openEdit = (ev: EventItem) => {
     setEditing(ev);
@@ -202,9 +193,6 @@ export default function EventsPage() {
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <Button className="gap-1.5" onClick={() => openNew("season")}>
-            <Plus className="h-4 w-4" /> New Event
-          </Button>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Event" : "New Event"}</DialogTitle>
@@ -341,9 +329,6 @@ export default function EventsPage() {
                 <p className="text-xs text-muted-foreground">{seasons.length} {seasons.length === 1 ? "event" : "events"}</p>
               </div>
             </div>
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openNew("season")}>
-              <Plus className="h-3.5 w-3.5" /> Add Season
-            </Button>
           </div>
 
           <div className="rounded-md border overflow-auto">
@@ -419,9 +404,6 @@ export default function EventsPage() {
                 <p className="text-xs text-muted-foreground">{tournaments.length} {tournaments.length === 1 ? "event" : "events"}</p>
               </div>
             </div>
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openNew("tournament")}>
-              <Plus className="h-3.5 w-3.5" /> Add Tournament
-            </Button>
           </div>
 
           <div className="rounded-md border overflow-auto">
