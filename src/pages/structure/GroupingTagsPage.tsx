@@ -49,7 +49,9 @@ const phasesByType: Record<EventType, string[]> = {
 };
 
 export default function GroupingTagsPage() {
+  const { activeLeague } = useActiveLeague();
   const [items, setItems] = useState<GroupingTag[]>(initial);
+
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<GroupingTag | null>(null);
   const [form, setForm] = useState<{ name: string; eventType: EventType; phase: string }>({
