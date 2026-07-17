@@ -29,11 +29,11 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Active Season",
+    title: "Active Events",
     scope: "event",
     items: [
       {
-        label: "Active Season", icon: CalendarDays,
+        label: "Active Events", icon: CalendarDays,
         children: [
           
           { label: "Games / Schedule", path: "/season/games" },
