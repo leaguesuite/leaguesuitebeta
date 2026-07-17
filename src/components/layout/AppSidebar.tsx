@@ -9,6 +9,10 @@ import {
   Swords, LifeBuoy
 } from "lucide-react";
 
+import LeagueSwitcher from "./LeagueSwitcher";
+
+type Scope = "tenant" | "league" | "event";
+
 interface NavItem {
   label: string;
   icon: React.ElementType;
@@ -16,7 +20,7 @@ interface NavItem {
   children?: { label: string; path: string; icon?: React.ElementType }[];
 }
 
-const navSections: { title: string; items: NavItem[] }[] = [
+const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
   {
     title: "",
     items: [
