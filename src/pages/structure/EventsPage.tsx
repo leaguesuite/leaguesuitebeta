@@ -187,7 +187,7 @@ export default function EventsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Events</h1>
+          <LeaguePageTitle title="Events" />
           <p className="text-sm text-muted-foreground mt-1">
             Every event belongs to one of two <span className="font-medium text-foreground">Event Types</span>: <span className="font-medium text-foreground">Season</span> (recurring, multi-week league play) or <span className="font-medium text-foreground">Tournament</span> (one-off competition). Individual events like <span className="italic">Summer 2026</span> or <span className="italic">Midnight Madness 2</span> are created under their respective type below.
           </p>

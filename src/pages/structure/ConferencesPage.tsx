@@ -77,7 +77,7 @@ export default function ConferencesPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Conferences & Subgroups</h1>
+          <LeaguePageTitle title="Conferences & Subgroups" />
           <p className="text-sm text-muted-foreground mt-1">
             Optional groupings inside a division. Maintain a reusable library at the league level, then enable conferences and subgroups per season.
           </p>

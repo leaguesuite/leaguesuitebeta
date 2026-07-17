@@ -89,7 +89,7 @@ export default function TournamentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Tournaments</h1>
+        <LeaguePageTitle title="Tournaments" />
         <p className="text-sm text-muted-foreground mt-1">
           View current and past tournaments. Access brackets, results, and champions.
         </p>

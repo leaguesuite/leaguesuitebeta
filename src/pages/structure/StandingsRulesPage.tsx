@@ -203,7 +203,7 @@ export default function StandingsRulesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Standings Rules</h1>
+          <LeaguePageTitle title="Standings Rules" />
           <p className="text-sm text-muted-foreground">Configure how standings are sorted and how tiebreaks are resolved</p>
         </div>
         <div className="flex items-center gap-2">

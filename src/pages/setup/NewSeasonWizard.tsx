@@ -58,7 +58,7 @@ export default function NewSeasonWizard() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">New Season Setup</h1>
+        <LeaguePageTitle title="New Season Setup" />
         <p className="text-sm text-muted-foreground mt-1">Follow the guided steps to configure and launch a new season.</p>
       </div>
 

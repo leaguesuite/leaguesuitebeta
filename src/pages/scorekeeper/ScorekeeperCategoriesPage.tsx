@@ -66,7 +66,7 @@ export default function ScorekeeperCategoriesPage() {
       <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Scorekeeper Categories</h1>
+            <LeaguePageTitle title="Scorekeeper Categories" />
             <p className="text-sm text-muted-foreground mt-1">
               Manage scorekeeping configurations served to the scorekeeper app via <code className="font-mono text-primary">/api/sk/v2/categories</code>.
             </p>
