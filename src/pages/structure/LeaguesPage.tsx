@@ -159,74 +159,70 @@ export default function LeaguesPage() {
       )}
 
       {/* All Leagues */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {leagues.map(league => (
-          <Card key={league.id} className="flex flex-col hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-base">{league.name}</CardTitle>
-                  <CardDescription className="flex items-center gap-1.5">
-                    <Trophy className="h-3.5 w-3.5" />
-                    {league.sportType}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {statusBadge(league.status)}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                        <MoreHorizontal className="h-4 w-4" />
+      <Card>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="text-left font-medium px-4 py-3">League</th>
+                <th className="text-left font-medium px-4 py-3">Status</th>
+                <th className="text-left font-medium px-4 py-3">Created</th>
+                <th className="text-left font-medium px-4 py-3">Current Event</th>
+                <th className="text-right font-medium px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leagues.map(league => (
+                <tr key={league.id} className="border-t hover:bg-muted/20">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{league.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">{statusBadge(league.status)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {new Date(league.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {league.currentSeason ?? <span className="italic">—</span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end items-center gap-1">
+                      <Button variant="outline" size="sm" className="gap-1.5">
+                        <Settings className="h-3.5 w-3.5" /> Settings
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setEditLeague(league)}>
-                        <Edit className="h-4 w-4 mr-2" /> Edit
-                      </DropdownMenuItem>
-                      {league.status !== "active" && (
-                        <DropdownMenuItem onClick={() => handleSetActive(league.id)}>
-                          <Star className="h-4 w-4 mr-2" /> Set as Active
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => handleDelete(league.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 flex-1">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-lg bg-muted/50 p-2.5">
-                  <p className="text-lg font-bold text-foreground">{league.seasonsCount}</p>
-                  <p className="text-[11px] text-muted-foreground">Seasons</p>
-                </div>
-                <div className="rounded-lg bg-muted/50 p-2.5">
-                  <p className="text-lg font-bold text-foreground">{league.teamsCount}</p>
-                  <p className="text-[11px] text-muted-foreground">Teams</p>
-                </div>
-                <div className="rounded-lg bg-muted/50 p-2.5">
-                  <p className="text-lg font-bold text-foreground">{league.membersCount}</p>
-                  <p className="text-[11px] text-muted-foreground">Members</p>
-                </div>
-              </div>
-              {league.currentSeason && (
-                <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5" />
-                  Current: <span className="font-medium text-foreground">{league.currentSeason}</span>
-                </div>
-              )}
-              <p className="mt-2 text-xs text-muted-foreground">
-                Created {new Date(league.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setEditLeague(league)}>
+                            <Edit className="h-4 w-4 mr-2" /> Edit
+                          </DropdownMenuItem>
+                          {league.status !== "active" && (
+                            <DropdownMenuItem onClick={() => handleSetActive(league.id)}>
+                              <Star className="h-4 w-4 mr-2" /> Set as Active
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDelete(league.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {/* Create Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
