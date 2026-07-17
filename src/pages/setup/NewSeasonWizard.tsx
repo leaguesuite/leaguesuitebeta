@@ -424,30 +424,56 @@ export default function NewSeasonWizard() {
 
         {currentStep === 7 && (
           <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-foreground">Rules & Stats Tracking</h2>
-            <p className="text-sm text-muted-foreground">Configure rule presets and choose which stats to track this season.</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-              {[
-                { stat: "Passing Yards", on: true },
-                { stat: "Rushing Yards", on: true },
-                { stat: "Touchdowns", on: true },
-                { stat: "Interceptions", on: true },
-                { stat: "Sacks", on: true },
-                { stat: "Flag Pulls", on: true },
-                { stat: "Receptions", on: true },
-                { stat: "PAT Conversions", on: false },
-                { stat: "Safeties", on: false },
-              ].map(s => (
-                <label key={s.stat} className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer hover:bg-secondary/30">
-                  <span className="text-sm text-foreground">{s.stat}</span>
-                  <div className={`w-9 h-5 rounded-full transition-colors relative ${s.on ? "bg-primary" : "bg-border"}`}>
-                    <div className={`w-4 h-4 rounded-full bg-card absolute top-0.5 transition-transform ${s.on ? "translate-x-4" : "translate-x-0.5"}`} />
-                  </div>
-                </label>
-              ))}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Rules & Stats Tracking</h2>
+                <p className="text-sm text-muted-foreground">Configure rule presets and choose which stats to track this event.</p>
+              </div>
+              {userTouchedStats && (
+                <button type="button" onClick={() => { setSelectedStats(computeDefaultStats(eventFormat)); setUserTouchedStats(false); }}
+                  className="shrink-0 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:bg-secondary">
+                  Reset to defaults
+                </button>
+              )}
+            </div>
+
+            {/* Memory hint */}
+            <div className={`flex items-start gap-2.5 p-3 rounded-lg border ${prior ? "border-primary/20 bg-primary/5" : "border-border bg-secondary/40"}`}>
+              {prior ? <History className="h-4 w-4 text-primary mt-0.5 shrink-0" /> : <Sparkles className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+              <div className="text-xs text-foreground/80 leading-relaxed">
+                {prior ? (
+                  <>Stats carried over from your last {eventFormat}: <span className="font-medium text-foreground">{prior.name}</span>. Any stats added to the library since then are enabled by default too.</>
+                ) : (
+                  <>No prior {eventFormat} found — all stats are enabled by default. Your choices here become the memory for the next {eventFormat}.</>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+              {STAT_LIBRARY.map(s => {
+                const on = !!selectedStats.find(x => x.id === s.id);
+                const isNew = newStatIds.has(s.id);
+                const wasInPrior = prior?.enabledStatIds.includes(s.id);
+                return (
+                  <label key={s.id} className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer hover:bg-secondary/30"
+                    onClick={(e) => { e.preventDefault(); setUserTouchedStats(true); setSelectedStats(prev => on ? prev.filter(x => x.id !== s.id) : [...prev, s]); }}>
+                    <div className="min-w-0">
+                      <div className="text-sm text-foreground flex items-center gap-1.5 flex-wrap">
+                        {s.name}
+                        {isNew && <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary">New</span>}
+                        {!isNew && prior && wasInPrior && <span className="text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">Last event</span>}
+                      </div>
+                    </div>
+                    <div className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${on ? "bg-primary" : "bg-border"}`}>
+                      <div className={`w-4 h-4 rounded-full bg-card absolute top-0.5 transition-transform ${on ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
         )}
+
 
         {currentStep === 8 && (
           <div className="space-y-5">
