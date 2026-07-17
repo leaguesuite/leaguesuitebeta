@@ -1,7 +1,8 @@
-import { Bell, Search, HelpCircle, ChevronDown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Bell, Search, HelpCircle, Building2 } from "lucide-react";
+import { useActiveLeague } from "@/contexts/LeagueContext";
 
 export default function AppHeader() {
+  const { tenant } = useActiveLeague();
   return (
     <header className="h-14 bg-card border-b border-border flex items-center justify-between px-6 shrink-0">
       <div className="flex items-center gap-3">
@@ -22,9 +23,9 @@ export default function AppHeader() {
         <button className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
           <HelpCircle className="h-4.5 w-4.5" />
         </button>
-        <div className="ml-2 pl-3 border-l border-border flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">Metro Flag League</span>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+        <div className="ml-2 pl-3 border-l border-border flex items-center gap-2 text-muted-foreground">
+          <Building2 className="h-3.5 w-3.5" />
+          <span className="text-sm font-medium text-foreground">{tenant.name}</span>
         </div>
       </div>
     </header>
