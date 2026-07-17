@@ -285,7 +285,7 @@ export default function NewSeasonWizard() {
           </div>
         )}
 
-        {currentStep === 5 && (
+        {currentStep === 6 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Locations & Fields</h2>
             <p className="text-sm text-muted-foreground">Assign game locations and fields for this season.</p>
@@ -315,7 +315,7 @@ export default function NewSeasonWizard() {
           </div>
         )}
 
-        {currentStep === 6 && (
+        {currentStep === 7 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Rules & Stats Tracking</h2>
             <p className="text-sm text-muted-foreground">Configure rule presets and choose which stats to track this season.</p>
@@ -342,7 +342,7 @@ export default function NewSeasonWizard() {
           </div>
         )}
 
-        {currentStep === 7 && (
+        {currentStep === 8 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Review & Launch</h2>
             <p className="text-sm text-muted-foreground">Review your season configuration before launching.</p>
