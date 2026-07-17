@@ -1,6 +1,6 @@
 import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
-import { useState } from "react";
-import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, CalendarDays, Zap, ListOrdered, Plus, X } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, CalendarDays, Zap, ListOrdered, Plus, X, Sparkles, History } from "lucide-react";
 
 const steps = [
   { id: 1, label: "Select League", icon: Trophy },
@@ -25,28 +25,65 @@ const TOURNAMENT_PHASES: PhaseOption[] = [
   { id: "elimination", name: "Elimination Round", numbering: "rounds", group: "tournament" },
 ];
 
+// Mock "previous event" memory. In production this comes from the last completed
+// event of the same type in the active league. `null` = no prior event of that type yet.
+type PriorEvent = { name: string; enabledPhaseIds: string[] } | null;
+const PRIOR_EVENT_BY_TYPE: Record<"season" | "tournament", PriorEvent> = {
+  // Last season had Regular Season + Playoffs enabled (Pre-Season was disabled)
+  season: { name: "Winter 2026", enabledPhaseIds: ["regular", "playoffs"] },
+  // No tournament has been run yet → all phases default on
+  tournament: null,
+};
+
+function computeDefaultPhases(format: "season" | "tournament"): PhaseOption[] {
+  const library = format === "season" ? SEASON_PHASES : TOURNAMENT_PHASES;
+  const prior = PRIOR_EVENT_BY_TYPE[format];
+  if (!prior) return [...library]; // first event of this type → all on
+  // Enable what was enabled last time, PLUS any phase that didn't exist yet in the prior event (new-to-library defaults on)
+  return library.filter(p => prior.enabledPhaseIds.includes(p.id) || !isKnownToPrior(p.id, format));
+}
+// For mock purposes we treat any id NOT present in the prior enabled OR disabled set as "new since last event".
+// The prior event knows about all current SEASON_PHASES/TOURNAMENT_PHASES ids by default, except ones we flag here:
+const NEW_SINCE_PRIOR: Record<"season" | "tournament", string[]> = {
+  season: [], // e.g. add "pre" here to simulate Pre-Season being newly introduced
+  tournament: [],
+};
+function isKnownToPrior(id: string, format: "season" | "tournament") {
+  return !NEW_SINCE_PRIOR[format].includes(id);
+}
+
 export default function NewSeasonWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [eventFormat, setEventFormat] = useState<"season" | "tournament">("season");
-  const [selectedPhases, setSelectedPhases] = useState<PhaseOption[]>([
-    SEASON_PHASES[0], SEASON_PHASES[2],
-  ]);
+  const [selectedPhases, setSelectedPhases] = useState<PhaseOption[]>(() => computeDefaultPhases("season"));
   const [customPhaseName, setCustomPhaseName] = useState("");
+  const [userTouchedPhases, setUserTouchedPhases] = useState(false);
+
+  // Re-apply default memory when the event format changes, unless the user has manually edited phases.
+  useEffect(() => {
+    if (!userTouchedPhases) setSelectedPhases(computeDefaultPhases(eventFormat));
+  }, [eventFormat, userTouchedPhases]);
+
+  const prior = PRIOR_EVENT_BY_TYPE[eventFormat];
+  const newPhaseIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat]), [eventFormat]);
 
   const togglePhase = (p: PhaseOption) => {
+    setUserTouchedPhases(true);
     setSelectedPhases(prev =>
       prev.find(x => x.id === p.id) ? prev.filter(x => x.id !== p.id) : [...prev, p]
     );
   };
   const addCustomPhase = () => {
     if (!customPhaseName.trim()) return;
+    setUserTouchedPhases(true);
     setSelectedPhases(prev => [...prev, {
       id: `custom-${Date.now()}`, name: customPhaseName.trim(), numbering: "rounds", group: eventFormat,
     }]);
     setCustomPhaseName("");
   };
-  const removePhase = (id: string) => setSelectedPhases(prev => prev.filter(p => p.id !== id));
+  const removePhase = (id: string) => { setUserTouchedPhases(true); setSelectedPhases(prev => prev.filter(p => p.id !== id)); };
   const movePhase = (idx: number, dir: -1 | 1) => {
+    setUserTouchedPhases(true);
     setSelectedPhases(prev => {
       const next = [...prev];
       const j = idx + dir;
@@ -54,6 +91,10 @@ export default function NewSeasonWizard() {
       [next[idx], next[j]] = [next[j], next[idx]];
       return next;
     });
+  };
+  const resetToDefaults = () => {
+    setSelectedPhases(computeDefaultPhases(eventFormat));
+    setUserTouchedPhases(false);
   };
 
   return (
