@@ -213,11 +213,21 @@ export default function AppSidebar() {
         </button>
       </div>
 
+      <LeagueSwitcher />
+
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
         {navSections.map((section, si) => (
           <div key={si} className={section.title ? "mt-4 first:mt-0" : ""}>
             {section.title && (
-              <div className="sidebar-section-label">{section.title}</div>
+              <div className="sidebar-section-label flex items-center gap-1.5">
+                <span>{section.title}</span>
+                {section.scope === "league" && (
+                  <span className="text-[9px] font-normal opacity-60 normal-case tracking-normal">· league</span>
+                )}
+                {section.scope === "event" && (
+                  <span className="text-[9px] font-normal opacity-60 normal-case tracking-normal">· event</span>
+                )}
+              </div>
             )}
             {section.items.map(item => (
               <div key={item.label}>
