@@ -134,7 +134,7 @@ export default function NewSeasonWizard() {
                   onChange={(e) => setEventFormat(e.target.value as "season" | "tournament")}
                   className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20"
                 >
-                  <option value="season">Season + Playoffs</option>
+                  <option value="season">Season</option>
                   <option value="tournament">Tournament</option>
                 </select>
               </div>
