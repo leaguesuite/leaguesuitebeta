@@ -27,45 +27,76 @@ const TOURNAMENT_PHASES: PhaseOption[] = [
 
 // Mock "previous event" memory. In production this comes from the last completed
 // event of the same type in the active league. `null` = no prior event of that type yet.
-type PriorEvent = { name: string; enabledPhaseIds: string[] } | null;
+type PriorEvent = { name: string; enabledPhaseIds: string[]; enabledStatIds: string[]; enabledTagIds: string[] } | null;
 const PRIOR_EVENT_BY_TYPE: Record<"season" | "tournament", PriorEvent> = {
-  // Last season had Regular Season + Playoffs enabled (Pre-Season was disabled)
-  season: { name: "Winter 2026", enabledPhaseIds: ["regular", "playoffs"] },
-  // No tournament has been run yet → all phases default on
+  season: {
+    name: "Winter 2026",
+    enabledPhaseIds: ["regular", "playoffs"],
+    enabledStatIds: ["passing_yds", "rushing_yds", "touchdowns", "interceptions", "sacks", "flag_pulls", "receptions"],
+    enabledTagIds: ["championship", "semifinal", "quarterfinal"],
+  },
   tournament: null,
 };
 
+// Items newly-added to the library since the last event of that type.
+// Rule: default ON for brand-new events of the type; NOT retroactively applied to events already in progress.
+const NEW_SINCE_PRIOR: Record<"season" | "tournament", { phases: string[]; stats: string[]; tags: string[] }> = {
+  season: { phases: [], stats: [], tags: [] },
+  tournament: { phases: [], stats: [], tags: [] },
+};
+
+// Generic memory helper: prior-enabled items stay on; brand-new library items default on; everything else off.
+function applyMemory<T extends { id: string }>(
+  library: T[],
+  priorEnabledIds: string[] | null,
+  newSincePriorIds: string[]
+): T[] {
+  if (!priorEnabledIds) return [...library]; // no prior event of this type
+  return library.filter(item =>
+    priorEnabledIds.includes(item.id) || newSincePriorIds.includes(item.id)
+  );
+}
+
 function computeDefaultPhases(format: "season" | "tournament"): PhaseOption[] {
   const library = format === "season" ? SEASON_PHASES : TOURNAMENT_PHASES;
-  const prior = PRIOR_EVENT_BY_TYPE[format];
-  if (!prior) return [...library]; // first event of this type → all on
-  // Enable what was enabled last time, PLUS any phase that didn't exist yet in the prior event (new-to-library defaults on)
-  return library.filter(p => prior.enabledPhaseIds.includes(p.id) || !isKnownToPrior(p.id, format));
+  return applyMemory(library, PRIOR_EVENT_BY_TYPE[format]?.enabledPhaseIds ?? null, NEW_SINCE_PRIOR[format].phases);
 }
-// For mock purposes we treat any id NOT present in the prior enabled OR disabled set as "new since last event".
-// The prior event knows about all current SEASON_PHASES/TOURNAMENT_PHASES ids by default, except ones we flag here:
-const NEW_SINCE_PRIOR: Record<"season" | "tournament", string[]> = {
-  season: [], // e.g. add "pre" here to simulate Pre-Season being newly introduced
-  tournament: [],
-};
-function isKnownToPrior(id: string, format: "season" | "tournament") {
-  return !NEW_SINCE_PRIOR[format].includes(id);
+
+// Stat library
+type StatOption = { id: string; name: string };
+const STAT_LIBRARY: StatOption[] = [
+  { id: "passing_yds", name: "Passing Yards" },
+  { id: "rushing_yds", name: "Rushing Yards" },
+  { id: "touchdowns", name: "Touchdowns" },
+  { id: "interceptions", name: "Interceptions" },
+  { id: "sacks", name: "Sacks" },
+  { id: "flag_pulls", name: "Flag Pulls" },
+  { id: "receptions", name: "Receptions" },
+  { id: "pat", name: "PAT Conversions" },
+  { id: "safeties", name: "Safeties" },
+];
+function computeDefaultStats(format: "season" | "tournament"): StatOption[] {
+  return applyMemory(STAT_LIBRARY, PRIOR_EVENT_BY_TYPE[format]?.enabledStatIds ?? null, NEW_SINCE_PRIOR[format].stats);
 }
 
 export default function NewSeasonWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [eventFormat, setEventFormat] = useState<"season" | "tournament">("season");
   const [selectedPhases, setSelectedPhases] = useState<PhaseOption[]>(() => computeDefaultPhases("season"));
+  const [selectedStats, setSelectedStats] = useState<StatOption[]>(() => computeDefaultStats("season"));
   const [customPhaseName, setCustomPhaseName] = useState("");
   const [userTouchedPhases, setUserTouchedPhases] = useState(false);
+  const [userTouchedStats, setUserTouchedStats] = useState(false);
 
-  // Re-apply default memory when the event format changes, unless the user has manually edited phases.
+  // Re-apply default memory when the event format changes, unless the user has manually edited.
   useEffect(() => {
     if (!userTouchedPhases) setSelectedPhases(computeDefaultPhases(eventFormat));
-  }, [eventFormat, userTouchedPhases]);
+    if (!userTouchedStats) setSelectedStats(computeDefaultStats(eventFormat));
+  }, [eventFormat, userTouchedPhases, userTouchedStats]);
 
   const prior = PRIOR_EVENT_BY_TYPE[eventFormat];
-  const newPhaseIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat]), [eventFormat]);
+  const newPhaseIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat].phases), [eventFormat]);
+  const newStatIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat].stats), [eventFormat]);
 
   const togglePhase = (p: PhaseOption) => {
     setUserTouchedPhases(true);
@@ -393,30 +424,56 @@ export default function NewSeasonWizard() {
 
         {currentStep === 7 && (
           <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-foreground">Rules & Stats Tracking</h2>
-            <p className="text-sm text-muted-foreground">Configure rule presets and choose which stats to track this season.</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-              {[
-                { stat: "Passing Yards", on: true },
-                { stat: "Rushing Yards", on: true },
-                { stat: "Touchdowns", on: true },
-                { stat: "Interceptions", on: true },
-                { stat: "Sacks", on: true },
-                { stat: "Flag Pulls", on: true },
-                { stat: "Receptions", on: true },
-                { stat: "PAT Conversions", on: false },
-                { stat: "Safeties", on: false },
-              ].map(s => (
-                <label key={s.stat} className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer hover:bg-secondary/30">
-                  <span className="text-sm text-foreground">{s.stat}</span>
-                  <div className={`w-9 h-5 rounded-full transition-colors relative ${s.on ? "bg-primary" : "bg-border"}`}>
-                    <div className={`w-4 h-4 rounded-full bg-card absolute top-0.5 transition-transform ${s.on ? "translate-x-4" : "translate-x-0.5"}`} />
-                  </div>
-                </label>
-              ))}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Rules & Stats Tracking</h2>
+                <p className="text-sm text-muted-foreground">Configure rule presets and choose which stats to track this event.</p>
+              </div>
+              {userTouchedStats && (
+                <button type="button" onClick={() => { setSelectedStats(computeDefaultStats(eventFormat)); setUserTouchedStats(false); }}
+                  className="shrink-0 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:bg-secondary">
+                  Reset to defaults
+                </button>
+              )}
+            </div>
+
+            {/* Memory hint */}
+            <div className={`flex items-start gap-2.5 p-3 rounded-lg border ${prior ? "border-primary/20 bg-primary/5" : "border-border bg-secondary/40"}`}>
+              {prior ? <History className="h-4 w-4 text-primary mt-0.5 shrink-0" /> : <Sparkles className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+              <div className="text-xs text-foreground/80 leading-relaxed">
+                {prior ? (
+                  <>Stats carried over from your last {eventFormat}: <span className="font-medium text-foreground">{prior.name}</span>. Any stats added to the library since then are enabled by default too.</>
+                ) : (
+                  <>No prior {eventFormat} found — all stats are enabled by default. Your choices here become the memory for the next {eventFormat}.</>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+              {STAT_LIBRARY.map(s => {
+                const on = !!selectedStats.find(x => x.id === s.id);
+                const isNew = newStatIds.has(s.id);
+                const wasInPrior = prior?.enabledStatIds.includes(s.id);
+                return (
+                  <label key={s.id} className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer hover:bg-secondary/30"
+                    onClick={(e) => { e.preventDefault(); setUserTouchedStats(true); setSelectedStats(prev => on ? prev.filter(x => x.id !== s.id) : [...prev, s]); }}>
+                    <div className="min-w-0">
+                      <div className="text-sm text-foreground flex items-center gap-1.5 flex-wrap">
+                        {s.name}
+                        {isNew && <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary">New</span>}
+                        {!isNew && prior && wasInPrior && <span className="text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">Last event</span>}
+                      </div>
+                    </div>
+                    <div className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${on ? "bg-primary" : "bg-border"}`}>
+                      <div className={`w-4 h-4 rounded-full bg-card absolute top-0.5 transition-transform ${on ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
         )}
+
 
         {currentStep === 8 && (
           <div className="space-y-5">
