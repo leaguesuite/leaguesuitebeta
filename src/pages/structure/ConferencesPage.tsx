@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useMemo, useState } from "react";
 import { Plus, Trash2, Layers, ChevronDown, ChevronRight, Library, Calendar, X, Check, Info, Users, ArrowRight } from "lucide-react";
 

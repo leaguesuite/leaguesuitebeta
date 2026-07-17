@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { MapPin, Plus, Trash2, Edit, ExternalLink, ChevronDown, ChevronRight, X, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

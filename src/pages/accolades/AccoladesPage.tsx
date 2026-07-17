@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Plus, Search, Trophy, Star, Award, Medal, Crown, Target, Zap, Edit, Trash2, ArrowLeft, X, Users, UserCheck, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

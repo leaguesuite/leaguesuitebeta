@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Plus, Edit, Trash2, Tag, ArrowUp, ArrowDown, CalendarDays, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
