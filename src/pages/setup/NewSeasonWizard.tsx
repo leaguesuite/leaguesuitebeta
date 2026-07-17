@@ -225,16 +225,40 @@ export default function NewSeasonWizard() {
 
         {currentStep === 4 && (
           <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-foreground">Phases</h2>
-            <p className="text-sm text-muted-foreground">
-              Pick which phases this event will include. Games and standings will be grouped by these phases (e.g. Regular Season + Playoffs, or Round Robin + Knockout).
-            </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Phases</h2>
+                <p className="text-sm text-muted-foreground">
+                  Pick which phases this event will include. Games and standings will be grouped by these phases.
+                </p>
+              </div>
+              {userTouchedPhases && (
+                <button type="button" onClick={resetToDefaults}
+                  className="shrink-0 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:bg-secondary">
+                  Reset to defaults
+                </button>
+              )}
+            </div>
+
+            {/* Memory hint */}
+            <div className={`flex items-start gap-2.5 p-3 rounded-lg border ${prior ? "border-primary/20 bg-primary/5" : "border-border bg-secondary/40"}`}>
+              {prior ? <History className="h-4 w-4 text-primary mt-0.5 shrink-0" /> : <Sparkles className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+              <div className="text-xs text-foreground/80 leading-relaxed">
+                {prior ? (
+                  <>Defaults carried over from your last {eventFormat}: <span className="font-medium text-foreground">{prior.name}</span>. Any phases added to the library since then are enabled by default too.</>
+                ) : (
+                  <>No prior {eventFormat} found in this league — all phases are enabled by default. Your choices here will become the memory for the next {eventFormat}.</>
+                )}
+              </div>
+            </div>
 
             <div>
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Suggested phases</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {(eventFormat === "season" ? SEASON_PHASES : TOURNAMENT_PHASES).map(p => {
                   const active = !!selectedPhases.find(x => x.id === p.id);
+                  const isNew = newPhaseIds.has(p.id);
+                  const wasInPrior = prior?.enabledPhaseIds.includes(p.id);
                   return (
                     <button
                       key={p.id}
@@ -244,13 +268,21 @@ export default function NewSeasonWizard() {
                         active ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"
                       }`}
                     >
-                      <div>
-                        <div className="text-sm font-medium text-foreground">{p.name}</div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-foreground flex items-center gap-2 flex-wrap">
+                          {p.name}
+                          {isNew && (
+                            <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary">New phase</span>
+                          )}
+                          {!isNew && prior && wasInPrior && (
+                            <span className="text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">From last event</span>
+                          )}
+                        </div>
                         <div className="text-[11px] text-muted-foreground">
                           {p.numbering === "weeks" ? "Grouped by week" : "Grouped by round"}
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-md flex items-center justify-center ${active ? "bg-primary text-primary-foreground" : "border border-border"}`}>
+                      <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${active ? "bg-primary text-primary-foreground" : "border border-border"}`}>
                         {active && <Check className="h-3.5 w-3.5" />}
                       </div>
                     </button>
@@ -258,6 +290,8 @@ export default function NewSeasonWizard() {
                 })}
               </div>
             </div>
+
+
 
             <div>
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Selected phases (in order)</div>
