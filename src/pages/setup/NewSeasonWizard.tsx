@@ -1,14 +1,27 @@
 import { useState } from "react";
-import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, CalendarDays, Zap } from "lucide-react";
+import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, CalendarDays, Zap, ListOrdered, Plus, X } from "lucide-react";
 
 const steps = [
   { id: 1, label: "Select League", icon: Trophy },
   { id: 2, label: "Name & Event Format", icon: CalendarDays },
   { id: 3, label: "Categories & Divisions", icon: Layers },
-  { id: 4, label: "Conferences", icon: Zap },
-  { id: 5, label: "Locations & Fields", icon: MapPin },
-  { id: 6, label: "Rules & Stats", icon: Settings },
-  { id: 7, label: "Review & Launch", icon: Eye },
+  { id: 4, label: "Phases", icon: ListOrdered },
+  { id: 5, label: "Conferences", icon: Zap },
+  { id: 6, label: "Locations & Fields", icon: MapPin },
+  { id: 7, label: "Rules & Stats", icon: Settings },
+  { id: 8, label: "Review & Launch", icon: Eye },
+];
+
+type PhaseOption = { id: string; name: string; numbering: "weeks" | "rounds"; group: "season" | "tournament" };
+const SEASON_PHASES: PhaseOption[] = [
+  { id: "regular", name: "Regular Season", numbering: "weeks", group: "season" },
+  { id: "pre", name: "Pre-Season", numbering: "weeks", group: "season" },
+  { id: "playoffs", name: "Playoffs", numbering: "rounds", group: "season" },
+];
+const TOURNAMENT_PHASES: PhaseOption[] = [
+  { id: "opening", name: "Opening Round", numbering: "rounds", group: "tournament" },
+  { id: "roundrobin", name: "Round Robin", numbering: "rounds", group: "tournament" },
+  { id: "elimination", name: "Elimination Round", numbering: "rounds", group: "tournament" },
 ];
 
 export default function NewSeasonWizard() {
