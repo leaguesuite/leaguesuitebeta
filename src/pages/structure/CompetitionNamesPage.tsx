@@ -23,12 +23,12 @@ type Phase = {
 };
 
 const initial: Phase[] = [
-  { id: 1, name: "Regular Season", description: "Standard weekly league play used for standings.", group: "season", numbering: "weeks", status: "active" },
-  { id: 2, name: "Pre-Season", description: "Warm-up games before the regular season.", group: "season", numbering: "weeks", status: "active" },
-  { id: 3, name: "Playoffs", description: "Post-season elimination rounds.", group: "season", numbering: "rounds", status: "active" },
-  { id: 4, name: "Opening Round", description: "Initial tournament games.", group: "tournament", numbering: "rounds", status: "active" },
-  { id: 5, name: "Round Robin", description: "Pool play where teams face each opponent.", group: "tournament", numbering: "rounds", status: "active" },
-  { id: 6, name: "Elimination Round", description: "Knockout stage to determine champion.", group: "tournament", numbering: "rounds", status: "active" },
+  { id: 1, name: "Regular Season", description: "Standard weekly league play used for standings.", group: "season", numbering: "weeks", hasStandings: true, status: "active" },
+  { id: 2, name: "Pre-Season", description: "Warm-up games before the regular season.", group: "season", numbering: "weeks", hasStandings: false, status: "active" },
+  { id: 3, name: "Playoffs", description: "Post-season elimination rounds.", group: "season", numbering: "rounds", hasStandings: false, status: "active" },
+  { id: 4, name: "Opening Round", description: "Initial tournament games.", group: "tournament", numbering: "rounds", hasStandings: false, status: "active" },
+  { id: 5, name: "Round Robin", description: "Pool play where teams face each opponent.", group: "tournament", numbering: "rounds", hasStandings: true, status: "active" },
+  { id: 6, name: "Elimination Round", description: "Knockout stage to determine champion.", group: "tournament", numbering: "rounds", hasStandings: false, status: "active" },
 ];
 
 export default function CompetitionNamesPage() {
