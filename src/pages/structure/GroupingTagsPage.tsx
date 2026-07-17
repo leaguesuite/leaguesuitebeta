@@ -130,7 +130,7 @@ export default function GroupingTagsPage() {
             {et === "season"
               ? <CalendarDays className="h-4 w-4 text-primary" />
               : <Trophy className="h-4 w-4 text-primary" />}
-            <h2 className="text-base font-semibold text-foreground">{eventTypeLabel[et]} Event Type</h2>
+            <h2 className="text-base font-semibold text-foreground">{eventTypeLabel[et]} Phase Type</h2>
           </div>
 
           {phasesByType[et].map(phase => {
