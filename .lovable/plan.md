@@ -1,76 +1,89 @@
-# Playoff & Bracket Manager — Wizard + Advancement Overhaul
+# Fix: Make "current league" explicit across the admin
 
-Replace the current `src/pages/season/BracketsPage.tsx` flow with an interactive, mock-data-backed Playoff Wizard and supporting bracket controls. All work stays in frontend/presentation (no API changes).
+## The problem
 
-## Scope (chosen by user)
+The header shows the tenant (Metro Flag League), but most configuration lives at the **league** level — Events, Phases, Tags, Categories, Divisions, Conferences, Locations, Standings Rules, Stats Tracking, Scorekeeper Categories, Games, Teams, Brackets, Standings, Reports, etc. Right now there's no way to tell (or change) which league those pages apply to. Single-league tenants barely notice; multi-league tenants have no way to work safely.
 
-**Core advancement set**
-1. Bracket ↔ Schedule visual link (per match: game ID, date, time, field, status)
-2. Pending advancement state (greyed feeder slots + per-round "Awaiting results" banner for reseeding)
-3. Rollback / unadvance action (cascade preview before applying)
-4. Advancement confirmation modal — review proposed advancers, then Apply (mobile-friendly)
-5. Scorekeeper sync banner across the bracket view
+## Recommended UX: a persistent League Switcher
 
-**Setup & safety set**
-6. Seed source selector per division/split (standings-as-of timestamp vs manual)
-7. Bracket templates (save/load named configurations)
-8. Public visibility toggle per round
-9. Conflict warnings step in wizard (field / referee / team double-book detection)
+The cleanest pattern for multi-tenant SaaS with a nested scope (Linear's workspace/team switcher, Vercel's team/project, Shopify's store) is a **single always-visible scope switcher** that every scoped page reads from. One source of truth, zero ambiguity.
 
-## New entry point
+### 1. Tenant + League switcher in the header (top-left of the sidebar area)
 
-`/season/brackets` is rebuilt around the wizard. Existing manual bracket UI is preserved internally and surfaced as the wizard's final "Review & Edit" step.
-
-## File changes
-
-**Replaced**
-- `src/pages/season/BracketsPage.tsx` — becomes a shell that hosts `PlayoffWizard` (default view) and the existing manual editor (post-publish view).
-
-**New under `src/components/playoffs/`**
-- `PlayoffWizard.tsx` — multi-step wrapper, mock state in component
-- `steps/FormatStep.tsx` — team count, bracket type (fixed / reseeding / pool-crossover), round count + names, bronze game toggle
-- `steps/SeedSourceStep.tsx` — per-division: "Use standings as of [datetime]" or "Manual entry"; ties detected → tiebreaker note (no modal in this scope)
-- `steps/PreviewStep.tsx` — renders full bracket with placeholder seed labels, public-visibility toggle per round
-- `steps/ConflictsStep.tsx` — runs mock detector over scheduled games and lists field/team/ref overlaps with severity chips
-- `steps/TemplatesPanel.tsx` — save current config as template, load existing (localStorage-backed mock)
-- `AdvancementConfirmDialog.tsx` — modal showing proposed advancers from completed games + Apply / Cancel; responsive layout
-- `RollbackDialog.tsx` — pick a match, shows downstream cascade list, Confirm rollback
-- `BracketGameLinkBadge.tsx` — small chip on each match: `Game #G-128 · Sat 7:00 PM · Field 2 · Final`
-- `PendingFeederSlot.tsx` — greyed "Winner of Game #G-118" slot styling + tooltip
-- `ReseedingBanner.tsx` — round-level "Awaiting all QF results to reseed" banner
-- `ScorekeeperSyncBanner.tsx` — sticky top banner: "Scorekeeper app last synced 2m ago · Re-sync"
-
-**New mock data**
-- `src/data/mockPlayoffs.ts` — divisions, scheduled playoff games (with mock conflicts), template presets
-
-## Wizard flow
+Replace the current top-right "Metro Flag League" chip with a proper two-level switcher pinned to the **top of the sidebar** (above the nav), so it reads like a breadcrumb of scope:
 
 ```text
-1. Format        → teams, type, rounds, bronze
-2. Seed Source   → per division/split
-3. Preview       → bracket with placeholders + per-round public toggle
-4. Conflicts     → list with severity chips, "Acknowledge & continue"
-5. Templates     → optional save
-6. Publish       → returns to bracket view with new bracket loaded
+┌─────────────────────────────┐
+│ 🏢 Acme Sports Group     ▾ │  ← tenant (rarely changes)
+│  └ 🏈 Metro Flag League  ▾ │  ← active league (changes often)
+├─────────────────────────────┤
+│  Dashboard                  │
+│  Events                     │
+│  Phases                     │
+│  …                          │
+└─────────────────────────────┘
 ```
 
-Templates panel is also accessible as a side button on step 1 (Load template).
+- Clicking the league row opens a popover listing all leagues in the tenant with search, plus "Manage leagues →" linking to `/structure/leagues`.
+- Switching league re-scopes every league-level page instantly (React Query invalidates, URL stays on the same page).
+- The tenant row is only interactive for users who belong to multiple tenants; otherwise it's a static label.
 
-## Bracket view additions (post-publish)
+### 2. Page-level league badge on every scoped page
 
-- `ScorekeeperSyncBanner` at top
-- Each `MatchCard` gains `BracketGameLinkBadge` and `PendingFeederSlot` rendering
-- Round headers gain `ReseedingBanner` when bracket is reseeding and prior round incomplete
-- Toolbar buttons: **Advance from results** (opens `AdvancementConfirmDialog`), **Rollback** (opens `RollbackDialog`), **Public visibility** (per-round toggles in popover)
+Every league-scoped page gets a small header strip below the page title:
 
-## Technical details
+```text
+Events
+Managing: 🏈 Metro Flag League  ·  Switch league
+```
 
-- Pure frontend. State held in `useState`/`useReducer` inside `PlayoffWizard` and `BracketsPage`. Templates use `localStorage` key `playoff_templates_v1`.
-- Conflict detector: pure function over mock schedule comparing `(field, datetime±90min)`, `(team, date)`, `(referee, datetime±90min)`.
-- Reuses `Dialog`, `Card`, `Button`, `Switch`, `Select`, `Tabs`, `Badge`, `Tooltip` from `@/components/ui/*`. Reuses existing `MatchCard` and `bracketGenerator` utils.
-- Styling follows the `section-card` admin pattern from memory; semantic tokens only.
-- No routing changes; `/season/brackets` continues to mount `BracketsPage`.
+This is redundant with the sidebar switcher on purpose — it prevents mistakes when an admin bulk-edits Divisions or Phases and forgets which league they're in. The "Switch league" link opens the same popover.
 
-## Out of scope (deferred items the user didn't pick)
+### 3. Classify every menu item by scope
 
-Change log, notification triggers, tiebreaker modal, forfeit/DQ outcome — not built now; can be added later.
+Add a tiny scope indicator in the sidebar so users learn what applies where:
+
+- **Tenant-level** (no league needed): Members, Leagues, Users & Permissions, Branding, Domains, General Settings
+- **League-level** (uses active league): Events, Phases, Tags, Categories, Divisions, Conferences & Subgroups, Locations & Fields, Standings Rules, Stats Tracking, Scorekeeper Categories
+- **Event-level** (uses active league + selected event): Games, Teams & Rosters, Standings, Brackets, Stats, Reports
+
+Visually: group them under section labels already present, and add a subtle "· league" caption under the section header for the league-scoped groups. When the user is on a tenant-level page, the league switcher dims to signal "not in use here."
+
+### 4. Persistence & URL
+
+- Persist active league id in `localStorage` (`activeLeagueId`) and expose via a `LeagueContext` provider wrapping `AppLayout`.
+- Also reflect it in the URL as a query param on scoped pages (`?league=<id>`) so shared links land in the correct scope. If the param disagrees with localStorage, the URL wins and updates storage.
+- If a user has zero leagues, scoped pages show an empty state pointing to "Create your first league".
+
+### 5. Event-level scope (bonus, same pattern)
+
+Games/Teams/Standings/Brackets pages already imply a current season/event. Add a second lightweight chip on those pages: `Metro Flag League › Spring 2026 ▾` so admins can jump between events without going back to Events.
+
+## What this plan will change
+
+**New:**
+- `src/contexts/LeagueContext.tsx` — provider with `activeLeagueId`, `setActiveLeagueId`, `leagues[]`, tenant info. Reads/writes localStorage, syncs with `?league=` param.
+- `src/components/layout/LeagueSwitcher.tsx` — the tenant/league popover for the sidebar.
+- `src/components/layout/PageScopeBanner.tsx` — the "Managing: <league> · Switch league" strip used on every league-scoped page.
+
+**Modified:**
+- `src/components/layout/AppSidebar.tsx` — mount `LeagueSwitcher` at the top; add scope captions to league-scoped groups.
+- `src/components/layout/AppHeader.tsx` — remove the redundant "Metro Flag League" chip on the right (now redundant with the sidebar switcher); keep tenant name only if multi-tenant.
+- `src/components/layout/AppLayout.tsx` — wrap in `LeagueProvider`.
+- All league-scoped pages under `src/pages/structure/*`, `src/pages/season/*`, `src/pages/scorekeeper/*` — mount `<PageScopeBanner />` under the page title. No business-logic changes yet; data hooks continue returning mock data but will read `activeLeagueId` so wiring to real data later is a one-line change.
+
+**Not changing:**
+- Tenant-level pages (Members, Leagues, Branding, Domains, Users & Permissions, General settings) — they get no banner and the sidebar switcher visibly dims.
+- Data fetching logic and mock data.
+- Any business rules, routing structure, or copy other than the scope banner.
+
+## Technical notes (for the dev reader)
+
+- `LeagueContext` value: `{ tenant, leagues, activeLeague, activeLeagueId, setActiveLeagueId, isMultiLeague }`. Consumers use a `useActiveLeague()` hook.
+- Route-level scope classification lives in a single `src/lib/routeScope.ts` map (`route → 'tenant' | 'league' | 'event'`) so the sidebar and banners agree.
+- Query keys for league-scoped `useQuery` calls should include `activeLeagueId` so switching leagues auto-invalidates.
+- No new dependencies.
+
+## Open question before I build
+
+Do you want the switcher **at the top of the sidebar** (recommended — matches Linear/Vercel and keeps the header clean) or **in the top header bar** replacing the current chip? Both work; the sidebar placement reads more naturally as "scope" and gives room for the tenant → league hierarchy on two lines.
