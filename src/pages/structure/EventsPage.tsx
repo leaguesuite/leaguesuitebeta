@@ -403,8 +403,11 @@ export default function EventsPage() {
                 <Trophy className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Tournaments</h2>
-                <p className="text-xs text-muted-foreground">{tournaments.length} {tournaments.length === 1 ? "event" : "events"}</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold text-foreground">Tournaments</h2>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">Event Type</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{tournaments.length} {tournaments.length === 1 ? "event" : "events"} · one-off competitions</p>
               </div>
             </div>
           </div>
