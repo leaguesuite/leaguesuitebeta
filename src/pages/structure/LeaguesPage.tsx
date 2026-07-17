@@ -191,7 +191,7 @@ export default function LeaguesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end items-center gap-1">
-                      <Button variant="outline" size="sm" className="gap-1.5">
+                      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate("/settings/general")}>
                         <Settings className="h-3.5 w-3.5" /> Settings
                       </Button>
                       <DropdownMenu>
