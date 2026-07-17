@@ -29,6 +29,7 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
   },
   {
     title: "Active Season",
+    scope: "event",
     items: [
       {
         label: "Active Season", icon: CalendarDays,
