@@ -17,8 +17,8 @@ export default function PageScopeBanner({ scope = "league" }: { scope?: "league"
   const label = scope === "event" ? "Event scope in" : "Managing";
 
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground -mt-3 mb-1">
-      <span>Managing:</span>
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <span>{label}:</span>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
