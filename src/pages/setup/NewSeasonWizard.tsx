@@ -27,37 +27,66 @@ const TOURNAMENT_PHASES: PhaseOption[] = [
 
 // Mock "previous event" memory. In production this comes from the last completed
 // event of the same type in the active league. `null` = no prior event of that type yet.
-type PriorEvent = { name: string; enabledPhaseIds: string[] } | null;
+type PriorEvent = { name: string; enabledPhaseIds: string[]; enabledStatIds: string[]; enabledTagIds: string[] } | null;
 const PRIOR_EVENT_BY_TYPE: Record<"season" | "tournament", PriorEvent> = {
-  // Last season had Regular Season + Playoffs enabled (Pre-Season was disabled)
-  season: { name: "Winter 2026", enabledPhaseIds: ["regular", "playoffs"] },
-  // No tournament has been run yet → all phases default on
+  season: {
+    name: "Winter 2026",
+    enabledPhaseIds: ["regular", "playoffs"],
+    enabledStatIds: ["passing_yds", "rushing_yds", "touchdowns", "interceptions", "sacks", "flag_pulls", "receptions"],
+    enabledTagIds: ["championship", "semifinal", "quarterfinal"],
+  },
   tournament: null,
 };
 
+// Items newly-added to the library since the last event of that type.
+// Rule: default ON for brand-new events of the type; NOT retroactively applied to events already in progress.
+const NEW_SINCE_PRIOR: Record<"season" | "tournament", { phases: string[]; stats: string[]; tags: string[] }> = {
+  season: { phases: [], stats: [], tags: [] },
+  tournament: { phases: [], stats: [], tags: [] },
+};
+
+// Generic memory helper: prior-enabled items stay on; brand-new library items default on; everything else off.
+function applyMemory<T extends { id: string }>(
+  library: T[],
+  priorEnabledIds: string[] | null,
+  newSincePriorIds: string[]
+): T[] {
+  if (!priorEnabledIds) return [...library]; // no prior event of this type
+  return library.filter(item =>
+    priorEnabledIds.includes(item.id) || newSincePriorIds.includes(item.id)
+  );
+}
+
 function computeDefaultPhases(format: "season" | "tournament"): PhaseOption[] {
   const library = format === "season" ? SEASON_PHASES : TOURNAMENT_PHASES;
-  const prior = PRIOR_EVENT_BY_TYPE[format];
-  if (!prior) return [...library]; // first event of this type → all on
-  // Enable what was enabled last time, PLUS any phase that didn't exist yet in the prior event (new-to-library defaults on)
-  return library.filter(p => prior.enabledPhaseIds.includes(p.id) || !isKnownToPrior(p.id, format));
+  return applyMemory(library, PRIOR_EVENT_BY_TYPE[format]?.enabledPhaseIds ?? null, NEW_SINCE_PRIOR[format].phases);
 }
-// For mock purposes we treat any id NOT present in the prior enabled OR disabled set as "new since last event".
-// The prior event knows about all current SEASON_PHASES/TOURNAMENT_PHASES ids by default, except ones we flag here:
-const NEW_SINCE_PRIOR: Record<"season" | "tournament", string[]> = {
-  season: [], // e.g. add "pre" here to simulate Pre-Season being newly introduced
-  tournament: [],
-};
-function isKnownToPrior(id: string, format: "season" | "tournament") {
-  return !NEW_SINCE_PRIOR[format].includes(id);
+
+// Stat library
+type StatOption = { id: string; name: string };
+const STAT_LIBRARY: StatOption[] = [
+  { id: "passing_yds", name: "Passing Yards" },
+  { id: "rushing_yds", name: "Rushing Yards" },
+  { id: "touchdowns", name: "Touchdowns" },
+  { id: "interceptions", name: "Interceptions" },
+  { id: "sacks", name: "Sacks" },
+  { id: "flag_pulls", name: "Flag Pulls" },
+  { id: "receptions", name: "Receptions" },
+  { id: "pat", name: "PAT Conversions" },
+  { id: "safeties", name: "Safeties" },
+];
+function computeDefaultStats(format: "season" | "tournament"): StatOption[] {
+  return applyMemory(STAT_LIBRARY, PRIOR_EVENT_BY_TYPE[format]?.enabledStatIds ?? null, NEW_SINCE_PRIOR[format].stats);
 }
 
 export default function NewSeasonWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [eventFormat, setEventFormat] = useState<"season" | "tournament">("season");
   const [selectedPhases, setSelectedPhases] = useState<PhaseOption[]>(() => computeDefaultPhases("season"));
+  const [selectedStats, setSelectedStats] = useState<StatOption[]>(() => computeDefaultStats("season"));
   const [customPhaseName, setCustomPhaseName] = useState("");
   const [userTouchedPhases, setUserTouchedPhases] = useState(false);
+  const [userTouchedStats, setUserTouchedStats] = useState(false);
 
   // Re-apply default memory when the event format changes, unless the user has manually edited phases.
   useEffect(() => {
