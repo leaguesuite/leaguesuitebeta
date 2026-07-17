@@ -11,9 +11,10 @@ import {
  * Renders a compact "Managing: <league>" strip. Place at the top of any
  * league-scoped page so admins always know which league they are editing.
  */
-export default function PageScopeBanner() {
+export default function PageScopeBanner({ scope = "league" }: { scope?: "league" | "event" }) {
   const { leagues, activeLeague, setActiveLeagueId, isMultiLeague } = useActiveLeague();
   const [open, setOpen] = useState(false);
+  const label = scope === "event" ? "Event scope in" : "Managing";
 
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground -mt-3 mb-1">
