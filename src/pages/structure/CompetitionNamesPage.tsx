@@ -35,17 +35,17 @@ export default function CompetitionNamesPage() {
   const [items, setItems] = useState<Phase[]>(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Phase | null>(null);
-  const [form, setForm] = useState<{ name: string; description: string; group: PhaseGroup; numbering: Numbering }>({ name: "", description: "", group: "season", numbering: "weeks" });
+  const [form, setForm] = useState<{ name: string; description: string; group: PhaseGroup; hasStandings: boolean }>({ name: "", description: "", group: "season", hasStandings: false });
 
   const openNew = (group: PhaseGroup) => {
     setEditing(null);
-    setForm({ name: "", description: "", group, numbering: "weeks" });
+    setForm({ name: "", description: "", group, hasStandings: false });
     setOpen(true);
   };
 
   const openEdit = (p: Phase) => {
     setEditing(p);
-    setForm({ name: p.name, description: p.description, group: p.group, numbering: p.numbering });
+    setForm({ name: p.name, description: p.description, group: p.group, hasStandings: p.hasStandings });
     setOpen(true);
   };
 
@@ -60,7 +60,7 @@ export default function CompetitionNamesPage() {
       toast({ title: "Phase updated" });
     } else {
       const id = Math.max(0, ...items.map(i => i.id)) + 1;
-      setItems(prev => [...prev, { id, name: form.name, description: form.description, group: form.group, numbering: form.numbering, status: "active" }]);
+      setItems(prev => [...prev, { id, name: form.name, description: form.description, group: form.group, numbering: "weeks", hasStandings: form.hasStandings, status: "active" }]);
       toast({ title: "Phase added" });
     }
     setOpen(false);
