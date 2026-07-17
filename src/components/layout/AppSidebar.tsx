@@ -59,6 +59,7 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
   },
   {
     title: "Configuration",
+    scope: "league",
     items: [
       {
         label: "League Structure", icon: Trophy,
