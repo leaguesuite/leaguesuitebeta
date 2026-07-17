@@ -1682,32 +1682,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_award_org_id: { Args: { _award_id: string }; Returns: string }
-      get_bracket_org_id: { Args: { _bracket_id: string }; Returns: string }
-      get_category_org_id: { Args: { _category_id: string }; Returns: string }
-      get_division_org_id: { Args: { _division_id: string }; Returns: string }
-      get_form_org_id: { Args: { _form_id: string }; Returns: string }
-      get_game_org_id: { Args: { _game_id: string }; Returns: string }
-      get_league_org_id: { Args: { _league_id: string }; Returns: string }
-      get_location_org_id: { Args: { _location_id: string }; Returns: string }
-      get_member_org_id: { Args: { _member_id: string }; Returns: string }
-      get_org_role: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: Database["public"]["Enums"]["org_role"]
-      }
-      get_season_org_id: { Args: { _season_id: string }; Returns: string }
-      get_team_org_id: { Args: { _team_id: string }; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_org_member: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
