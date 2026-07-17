@@ -1,18 +1,59 @@
 import { useState } from "react";
-import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, CalendarDays, Zap } from "lucide-react";
+import { Check, ChevronRight, Trophy, Layers, MapPin, Settings, BarChart3, Eye, CalendarDays, Zap, ListOrdered, Plus, X } from "lucide-react";
 
 const steps = [
   { id: 1, label: "Select League", icon: Trophy },
   { id: 2, label: "Name & Event Format", icon: CalendarDays },
   { id: 3, label: "Categories & Divisions", icon: Layers },
-  { id: 4, label: "Conferences", icon: Zap },
-  { id: 5, label: "Locations & Fields", icon: MapPin },
-  { id: 6, label: "Rules & Stats", icon: Settings },
-  { id: 7, label: "Review & Launch", icon: Eye },
+  { id: 4, label: "Phases", icon: ListOrdered },
+  { id: 5, label: "Conferences", icon: Zap },
+  { id: 6, label: "Locations & Fields", icon: MapPin },
+  { id: 7, label: "Rules & Stats", icon: Settings },
+  { id: 8, label: "Review & Launch", icon: Eye },
+];
+
+type PhaseOption = { id: string; name: string; numbering: "weeks" | "rounds"; group: "season" | "tournament" };
+const SEASON_PHASES: PhaseOption[] = [
+  { id: "regular", name: "Regular Season", numbering: "weeks", group: "season" },
+  { id: "pre", name: "Pre-Season", numbering: "weeks", group: "season" },
+  { id: "playoffs", name: "Playoffs", numbering: "rounds", group: "season" },
+];
+const TOURNAMENT_PHASES: PhaseOption[] = [
+  { id: "opening", name: "Opening Round", numbering: "rounds", group: "tournament" },
+  { id: "roundrobin", name: "Round Robin", numbering: "rounds", group: "tournament" },
+  { id: "elimination", name: "Elimination Round", numbering: "rounds", group: "tournament" },
 ];
 
 export default function NewSeasonWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [eventFormat, setEventFormat] = useState<"season" | "tournament">("season");
+  const [selectedPhases, setSelectedPhases] = useState<PhaseOption[]>([
+    SEASON_PHASES[0], SEASON_PHASES[2],
+  ]);
+  const [customPhaseName, setCustomPhaseName] = useState("");
+
+  const togglePhase = (p: PhaseOption) => {
+    setSelectedPhases(prev =>
+      prev.find(x => x.id === p.id) ? prev.filter(x => x.id !== p.id) : [...prev, p]
+    );
+  };
+  const addCustomPhase = () => {
+    if (!customPhaseName.trim()) return;
+    setSelectedPhases(prev => [...prev, {
+      id: `custom-${Date.now()}`, name: customPhaseName.trim(), numbering: "rounds", group: eventFormat,
+    }]);
+    setCustomPhaseName("");
+  };
+  const removePhase = (id: string) => setSelectedPhases(prev => prev.filter(p => p.id !== id));
+  const movePhase = (idx: number, dir: -1 | 1) => {
+    setSelectedPhases(prev => {
+      const next = [...prev];
+      const j = idx + dir;
+      if (j < 0 || j >= next.length) return prev;
+      [next[idx], next[j]] = [next[j], next[idx]];
+      return next;
+    });
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -88,9 +129,13 @@ export default function NewSeasonWizard() {
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">Event Format</label>
-                <select className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20">
-                  <option>Season + Playoffs</option>
-                  <option>Tournament</option>
+                <select
+                  value={eventFormat}
+                  onChange={(e) => setEventFormat(e.target.value as "season" | "tournament")}
+                  className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20"
+                >
+                  <option value="season">Season + Playoffs</option>
+                  <option value="tournament">Tournament</option>
                 </select>
               </div>
               <div>
@@ -138,6 +183,95 @@ export default function NewSeasonWizard() {
 
         {currentStep === 4 && (
           <div className="space-y-5">
+            <h2 className="text-lg font-semibold text-foreground">Phases</h2>
+            <p className="text-sm text-muted-foreground">
+              Pick which phases this event will include. Games and standings will be grouped by these phases (e.g. Regular Season + Playoffs, or Round Robin + Knockout).
+            </p>
+
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Suggested phases</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {(eventFormat === "season" ? SEASON_PHASES : TOURNAMENT_PHASES).map(p => {
+                  const active = !!selectedPhases.find(x => x.id === p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => togglePhase(p)}
+                      className={`flex items-center justify-between p-3 rounded-lg border-2 text-left transition-all ${
+                        active ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"
+                      }`}
+                    >
+                      <div>
+                        <div className="text-sm font-medium text-foreground">{p.name}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {p.numbering === "weeks" ? "Grouped by week" : "Grouped by round"}
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-md flex items-center justify-center ${active ? "bg-primary text-primary-foreground" : "border border-border"}`}>
+                        {active && <Check className="h-3.5 w-3.5" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Selected phases (in order)</div>
+              {selectedPhases.length === 0 ? (
+                <div className="p-6 text-center border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground">
+                  No phases selected yet.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedPhases.map((p, idx) => (
+                    <div key={p.id} className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-card">
+                      <span className="w-6 h-6 rounded-md bg-secondary text-xs font-semibold flex items-center justify-center text-foreground">{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-foreground truncate">{p.name}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {p.numbering === "weeks" ? "Week numbering" : "Round numbering"}
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => movePhase(idx, -1)} disabled={idx === 0}
+                        className="h-7 w-7 rounded-md border border-border text-xs text-muted-foreground hover:bg-secondary disabled:opacity-30">↑</button>
+                      <button type="button" onClick={() => movePhase(idx, 1)} disabled={idx === selectedPhases.length - 1}
+                        className="h-7 w-7 rounded-md border border-border text-xs text-muted-foreground hover:bg-secondary disabled:opacity-30">↓</button>
+                      <button type="button" onClick={() => removePhase(p.id)}
+                        className="h-7 w-7 rounded-md border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Add a custom phase</div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customPhaseName}
+                  onChange={(e) => setCustomPhaseName(e.target.value)}
+                  placeholder="e.g. Knockout Round, Group Stage"
+                  className="h-10 flex-1 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20"
+                />
+                <button
+                  type="button"
+                  onClick={addCustomPhase}
+                  className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+                >
+                  <Plus className="h-4 w-4" /> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 5 && (
+          <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Conferences & Subdivisions</h2>
             <p className="text-sm text-muted-foreground">Optionally configure conferences and subdivisions for applicable divisions.</p>
             <div className="p-8 text-center border-2 border-dashed border-border rounded-xl">
@@ -151,7 +285,7 @@ export default function NewSeasonWizard() {
           </div>
         )}
 
-        {currentStep === 5 && (
+        {currentStep === 6 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Locations & Fields</h2>
             <p className="text-sm text-muted-foreground">Assign game locations and fields for this season.</p>
@@ -181,7 +315,7 @@ export default function NewSeasonWizard() {
           </div>
         )}
 
-        {currentStep === 6 && (
+        {currentStep === 7 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Rules & Stats Tracking</h2>
             <p className="text-sm text-muted-foreground">Configure rule presets and choose which stats to track this season.</p>
@@ -208,7 +342,7 @@ export default function NewSeasonWizard() {
           </div>
         )}
 
-        {currentStep === 7 && (
+        {currentStep === 8 && (
           <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Review & Launch</h2>
             <p className="text-sm text-muted-foreground">Review your season configuration before launching.</p>
