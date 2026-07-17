@@ -68,6 +68,7 @@ const SPORT_TYPES = ["Flag Football", "Basketball", "Soccer", "Volleyball", "Sof
 
 export default function LeaguesPage() {
   const [leagues, setLeagues] = useState<League[]>(MOCK_LEAGUES);
+  const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [editLeague, setEditLeague] = useState<League | null>(null);
   const [newName, setNewName] = useState("");
