@@ -26,6 +26,34 @@ const TOURNAMENT_PHASES: PhaseOption[] = [
 
 export default function NewSeasonWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [eventFormat, setEventFormat] = useState<"season" | "tournament">("season");
+  const [selectedPhases, setSelectedPhases] = useState<PhaseOption[]>([
+    SEASON_PHASES[0], SEASON_PHASES[2],
+  ]);
+  const [customPhaseName, setCustomPhaseName] = useState("");
+
+  const togglePhase = (p: PhaseOption) => {
+    setSelectedPhases(prev =>
+      prev.find(x => x.id === p.id) ? prev.filter(x => x.id !== p.id) : [...prev, p]
+    );
+  };
+  const addCustomPhase = () => {
+    if (!customPhaseName.trim()) return;
+    setSelectedPhases(prev => [...prev, {
+      id: `custom-${Date.now()}`, name: customPhaseName.trim(), numbering: "rounds", group: eventFormat,
+    }]);
+    setCustomPhaseName("");
+  };
+  const removePhase = (id: string) => setSelectedPhases(prev => prev.filter(p => p.id !== id));
+  const movePhase = (idx: number, dir: -1 | 1) => {
+    setSelectedPhases(prev => {
+      const next = [...prev];
+      const j = idx + dir;
+      if (j < 0 || j >= next.length) return prev;
+      [next[idx], next[j]] = [next[j], next[idx]];
+      return next;
+    });
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
