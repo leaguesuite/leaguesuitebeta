@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -90,7 +91,7 @@ export default function SeasonsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Seasons</h1>
+        <LeaguePageTitle title="Seasons" />
         <p className="text-sm text-muted-foreground mt-1">
           View current and past seasons across all leagues. Access historical standings, schedules, and stats.
         </p>

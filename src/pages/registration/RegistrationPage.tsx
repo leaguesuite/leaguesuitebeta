@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState, useMemo } from "react";
 import { Plus, Search, Users, UserCheck, Eye, Edit, Trash2, CalendarDays, ClipboardList, ChevronRight, ToggleLeft, ToggleRight, ArrowLeft, Inbox, DollarSign, Phone, Mail, ArrowUpDown, Download, MapPin, Palette, Clock, FileText, X } from "lucide-react";
 import { exportToExcel } from "@/utils/exportToExcel";
@@ -619,7 +620,7 @@ export default function RegistrationPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Registration</h1>
+          <LeaguePageTitle title="Registration" />
           <p className="text-sm text-muted-foreground mt-1">Manage registration forms and view submissions.</p>
         </div>
         <button

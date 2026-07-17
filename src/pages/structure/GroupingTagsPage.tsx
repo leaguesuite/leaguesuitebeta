@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Plus, Edit, Trash2, Tag, ArrowUp, ArrowDown, CalendarDays, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -113,10 +114,7 @@ export default function GroupingTagsPage() {
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            <span className="text-muted-foreground font-medium">{activeLeague.name}</span>{" "}
-            <span className="text-muted-foreground/60 font-normal">›</span> Tags
-          </h1>
+          <LeaguePageTitle title="Tags" />
 
           <p className="text-sm text-muted-foreground mt-1">
             Tags used to group games within each phase. Defaults are provided per event type.

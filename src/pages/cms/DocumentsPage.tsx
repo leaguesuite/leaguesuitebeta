@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -204,7 +205,7 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Documents</h1>
+          <LeaguePageTitle title="Documents" className="tracking-tight" />
           <p className="text-sm text-muted-foreground">
             Upload PDFs and images. Toggle "Show in Menu" to display on your public site navigation.
           </p>

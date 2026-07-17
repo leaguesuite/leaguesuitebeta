@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Plus, Search, Trophy, Star, Award, Medal, Crown, Target, Zap, Edit, Trash2, ArrowLeft, X, Users, UserCheck, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -153,7 +154,7 @@ export default function AccoladesPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-foreground">Accolades Hub</h1>
+            <LeaguePageTitle title="Accolades Hub" />
             <Badge variant="secondary" className="text-xs font-semibold">League Suite</Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">Award and track achievements for players and teams across seasons.</p>

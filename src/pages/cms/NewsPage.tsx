@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,7 +103,7 @@ export default function NewsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">News</h1>
+          <LeaguePageTitle title="News" />
           <p className="text-sm text-muted-foreground mt-1">Quick updates, announcements, and league bulletins.</p>
         </div>
         <Button size="sm" className="gap-2" onClick={openNew}>

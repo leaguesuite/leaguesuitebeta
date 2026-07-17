@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, ChevronRight, Users, Layers, Edit, Trash2, Eye } from "lucide-react";
@@ -167,7 +168,7 @@ export default function CategoriesPage() {
     <div className="space-y-6 max-w-7xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Categories & Divisions</h1>
+          <LeaguePageTitle title="Categories & Divisions" />
           <p className="text-sm text-muted-foreground mt-1">Manage reusable league structure templates with rules and division configurations.</p>
         </div>
         <div className="flex items-center gap-2">

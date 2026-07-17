@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Plus, Edit, Trash2, Trophy, GripVertical, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -120,7 +121,7 @@ export default function CompetitionNamesPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Phases</h1>
+        <LeaguePageTitle title="Phases" />
         <p className="text-sm text-muted-foreground mt-1">
           Define the phases used when scheduling games. Each phase can be renamed to match your league's terminology.
         </p>

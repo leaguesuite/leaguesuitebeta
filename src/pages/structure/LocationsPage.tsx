@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { MapPin, Plus, Trash2, Edit, ExternalLink, ChevronDown, ChevronRight, X, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -127,7 +128,7 @@ export default function LocationsPage() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Locations & Fields</h1>
+          <LeaguePageTitle title="Locations & Fields" />
           <p className="text-sm text-muted-foreground mt-1">
             {locations.length} location{locations.length !== 1 ? "s" : ""} · {totalFields} field{totalFields !== 1 ? "s" : ""} configured
           </p>

@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Plus, Edit, Trash2, Trophy, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -84,7 +85,7 @@ export default function PlayoffRoundsPage() {
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Playoff Rounds</h1>
+          <LeaguePageTitle title="Playoff Rounds" />
           <p className="text-sm text-muted-foreground mt-1">
             Configure the rounds available when creating playoff games. Order determines display sequence.
           </p>

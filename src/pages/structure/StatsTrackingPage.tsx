@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -77,7 +78,7 @@ export default function StatsTrackingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Stats Tracking</h1>
+          <LeaguePageTitle title="Stats Tracking" className="tracking-tight" />
           <p className="text-sm text-muted-foreground">
             Toggle individual stats on or off to control what is displayed on your public site and admin views.
           </p>

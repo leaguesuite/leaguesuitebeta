@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,7 @@ export default function BracketManagerPage() {
             <Trophy className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">Bracket Manager</h1>
+            <LeaguePageTitle title="Bracket Manager" className="text-xl tracking-tight" />
             <p className="text-sm text-muted-foreground">Create and manage playoff brackets</p>
           </div>
         </div>

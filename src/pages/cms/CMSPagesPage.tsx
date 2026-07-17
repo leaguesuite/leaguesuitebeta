@@ -1,3 +1,4 @@
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -349,7 +350,7 @@ export default function CMSPagesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Pages</h1>
+            <LeaguePageTitle title="Pages" />
             <p className="text-sm text-muted-foreground">Create and manage content pages with AI-powered generation</p>
           </div>
           <Button onClick={startWizard} className="gap-2">
