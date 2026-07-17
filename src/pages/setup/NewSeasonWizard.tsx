@@ -88,13 +88,15 @@ export default function NewSeasonWizard() {
   const [userTouchedPhases, setUserTouchedPhases] = useState(false);
   const [userTouchedStats, setUserTouchedStats] = useState(false);
 
-  // Re-apply default memory when the event format changes, unless the user has manually edited phases.
+  // Re-apply default memory when the event format changes, unless the user has manually edited.
   useEffect(() => {
     if (!userTouchedPhases) setSelectedPhases(computeDefaultPhases(eventFormat));
-  }, [eventFormat, userTouchedPhases]);
+    if (!userTouchedStats) setSelectedStats(computeDefaultStats(eventFormat));
+  }, [eventFormat, userTouchedPhases, userTouchedStats]);
 
   const prior = PRIOR_EVENT_BY_TYPE[eventFormat];
-  const newPhaseIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat]), [eventFormat]);
+  const newPhaseIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat].phases), [eventFormat]);
+  const newStatIds = useMemo(() => new Set(NEW_SINCE_PRIOR[eventFormat].stats), [eventFormat]);
 
   const togglePhase = (p: PhaseOption) => {
     setUserTouchedPhases(true);
