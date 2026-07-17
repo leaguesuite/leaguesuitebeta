@@ -48,6 +48,7 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
   },
   {
     title: "Setup",
+    scope: "league",
     items: [
       {
         label: "New Event Wizard", icon: PlusCircle,
