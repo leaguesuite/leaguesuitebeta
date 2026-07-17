@@ -18,6 +18,7 @@ type Phase = {
   description: string;
   group: PhaseGroup;
   numbering: Numbering;
+  hasStandings: boolean;
   status: "active" | "archived";
 };
 
