@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,6 +68,7 @@ const SPORT_TYPES = ["Flag Football", "Basketball", "Soccer", "Volleyball", "Sof
 
 export default function LeaguesPage() {
   const [leagues, setLeagues] = useState<League[]>(MOCK_LEAGUES);
+  const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [editLeague, setEditLeague] = useState<League | null>(null);
   const [newName, setNewName] = useState("");
@@ -150,7 +152,7 @@ export default function LeaguesPage() {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="gap-1.5">
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate("/settings/general")}>
                 <Settings className="h-3.5 w-3.5" /> League Settings
               </Button>
             </div>
@@ -189,7 +191,7 @@ export default function LeaguesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end items-center gap-1">
-                      <Button variant="outline" size="sm" className="gap-1.5">
+                      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate("/settings/general")}>
                         <Settings className="h-3.5 w-3.5" /> Settings
                       </Button>
                       <DropdownMenu>
