@@ -18,33 +18,34 @@ type Phase = {
   description: string;
   group: PhaseGroup;
   numbering: Numbering;
+  hasStandings: boolean;
   status: "active" | "archived";
 };
 
 const initial: Phase[] = [
-  { id: 1, name: "Regular Season", description: "Standard weekly league play used for standings.", group: "season", numbering: "weeks", status: "active" },
-  { id: 2, name: "Pre-Season", description: "Warm-up games before the regular season.", group: "season", numbering: "weeks", status: "active" },
-  { id: 3, name: "Playoffs", description: "Post-season elimination rounds.", group: "season", numbering: "rounds", status: "active" },
-  { id: 4, name: "Opening Round", description: "Initial tournament games.", group: "tournament", numbering: "rounds", status: "active" },
-  { id: 5, name: "Round Robin", description: "Pool play where teams face each opponent.", group: "tournament", numbering: "rounds", status: "active" },
-  { id: 6, name: "Elimination Round", description: "Knockout stage to determine champion.", group: "tournament", numbering: "rounds", status: "active" },
+  { id: 1, name: "Regular Season", description: "Standard weekly league play used for standings.", group: "season", numbering: "weeks", hasStandings: true, status: "active" },
+  { id: 2, name: "Pre-Season", description: "Warm-up games before the regular season.", group: "season", numbering: "weeks", hasStandings: false, status: "active" },
+  { id: 3, name: "Playoffs", description: "Post-season elimination rounds.", group: "season", numbering: "rounds", hasStandings: false, status: "active" },
+  { id: 4, name: "Opening Round", description: "Initial tournament games.", group: "tournament", numbering: "rounds", hasStandings: false, status: "active" },
+  { id: 5, name: "Round Robin", description: "Pool play where teams face each opponent.", group: "tournament", numbering: "rounds", hasStandings: true, status: "active" },
+  { id: 6, name: "Elimination Round", description: "Knockout stage to determine champion.", group: "tournament", numbering: "rounds", hasStandings: false, status: "active" },
 ];
 
 export default function CompetitionNamesPage() {
   const [items, setItems] = useState<Phase[]>(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Phase | null>(null);
-  const [form, setForm] = useState<{ name: string; description: string; group: PhaseGroup; numbering: Numbering }>({ name: "", description: "", group: "season", numbering: "weeks" });
+  const [form, setForm] = useState<{ name: string; description: string; group: PhaseGroup; hasStandings: boolean }>({ name: "", description: "", group: "season", hasStandings: false });
 
   const openNew = (group: PhaseGroup) => {
     setEditing(null);
-    setForm({ name: "", description: "", group, numbering: "weeks" });
+    setForm({ name: "", description: "", group, hasStandings: false });
     setOpen(true);
   };
 
   const openEdit = (p: Phase) => {
     setEditing(p);
-    setForm({ name: p.name, description: p.description, group: p.group, numbering: p.numbering });
+    setForm({ name: p.name, description: p.description, group: p.group, hasStandings: p.hasStandings });
     setOpen(true);
   };
 
@@ -59,7 +60,7 @@ export default function CompetitionNamesPage() {
       toast({ title: "Phase updated" });
     } else {
       const id = Math.max(0, ...items.map(i => i.id)) + 1;
-      setItems(prev => [...prev, { id, name: form.name, description: form.description, group: form.group, numbering: form.numbering, status: "active" }]);
+      setItems(prev => [...prev, { id, name: form.name, description: form.description, group: form.group, numbering: "weeks", hasStandings: form.hasStandings, status: "active" }]);
       toast({ title: "Phase added" });
     }
     setOpen(false);
@@ -138,16 +139,16 @@ export default function CompetitionNamesPage() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-xs">Group</Label>
+              <Label className="text-xs">Event Type</Label>
               <div className="flex gap-2">
                 <Button type="button" variant={form.group === "season" ? "default" : "outline"} size="sm"
                   onClick={() => setForm(f => ({ ...f, group: "season" }))} className="flex-1">Season</Button>
                 <Button type="button" variant={form.group === "tournament" ? "default" : "outline"} size="sm"
-                  onClick={() => setForm(f => ({ ...f, group: "tournament" }))} className="flex-1">Tournaments</Button>
+                  onClick={() => setForm(f => ({ ...f, group: "tournament" }))} className="flex-1">Tournament</Button>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Name <span className="text-destructive">*</span></Label>
+              <Label className="text-xs">Event Name <span className="text-destructive">*</span></Label>
               <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 placeholder="e.g. Regular Season" />
             </div>
@@ -156,19 +157,22 @@ export default function CompetitionNamesPage() {
               <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 placeholder="Short description" />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Numbering</Label>
-              <div className="flex gap-2">
-                <Button type="button" variant={form.numbering === "weeks" ? "default" : "outline"} size="sm"
-                  onClick={() => setForm(f => ({ ...f, numbering: "weeks" }))} className="flex-1">Week Numbers</Button>
-                <Button type="button" variant={form.numbering === "rounds" ? "default" : "outline"} size="sm"
-                  onClick={() => setForm(f => ({ ...f, numbering: "rounds" }))} className="flex-1">Round Names</Button>
+            <div className="flex items-center justify-between rounded-md border border-border px-3 py-2.5">
+              <div className="space-y-0.5">
+                <Label className="text-xs font-medium">Has Standings</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Games in this phase count toward the standings.
+                </p>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                {form.numbering === "weeks"
-                  ? "Games will be grouped and labeled by week number (e.g. Week 1, Week 2)."
-                  : "Games will be grouped and labeled by round name (e.g. Quarterfinals, Semifinals)."}
-              </p>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={form.hasStandings}
+                onClick={() => setForm(f => ({ ...f, hasStandings: !f.hasStandings }))}
+                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${form.hasStandings ? "bg-primary" : "bg-muted"}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-background shadow transition-transform ${form.hasStandings ? "translate-x-4" : "translate-x-0.5"}`} />
+              </button>
             </div>
           </div>
           <DialogFooter>
