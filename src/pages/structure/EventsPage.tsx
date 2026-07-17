@@ -189,7 +189,7 @@ export default function EventsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Events</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            All past, current, and upcoming events. Seasons run on a recurring schedule; tournaments are one-off competitions.
+            Every event belongs to one of two <span className="font-medium text-foreground">Event Types</span>: <span className="font-medium text-foreground">Season</span> (recurring, multi-week league play) or <span className="font-medium text-foreground">Tournament</span> (one-off competition). Individual events like <span className="italic">Summer 2026</span> or <span className="italic">Midnight Madness 2</span> are created under their respective type below.
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -325,8 +325,11 @@ export default function EventsPage() {
                 <CalendarDays className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Seasons</h2>
-                <p className="text-xs text-muted-foreground">{seasons.length} {seasons.length === 1 ? "event" : "events"}</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold text-foreground">Seasons</h2>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">Event Type</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{seasons.length} {seasons.length === 1 ? "event" : "events"} · recurring multi-week league play</p>
               </div>
             </div>
           </div>
@@ -400,8 +403,11 @@ export default function EventsPage() {
                 <Trophy className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Tournaments</h2>
-                <p className="text-xs text-muted-foreground">{tournaments.length} {tournaments.length === 1 ? "event" : "events"}</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold text-foreground">Tournaments</h2>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">Event Type</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{tournaments.length} {tournaments.length === 1 ? "event" : "events"} · one-off competitions</p>
               </div>
             </div>
           </div>
