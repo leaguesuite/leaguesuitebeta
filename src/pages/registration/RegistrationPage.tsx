@@ -532,6 +532,7 @@ export default function RegistrationPage() {
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
                     <th className="text-right px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Paid to Date</th>
+                    <th className="text-center px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Roster</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -549,6 +550,16 @@ export default function RegistrationPage() {
                         <span className={sub.paidToDate > 0 ? "text-success" : "text-destructive"}>
                           ${sub.paidToDate.toFixed(2)}
                         </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setViewingTeamSub(sub); }}
+                          title={`View roster (${sub.roster.length} players)`}
+                          className="inline-flex items-center gap-1.5 h-7 px-2 rounded-md border border-border bg-card text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <Users className="h-3.5 w-3.5 text-primary" />
+                          <span>{sub.roster.length}</span>
+                        </button>
                       </td>
                     </tr>
                   ))}
