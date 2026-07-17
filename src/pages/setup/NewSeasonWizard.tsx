@@ -183,6 +183,95 @@ export default function NewSeasonWizard() {
 
         {currentStep === 4 && (
           <div className="space-y-5">
+            <h2 className="text-lg font-semibold text-foreground">Phases</h2>
+            <p className="text-sm text-muted-foreground">
+              Pick which phases this event will include. Games and standings will be grouped by these phases (e.g. Regular Season + Playoffs, or Round Robin + Knockout).
+            </p>
+
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Suggested phases</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {(eventFormat === "season" ? SEASON_PHASES : TOURNAMENT_PHASES).map(p => {
+                  const active = !!selectedPhases.find(x => x.id === p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => togglePhase(p)}
+                      className={`flex items-center justify-between p-3 rounded-lg border-2 text-left transition-all ${
+                        active ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"
+                      }`}
+                    >
+                      <div>
+                        <div className="text-sm font-medium text-foreground">{p.name}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {p.numbering === "weeks" ? "Grouped by week" : "Grouped by round"}
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-md flex items-center justify-center ${active ? "bg-primary text-primary-foreground" : "border border-border"}`}>
+                        {active && <Check className="h-3.5 w-3.5" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Selected phases (in order)</div>
+              {selectedPhases.length === 0 ? (
+                <div className="p-6 text-center border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground">
+                  No phases selected yet.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedPhases.map((p, idx) => (
+                    <div key={p.id} className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-card">
+                      <span className="w-6 h-6 rounded-md bg-secondary text-xs font-semibold flex items-center justify-center text-foreground">{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-foreground truncate">{p.name}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {p.numbering === "weeks" ? "Week numbering" : "Round numbering"}
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => movePhase(idx, -1)} disabled={idx === 0}
+                        className="h-7 w-7 rounded-md border border-border text-xs text-muted-foreground hover:bg-secondary disabled:opacity-30">↑</button>
+                      <button type="button" onClick={() => movePhase(idx, 1)} disabled={idx === selectedPhases.length - 1}
+                        className="h-7 w-7 rounded-md border border-border text-xs text-muted-foreground hover:bg-secondary disabled:opacity-30">↓</button>
+                      <button type="button" onClick={() => removePhase(p.id)}
+                        className="h-7 w-7 rounded-md border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Add a custom phase</div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customPhaseName}
+                  onChange={(e) => setCustomPhaseName(e.target.value)}
+                  placeholder="e.g. Knockout Round, Group Stage"
+                  className="h-10 flex-1 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20"
+                />
+                <button
+                  type="button"
+                  onClick={addCustomPhase}
+                  className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+                >
+                  <Plus className="h-4 w-4" /> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 5 && (
+          <div className="space-y-5">
             <h2 className="text-lg font-semibold text-foreground">Conferences & Subdivisions</h2>
             <p className="text-sm text-muted-foreground">Optionally configure conferences and subdivisions for applicable divisions.</p>
             <div className="p-8 text-center border-2 border-dashed border-border rounded-xl">
