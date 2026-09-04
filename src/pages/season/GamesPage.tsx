@@ -216,6 +216,14 @@ const teamCaptains: Record<string, { name: string; email: string }> = {
   "Arctic Wolves": { name: "Jamie Cole", email: "jamie.cole@example.com" },
 };
 
+// Parse location and field number from combined field string
+function parseFieldString(field: string): { location: string; fieldNumber: string } {
+  if (!field || field === "TBD") return { location: field || "TBD", fieldNumber: "" };
+  const match = field.match(/^(.+?)\s*#?\s*(\d+|[A-Za-z])$/);
+  if (match) return { location: match[1].trim(), fieldNumber: match[2] };
+  return { location: field, fieldNumber: "" };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function GamesPage() {
@@ -223,6 +231,8 @@ export default function GamesPage() {
   const [selectedDivision, setSelectedDivision] = useState("All Divisions");
   const [selectedWeek, setSelectedWeek] = useState("All Weeks");
   const [selectedPhase, setSelectedPhase] = useState("All Phases");
+  const [selectedLocation, setSelectedLocation] = useState("All Locations");
+  const [selectedFieldNumber, setSelectedFieldNumber] = useState("All Fields");
   const [search, setSearch] = useState("");
 
   // Edit game info
