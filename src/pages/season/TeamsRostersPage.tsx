@@ -443,9 +443,10 @@ export default function TeamsRostersPage() {
 
         {/* Roster Dialog */}
         <Dialog open={rosterOpen} onOpenChange={setRosterOpen}>
-          <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedTeam?.name} — Roster</DialogTitle>
+              <DialogDescription>Set each player's jersey number, short label and role.</DialogDescription>
             </DialogHeader>
             {selectedTeam && (
               <div className="space-y-4">
@@ -462,19 +463,58 @@ export default function TeamsRostersPage() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead className="w-12">#</TableHead>
                         <TableHead>Player</TableHead>
+                        <TableHead className="w-24">Jersey #</TableHead>
+                        <TableHead className="w-28">Label</TableHead>
+                        <TableHead className="w-32">Role</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getTeamRoster(selectedTeam.name).map((p, i) => (
+                      {getTeamRoster(selectedTeam.name).map(p => (
                         <TableRow key={p.player_id}>
-                          <TableCell className="font-mono text-sm text-muted-foreground">{i + 1}</TableCell>
                           <TableCell>
                             <span className="font-medium text-sm text-foreground">{p.player_name}</span>
                             <span className="block text-xs text-muted-foreground">ID: {p.member_id}</span>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={p.jersey}
+                              inputMode="numeric"
+                              maxLength={3}
+                              placeholder="—"
+                              className="h-8 w-16 text-sm"
+                              onChange={e =>
+                                updateEntry(selectedTeam.name, p.player_id, {
+                                  jersey: e.target.value.replace(/\D/g, "").slice(0, 3),
+                                })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={p.label}
+                              maxLength={5}
+                              placeholder="e.g. SUB"
+                              className="h-8 w-20 text-sm"
+                              onChange={e =>
+                                updateEntry(selectedTeam.name, p.player_id, { label: e.target.value.slice(0, 5) })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={p.role}
+                              onValueChange={v => updateEntry(selectedTeam.name, p.player_id, { role: v as RosterRole })}
+                            >
+                              <SelectTrigger className="h-8 w-28 text-sm capitalize"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {ROSTER_ROLES.map(r => (
+                                  <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </TableCell>
                           <TableCell>
                             <Badge variant={p.status === "active" ? "default" : "secondary"} className="text-xs">
@@ -482,7 +522,12 @@ export default function TeamsRostersPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => removeEntry(selectedTeam.name, p.player_id)}
+                            >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </TableCell>
@@ -490,7 +535,7 @@ export default function TeamsRostersPage() {
                       ))}
                       {getTeamRoster(selectedTeam.name).length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                             No players on this roster yet. Click "Add Player" to get started.
                           </TableCell>
                         </TableRow>
@@ -498,6 +543,7 @@ export default function TeamsRostersPage() {
                     </TableBody>
                   </Table>
                 </div>
+
               </div>
             )}
           </DialogContent>
