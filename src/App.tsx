@@ -13,6 +13,7 @@ import BracketsPage from "@/pages/season/BracketsPage";
 import ReportsPage from "@/pages/season/ReportsPage";
 import StatsPage from "@/pages/season/StatsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
+import DivisionsPage from "@/pages/structure/DivisionsPage";
 import ScorekeeperCategoriesPage from "@/pages/scorekeeper/ScorekeeperCategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
@@ -96,7 +97,7 @@ const App = () => (
             <Route path="/structure/leagues" element={<LeaguesPage />} />
             <Route path="/structure/events" element={<EventsPage />} />
             <Route path="/structure/categories" element={<CategoriesPage />} />
-            <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
+            <Route path="/structure/divisions" element={<DivisionsPage />} />
             <Route path="/structure/conferences" element={<ConferencesPage />} />
             <Route path="/structure/subdivisions" element={<ConferencesPage />} />
 
