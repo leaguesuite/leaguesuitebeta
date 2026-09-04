@@ -1,7 +1,7 @@
 import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Users, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,8 +33,8 @@ export default function DivisionsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [divCategoryId, setDivCategoryId] = useState<string>("");
   const [divName, setDivName] = useState("");
-  const [divTeamCap, setDivTeamCap] = useState(10);
-  const [divQbCap, setDivQbCap] = useState(2);
+  const [divTeamCap, setDivTeamCap] = useState(475);
+  const [divQbCap, setDivQbCap] = useState(85);
 
   const catName = (id: number) => categories.find(c => c.id === id)?.name ?? "—";
 
@@ -42,8 +42,8 @@ export default function DivisionsPage() {
     setEditingId(null);
     setDivCategoryId(categoryFilter !== "all" ? categoryFilter : "");
     setDivName("");
-    setDivTeamCap(10);
-    setDivQbCap(2);
+    setDivTeamCap(475);
+    setDivQbCap(85);
   };
 
   const openNew = () => { resetDiv(); setDivOpen(true); };
@@ -138,7 +138,6 @@ export default function DivisionsPage() {
               <th className="table-header text-left px-5 py-3">Category</th>
               <th className="table-header text-left px-5 py-3">Team Cap</th>
               <th className="table-header text-left px-5 py-3">QB Cap</th>
-              <th className="table-header text-left px-5 py-3">Teams</th>
               <th className="table-header text-left px-5 py-3">Status</th>
               <th className="table-header text-right px-5 py-3">Actions</th>
             </tr>
@@ -146,7 +145,7 @@ export default function DivisionsPage() {
           <tbody className="divide-y divide-border">
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-10 text-center text-sm text-muted-foreground">
+                <td colSpan={6} className="px-5 py-10 text-center text-sm text-muted-foreground">
                   No divisions found.
                 </td>
               </tr>
@@ -157,14 +156,8 @@ export default function DivisionsPage() {
                   <span className="text-sm font-medium text-foreground">{catName(div.categoryId)} {div.name}</span>
                 </td>
                 <td className="px-5 py-3 text-sm text-muted-foreground">{catName(div.categoryId)}</td>
-                <td className="px-5 py-3 text-sm text-muted-foreground">{div.teamCap} teams max</td>
-                <td className="px-5 py-3 text-sm text-muted-foreground">{div.qbCap} per team</td>
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground">{div.teams}</span>
-                  </div>
-                </td>
+                <td className="px-5 py-3 text-sm text-foreground">{div.teamCap}</td>
+                <td className="px-5 py-3 text-sm text-foreground">{div.qbCap}</td>
                 <td className="px-5 py-3">
                   <Badge variant={div.status === "active" ? "default" : "secondary"} className={`text-xs ${div.status === "active" ? "bg-success/10 text-success border border-success/20" : ""}`}>
                     {div.status === "active" ? "Active" : "Draft"}
