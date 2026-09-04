@@ -13,6 +13,7 @@ import BracketsPage from "@/pages/season/BracketsPage";
 import ReportsPage from "@/pages/season/ReportsPage";
 import StatsPage from "@/pages/season/StatsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
+import DivisionsPage from "@/pages/structure/DivisionsPage";
 import ScorekeeperCategoriesPage from "@/pages/scorekeeper/ScorekeeperCategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
