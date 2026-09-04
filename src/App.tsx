@@ -96,7 +96,7 @@ const App = () => (
             <Route path="/structure/leagues" element={<LeaguesPage />} />
             <Route path="/structure/events" element={<EventsPage />} />
             <Route path="/structure/categories" element={<CategoriesPage />} />
-            <Route path="/structure/divisions" element={<PlaceholderPage title="Divisions" description="Manage divisions across categories." />} />
+            <Route path="/structure/divisions" element={<DivisionsPage />} />
             <Route path="/structure/conferences" element={<ConferencesPage />} />
             <Route path="/structure/subdivisions" element={<ConferencesPage />} />
 
