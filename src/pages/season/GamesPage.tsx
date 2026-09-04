@@ -315,23 +315,29 @@ export default function GamesPage() {
     toast({ title: "Game added", description: `${newGame.home} vs ${newGame.away}` });
   };
 
+  const parseField = parseFieldString;
+
+  // Location + field options derived from the games list
+  const locationOptions = ["All Locations", ...Array.from(new Set(games.map(g => parseFieldString(g.field).location).filter(Boolean))).sort()];
+  const fieldNumberOptions = ["All Fields", ...Array.from(new Set(
+    games
+      .filter(g => selectedLocation === "All Locations" || parseFieldString(g.field).location === selectedLocation)
+      .map(g => parseFieldString(g.field).fieldNumber)
+      .filter(Boolean)
+  )).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0) || a.localeCompare(b))];
+
   const filtered = games.filter(g => {
+    const { location, fieldNumber } = parseFieldString(g.field);
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
     if (selectedPhase !== "All Phases" && g.phase !== selectedPhase) return false;
+    if (selectedLocation !== "All Locations" && location !== selectedLocation) return false;
+    if (selectedFieldNumber !== "All Fields" && fieldNumber !== selectedFieldNumber) return false;
     if (search && !g.home.toLowerCase().includes(search.toLowerCase()) && !g.away.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
   const formatScore = (g: Game) => g.homeScore === null || g.awayScore === null ? "-" : `${g.homeScore}-${g.awayScore}`;
-
-  // Parse location and field number from combined field string
-  const parseField = (field: string): { location: string; fieldNumber: string } => {
-    if (!field || field === "TBD") return { location: field || "TBD", fieldNumber: "" };
-    const match = field.match(/^(.+)\s+(\d+|[A-Za-z])$/);
-    if (match) return { location: match[1].trim(), fieldNumber: match[2] };
-    return { location: field, fieldNumber: "" };
-  };
 
   const timeToMinutes = (time: string): number => {
     const match = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
