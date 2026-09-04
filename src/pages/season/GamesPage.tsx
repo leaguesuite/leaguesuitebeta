@@ -282,6 +282,18 @@ export default function GamesPage() {
     setBulkAction(null);
   };
 
+  // Reset a single game (clear score + stats)
+  const [resetGame, setResetGame] = useState<Game | null>(null);
+  const confirmReset = () => {
+    if (!resetGame) return;
+    setGames(prev => prev.map(g => g.id === resetGame.id
+      ? { ...g, homeScore: null, awayScore: null, periodScores: undefined, playerStats: [], status: "upcoming" }
+      : g));
+    toast({ title: "Game reset", description: `${resetGame.home} vs ${resetGame.away} — score and stats cleared.` });
+    setResetGame(null);
+  };
+
+
   // Add game
   const emptyAddForm = {
     hideFromSchedule: false, date: "", time: "", week: "", field: "", fieldNumber: "",
