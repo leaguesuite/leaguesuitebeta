@@ -156,10 +156,41 @@ export default function TeamsRostersPage() {
   };
 
   const getTeamRoster = (teamName: string) =>
-    mockPlayers.filter(p => p.team_name === teamName).map(p => {
+    (rosters[teamName] ?? []).map(p => {
       const member = mockMembers.find(m => m.member_id === p.member_id);
       return { ...p, status: member?.status || "active" };
     });
+
+  const updateEntry = (teamName: string, playerId: number, patch: Partial<RosterEntry>) => {
+    setRosters(prev => ({
+      ...prev,
+      [teamName]: (prev[teamName] ?? []).map(p => p.player_id === playerId ? { ...p, ...patch } : p),
+    }));
+  };
+
+  const removeEntry = (teamName: string, playerId: number) => {
+    setRosters(prev => ({
+      ...prev,
+      [teamName]: (prev[teamName] ?? []).filter(p => p.player_id !== playerId),
+    }));
+  };
+
+  const addEntry = (teamName: string, member: { member_id: number; first_name: string; last_name: string }) => {
+    setRosters(prev => ({
+      ...prev,
+      [teamName]: [
+        ...(prev[teamName] ?? []),
+        {
+          player_id: Date.now(),
+          member_id: member.member_id,
+          player_name: `${member.first_name} ${member.last_name}`,
+          jersey: "",
+          label: "",
+          role: "player" as RosterRole,
+        },
+      ],
+    }));
+  };
 
   const openEditTeam = (team: Team) => { setEditForm({ ...team }); setEditTeamOpen(true); };
   const saveTeamEdit = () => {
@@ -170,8 +201,10 @@ export default function TeamsRostersPage() {
   const openRoster = (team: Team) => { setSelectedTeam(team); setRosterOpen(true); };
 
   const unrosteredMembers = mockMembers.filter(m =>
-    m.status === "active" && !mockPlayers.some(p => p.member_id === m.member_id && p.team_name === selectedTeam?.name)
+    m.status === "active" &&
+    !(rosters[selectedTeam?.name ?? ""] ?? []).some(p => p.member_id === m.member_id)
   );
+
 
   const SortHeader = ({ k, label }: { k: SortKey; label: string }) => (
     <button
