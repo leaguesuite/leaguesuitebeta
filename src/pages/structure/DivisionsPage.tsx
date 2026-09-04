@@ -199,11 +199,11 @@ export default function DivisionsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="div-cap">Team Cap</Label>
-                <Input id="div-cap" type="number" value={divTeamCap} onChange={e => setDivTeamCap(Number(e.target.value))} />
+                <Input id="div-cap" type="number" placeholder="475" value={divTeamCap} onChange={e => setDivTeamCap(Number(e.target.value))} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="div-qb">QB Cap</Label>
-                <Input id="div-qb" type="number" value={divQbCap} onChange={e => setDivQbCap(Number(e.target.value))} />
+                <Input id="div-qb" type="number" placeholder="85" value={divQbCap} onChange={e => setDivQbCap(Number(e.target.value))} />
               </div>
             </div>
           </div>
