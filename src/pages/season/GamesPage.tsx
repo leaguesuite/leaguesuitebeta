@@ -216,6 +216,14 @@ const teamCaptains: Record<string, { name: string; email: string }> = {
   "Arctic Wolves": { name: "Jamie Cole", email: "jamie.cole@example.com" },
 };
 
+// Parse location and field number from combined field string
+function parseFieldString(field: string): { location: string; fieldNumber: string } {
+  if (!field || field === "TBD") return { location: field || "TBD", fieldNumber: "" };
+  const match = field.match(/^(.+?)\s*#?\s*(\d+|[A-Za-z])$/);
+  if (match) return { location: match[1].trim(), fieldNumber: match[2] };
+  return { location: field, fieldNumber: "" };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function GamesPage() {
@@ -223,6 +231,8 @@ export default function GamesPage() {
   const [selectedDivision, setSelectedDivision] = useState("All Divisions");
   const [selectedWeek, setSelectedWeek] = useState("All Weeks");
   const [selectedPhase, setSelectedPhase] = useState("All Phases");
+  const [selectedLocation, setSelectedLocation] = useState("All Locations");
+  const [selectedFieldNumber, setSelectedFieldNumber] = useState("All Fields");
   const [search, setSearch] = useState("");
 
   // Edit game info
@@ -305,23 +315,29 @@ export default function GamesPage() {
     toast({ title: "Game added", description: `${newGame.home} vs ${newGame.away}` });
   };
 
+  const parseField = parseFieldString;
+
+  // Location + field options derived from the games list
+  const locationOptions = ["All Locations", ...Array.from(new Set(games.map(g => parseFieldString(g.field).location).filter(Boolean))).sort()];
+  const fieldNumberOptions = ["All Fields", ...Array.from(new Set(
+    games
+      .filter(g => selectedLocation === "All Locations" || parseFieldString(g.field).location === selectedLocation)
+      .map(g => parseFieldString(g.field).fieldNumber)
+      .filter(Boolean)
+  )).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0) || a.localeCompare(b))];
+
   const filtered = games.filter(g => {
+    const { location, fieldNumber } = parseFieldString(g.field);
     if (selectedDivision !== "All Divisions" && g.division !== selectedDivision) return false;
     if (selectedWeek !== "All Weeks" && `Week ${g.week}` !== selectedWeek) return false;
     if (selectedPhase !== "All Phases" && g.phase !== selectedPhase) return false;
+    if (selectedLocation !== "All Locations" && location !== selectedLocation) return false;
+    if (selectedFieldNumber !== "All Fields" && fieldNumber !== selectedFieldNumber) return false;
     if (search && !g.home.toLowerCase().includes(search.toLowerCase()) && !g.away.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
   const formatScore = (g: Game) => g.homeScore === null || g.awayScore === null ? "-" : `${g.homeScore}-${g.awayScore}`;
-
-  // Parse location and field number from combined field string
-  const parseField = (field: string): { location: string; fieldNumber: string } => {
-    if (!field || field === "TBD") return { location: field || "TBD", fieldNumber: "" };
-    const match = field.match(/^(.+)\s+(\d+|[A-Za-z])$/);
-    if (match) return { location: match[1].trim(), fieldNumber: match[2] };
-    return { location: field, fieldNumber: "" };
-  };
 
   const timeToMinutes = (time: string): number => {
     const match = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -626,6 +642,18 @@ export default function GamesPage() {
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {weeks.map(w => <option key={w}>{w}</option>)}
           </select>
+          <select value={selectedLocation} onChange={e => { setSelectedLocation(e.target.value); setSelectedFieldNumber("All Fields"); }}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
+            {locationOptions.map(l => <option key={l}>{l}</option>)}
+          </select>
+          <select value={selectedFieldNumber} onChange={e => setSelectedFieldNumber(e.target.value)}
+            disabled={fieldNumberOptions.length <= 1}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20 disabled:opacity-50">
+            {fieldNumberOptions.map(f => <option key={f} value={f}>{f === "All Fields" ? "All Fields" : `Field ${f}`}</option>)}
+          </select>
+          {(selectedLocation !== "All Locations" || selectedFieldNumber !== "All Fields") && (
+            <Button variant="ghost" size="sm" onClick={() => { setSelectedLocation("All Locations"); setSelectedFieldNumber("All Fields"); }}>Clear</Button>
+          )}
           <div className="ml-auto text-sm text-muted-foreground">{displayedGames.length} game{displayedGames.length !== 1 ? "s" : ""}</div>
         </div>
       </div>
