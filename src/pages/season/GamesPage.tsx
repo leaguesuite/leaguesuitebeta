@@ -642,6 +642,18 @@ export default function GamesPage() {
             className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
             {weeks.map(w => <option key={w}>{w}</option>)}
           </select>
+          <select value={selectedLocation} onChange={e => { setSelectedLocation(e.target.value); setSelectedFieldNumber("All Fields"); }}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20">
+            {locationOptions.map(l => <option key={l}>{l}</option>)}
+          </select>
+          <select value={selectedFieldNumber} onChange={e => setSelectedFieldNumber(e.target.value)}
+            disabled={fieldNumberOptions.length <= 1}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-ring/20 disabled:opacity-50">
+            {fieldNumberOptions.map(f => <option key={f} value={f}>{f === "All Fields" ? "All Fields" : `Field ${f}`}</option>)}
+          </select>
+          {(selectedLocation !== "All Locations" || selectedFieldNumber !== "All Fields") && (
+            <Button variant="ghost" size="sm" onClick={() => { setSelectedLocation("All Locations"); setSelectedFieldNumber("All Fields"); }}>Clear</Button>
+          )}
           <div className="ml-auto text-sm text-muted-foreground">{displayedGames.length} game{displayedGames.length !== 1 ? "s" : ""}</div>
         </div>
       </div>
