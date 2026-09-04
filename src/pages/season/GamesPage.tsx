@@ -1228,6 +1228,25 @@ export default function GamesPage() {
         }}
       />
 
+      {/* Single game reset confirm */}
+      <AlertDialog open={!!resetGame} onOpenChange={(o) => !o && setResetGame(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset this game?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This clears the final score, period scores, and all player stats for {resetGame?.home} vs {resetGame?.away}, and puts the game back to upcoming. The game itself stays on the schedule.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Reset Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       <AlertDialog open={!!bulkAction} onOpenChange={(o) => !o && setBulkAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
