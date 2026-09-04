@@ -91,6 +91,8 @@ export default function TeamsRostersPage() {
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [editForm, setEditForm] = useState<Team | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [rosters, setRosters] = useState<Record<string, RosterEntry[]>>(() => buildInitialRosters());
+
 
   // Bulk selection state
   const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
