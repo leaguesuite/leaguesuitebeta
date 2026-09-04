@@ -48,8 +48,37 @@ const INITIAL_TEAMS: Team[] = [
 
 const DIVISIONS = ["Division A", "Division B"];
 
+const ROSTER_ROLES = ["player", "coach"] as const;
+type RosterRole = typeof ROSTER_ROLES[number];
+
+interface RosterEntry {
+  player_id: number;
+  member_id: number;
+  player_name: string;
+  jersey: string;
+  label: string;
+  role: RosterRole;
+}
+
+const buildInitialRosters = (): Record<string, RosterEntry[]> => {
+  const map: Record<string, RosterEntry[]> = {};
+  mockPlayers.forEach((p, i) => {
+    const list = map[p.team_name] ?? (map[p.team_name] = []);
+    list.push({
+      player_id: p.player_id,
+      member_id: p.member_id,
+      player_name: p.player_name,
+      jersey: String(((i * 7) % 89) + 1),
+      label: "",
+      role: "player",
+    });
+  });
+  return map;
+};
+
 type SortKey = "name" | "division" | "captain";
 type SortDir = "asc" | "desc";
+
 
 export default function TeamsRostersPage() {
   const [teams, setTeams] = useState<Team[]>(INITIAL_TEAMS);
