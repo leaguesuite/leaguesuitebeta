@@ -758,7 +758,17 @@ export default function GamesPage() {
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openEditGame(game)}><Edit className="h-3 w-3" /> Edit</Button>
                         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openStats(game)}><BarChart3 className="h-3 w-3" /> Stats</Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
+                          disabled={game.homeScore === null && game.awayScore === null && (game.playerStats?.length ?? 0) === 0}
+                          onClick={() => setResetGame(game)}
+                        >
+                          <Eraser className="h-3 w-3" /> Reset
+                        </Button>
                       </div>
+
                     </td>
                   </tr>
                 );
