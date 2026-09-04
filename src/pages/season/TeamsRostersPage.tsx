@@ -561,8 +561,14 @@ export default function TeamsRostersPage() {
                 {unrosteredMembers.map(m => (
                   <button
                     key={m.member_id}
+                    onClick={() => {
+                      if (!selectedTeam) return;
+                      addEntry(selectedTeam.name, m);
+                      setAddPlayerOpen(false);
+                    }}
                     className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted transition-colors text-left"
                   >
+
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium text-foreground">{m.first_name} {m.last_name}</span>
                       <span className="block text-xs text-muted-foreground">{m.email}</span>
