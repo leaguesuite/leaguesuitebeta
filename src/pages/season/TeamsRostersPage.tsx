@@ -48,8 +48,37 @@ const INITIAL_TEAMS: Team[] = [
 
 const DIVISIONS = ["Division A", "Division B"];
 
+const ROSTER_ROLES = ["player", "coach"] as const;
+type RosterRole = typeof ROSTER_ROLES[number];
+
+interface RosterEntry {
+  player_id: number;
+  member_id: number;
+  player_name: string;
+  jersey: string;
+  label: string;
+  role: RosterRole;
+}
+
+const buildInitialRosters = (): Record<string, RosterEntry[]> => {
+  const map: Record<string, RosterEntry[]> = {};
+  mockPlayers.forEach((p, i) => {
+    const list = map[p.team_name] ?? (map[p.team_name] = []);
+    list.push({
+      player_id: p.player_id,
+      member_id: p.member_id,
+      player_name: p.player_name,
+      jersey: String(((i * 7) % 89) + 1),
+      label: "",
+      role: "player",
+    });
+  });
+  return map;
+};
+
 type SortKey = "name" | "division" | "captain";
 type SortDir = "asc" | "desc";
+
 
 export default function TeamsRostersPage() {
   const [teams, setTeams] = useState<Team[]>(INITIAL_TEAMS);
@@ -62,6 +91,8 @@ export default function TeamsRostersPage() {
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [editForm, setEditForm] = useState<Team | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [rosters, setRosters] = useState<Record<string, RosterEntry[]>>(() => buildInitialRosters());
+
 
   // Bulk selection state
   const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
@@ -127,10 +158,41 @@ export default function TeamsRostersPage() {
   };
 
   const getTeamRoster = (teamName: string) =>
-    mockPlayers.filter(p => p.team_name === teamName).map(p => {
+    (rosters[teamName] ?? []).map(p => {
       const member = mockMembers.find(m => m.member_id === p.member_id);
       return { ...p, status: member?.status || "active" };
     });
+
+  const updateEntry = (teamName: string, playerId: number, patch: Partial<RosterEntry>) => {
+    setRosters(prev => ({
+      ...prev,
+      [teamName]: (prev[teamName] ?? []).map(p => p.player_id === playerId ? { ...p, ...patch } : p),
+    }));
+  };
+
+  const removeEntry = (teamName: string, playerId: number) => {
+    setRosters(prev => ({
+      ...prev,
+      [teamName]: (prev[teamName] ?? []).filter(p => p.player_id !== playerId),
+    }));
+  };
+
+  const addEntry = (teamName: string, member: { member_id: number; first_name: string; last_name: string }) => {
+    setRosters(prev => ({
+      ...prev,
+      [teamName]: [
+        ...(prev[teamName] ?? []),
+        {
+          player_id: Date.now(),
+          member_id: member.member_id,
+          player_name: `${member.first_name} ${member.last_name}`,
+          jersey: "",
+          label: "",
+          role: "player" as RosterRole,
+        },
+      ],
+    }));
+  };
 
   const openEditTeam = (team: Team) => { setEditForm({ ...team }); setEditTeamOpen(true); };
   const saveTeamEdit = () => {
@@ -141,8 +203,10 @@ export default function TeamsRostersPage() {
   const openRoster = (team: Team) => { setSelectedTeam(team); setRosterOpen(true); };
 
   const unrosteredMembers = mockMembers.filter(m =>
-    m.status === "active" && !mockPlayers.some(p => p.member_id === m.member_id && p.team_name === selectedTeam?.name)
+    m.status === "active" &&
+    !(rosters[selectedTeam?.name ?? ""] ?? []).some(p => p.member_id === m.member_id)
   );
+
 
   const SortHeader = ({ k, label }: { k: SortKey; label: string }) => (
     <button
@@ -379,9 +443,10 @@ export default function TeamsRostersPage() {
 
         {/* Roster Dialog */}
         <Dialog open={rosterOpen} onOpenChange={setRosterOpen}>
-          <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedTeam?.name} — Roster</DialogTitle>
+              <DialogDescription>Set each player's jersey number, short label and role.</DialogDescription>
             </DialogHeader>
             {selectedTeam && (
               <div className="space-y-4">
@@ -398,19 +463,58 @@ export default function TeamsRostersPage() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead className="w-12">#</TableHead>
                         <TableHead>Player</TableHead>
+                        <TableHead className="w-24">Jersey #</TableHead>
+                        <TableHead className="w-28">Label</TableHead>
+                        <TableHead className="w-32">Role</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getTeamRoster(selectedTeam.name).map((p, i) => (
+                      {getTeamRoster(selectedTeam.name).map(p => (
                         <TableRow key={p.player_id}>
-                          <TableCell className="font-mono text-sm text-muted-foreground">{i + 1}</TableCell>
                           <TableCell>
                             <span className="font-medium text-sm text-foreground">{p.player_name}</span>
                             <span className="block text-xs text-muted-foreground">ID: {p.member_id}</span>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={p.jersey}
+                              inputMode="numeric"
+                              maxLength={3}
+                              placeholder="—"
+                              className="h-8 w-16 text-sm"
+                              onChange={e =>
+                                updateEntry(selectedTeam.name, p.player_id, {
+                                  jersey: e.target.value.replace(/\D/g, "").slice(0, 3),
+                                })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={p.label}
+                              maxLength={5}
+                              placeholder="e.g. SUB"
+                              className="h-8 w-20 text-sm"
+                              onChange={e =>
+                                updateEntry(selectedTeam.name, p.player_id, { label: e.target.value.slice(0, 5) })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={p.role}
+                              onValueChange={v => updateEntry(selectedTeam.name, p.player_id, { role: v as RosterRole })}
+                            >
+                              <SelectTrigger className="h-8 w-28 text-sm capitalize"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {ROSTER_ROLES.map(r => (
+                                  <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </TableCell>
                           <TableCell>
                             <Badge variant={p.status === "active" ? "default" : "secondary"} className="text-xs">
@@ -418,7 +522,12 @@ export default function TeamsRostersPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => removeEntry(selectedTeam.name, p.player_id)}
+                            >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </TableCell>
@@ -426,7 +535,7 @@ export default function TeamsRostersPage() {
                       ))}
                       {getTeamRoster(selectedTeam.name).length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                             No players on this roster yet. Click "Add Player" to get started.
                           </TableCell>
                         </TableRow>
@@ -434,6 +543,7 @@ export default function TeamsRostersPage() {
                     </TableBody>
                   </Table>
                 </div>
+
               </div>
             )}
           </DialogContent>
@@ -451,8 +561,14 @@ export default function TeamsRostersPage() {
                 {unrosteredMembers.map(m => (
                   <button
                     key={m.member_id}
+                    onClick={() => {
+                      if (!selectedTeam) return;
+                      addEntry(selectedTeam.name, m);
+                      setAddPlayerOpen(false);
+                    }}
                     className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted transition-colors text-left"
                   >
+
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium text-foreground">{m.first_name} {m.last_name}</span>
                       <span className="block text-xs text-muted-foreground">{m.email}</span>
