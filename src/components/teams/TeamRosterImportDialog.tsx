@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, Fragment } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -265,7 +265,7 @@ export default function TeamRosterImportDialog({ open, onOpenChange, existingTea
                   </TableHeader>
                   <TableBody>
                     {groups.map(g => (
-                      <>
+                      <Fragment key={`${g.team}|${g.division}`}>
                         <TableRow key={`h-${g.team}-${g.division}`} className="bg-muted/30 hover:bg-muted/30">
                           <TableCell colSpan={6} className="py-2">
                             <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ export default function TeamRosterImportDialog({ open, onOpenChange, existingTea
                             </TableRow>
                           );
                         })}
-                      </>
+                      </Fragment>
                     ))}
                   </TableBody>
                 </Table>
