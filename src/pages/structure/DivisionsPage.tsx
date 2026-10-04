@@ -64,7 +64,7 @@ export default function DivisionsPage() {
     const cid = Number(divCategoryId);
     if (editingId !== null) {
       setDivisions(prev => prev.map(d => d.id === editingId
-        ? { ...d, categoryId: cid, name: divName.trim(), teamCap: divTeamCap, qbCap: divQbCap }
+        ? { ...d, categoryId: cid, name: divName.trim(), teamCap: Number(divTeamCap), qbCap: Number(divQbCap) }
         : d));
       toast.success(`Division "${divName.trim()}" updated`);
     } else {
@@ -72,8 +72,8 @@ export default function DivisionsPage() {
         id: Date.now(),
         categoryId: cid,
         name: divName.trim(),
-        teamCap: divTeamCap,
-        qbCap: divQbCap,
+        teamCap: Number(divTeamCap),
+        qbCap: Number(divQbCap),
         teams: 0,
         status: "draft",
       }]);
