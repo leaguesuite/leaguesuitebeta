@@ -87,6 +87,9 @@ export default function NewSeasonWizard() {
   const [customPhaseName, setCustomPhaseName] = useState("");
   const [userTouchedPhases, setUserTouchedPhases] = useState(false);
   const [userTouchedStats, setUserTouchedStats] = useState(false);
+  const [eventName, setEventName] = useState("Spring 2025");
+  const [startDate, setStartDate] = useState("2025-03-15");
+  const [endDate, setEndDate] = useState("2025-06-15");
 
   // Re-apply default memory when the event format changes, unless the user has manually edited.
   useEffect(() => {
@@ -127,6 +130,11 @@ export default function NewSeasonWizard() {
     setSelectedPhases(computeDefaultPhases(eventFormat));
     setUserTouchedPhases(false);
   };
+
+  const eventNameError = !eventName.trim() ? "Season name is required" : "";
+  const startDateError = !startDate ? "Start date is required" : "";
+  const endDateError = !endDate ? "End date is required" : (startDate && endDate <= startDate) ? "End date must be after start date" : "";
+  const step2Valid = !eventNameError && !startDateError && !endDateError;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -198,7 +206,8 @@ export default function NewSeasonWizard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="text-sm font-medium text-foreground">Event Name</label>
-                <input type="text" defaultValue="Spring 2025" className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
+                <input type="text" value={eventName} onChange={(e) => setEventName(e.target.value)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
+                {eventNameError && <p className="mt-1 text-xs text-destructive">{eventNameError}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">Event Format</label>
@@ -213,11 +222,13 @@ export default function NewSeasonWizard() {
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">Start Date</label>
-                <input type="date" defaultValue="2025-03-15" className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
+                {startDateError && <p className="mt-1 text-xs text-destructive">{startDateError}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">End Date</label>
-                <input type="date" defaultValue="2025-06-15" className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring/20" />
+                {endDateError && <p className="mt-1 text-xs text-destructive">{endDateError}</p>}
               </div>
             </div>
           </div>
@@ -500,6 +511,7 @@ export default function NewSeasonWizard() {
         )}
       </div>
 
+
       {/* Nav Buttons */}
       <div className="flex items-center justify-between">
         <button
@@ -514,7 +526,8 @@ export default function NewSeasonWizard() {
           {currentStep < steps.length ? (
             <button
               onClick={() => setCurrentStep(currentStep + 1)}
-              className="h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+              disabled={currentStep === 2 && !step2Valid}
+              className="h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Continue <ChevronRight className="h-4 w-4" />
             </button>

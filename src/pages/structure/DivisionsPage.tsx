@@ -33,8 +33,8 @@ export default function DivisionsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [divCategoryId, setDivCategoryId] = useState<string>("");
   const [divName, setDivName] = useState("");
-  const [divTeamCap, setDivTeamCap] = useState(475);
-  const [divQbCap, setDivQbCap] = useState(85);
+  const [divTeamCap, setDivTeamCap] = useState<number | "">(8);
+  const [divQbCap, setDivQbCap] = useState<number | "">(2);
 
   const catName = (id: number) => categories.find(c => c.id === id)?.name ?? "—";
 
@@ -42,8 +42,8 @@ export default function DivisionsPage() {
     setEditingId(null);
     setDivCategoryId(categoryFilter !== "all" ? categoryFilter : "");
     setDivName("");
-    setDivTeamCap(475);
-    setDivQbCap(85);
+    setDivTeamCap(8);
+    setDivQbCap(2);
   };
 
   const openNew = () => { resetDiv(); setDivOpen(true); };
@@ -60,10 +60,11 @@ export default function DivisionsPage() {
   const handleSave = () => {
     if (!divCategoryId) { toast.error("Select a category"); return; }
     if (!divName.trim()) { toast.error("Division name is required"); return; }
+    if (teamCapError || qbCapError) return;
     const cid = Number(divCategoryId);
     if (editingId !== null) {
       setDivisions(prev => prev.map(d => d.id === editingId
-        ? { ...d, categoryId: cid, name: divName.trim(), teamCap: divTeamCap, qbCap: divQbCap }
+        ? { ...d, categoryId: cid, name: divName.trim(), teamCap: Number(divTeamCap), qbCap: Number(divQbCap) }
         : d));
       toast.success(`Division "${divName.trim()}" updated`);
     } else {
@@ -71,8 +72,8 @@ export default function DivisionsPage() {
         id: Date.now(),
         categoryId: cid,
         name: divName.trim(),
-        teamCap: divTeamCap,
-        qbCap: divQbCap,
+        teamCap: Number(divTeamCap),
+        qbCap: Number(divQbCap),
         teams: 0,
         status: "draft",
       }]);
@@ -92,6 +93,11 @@ export default function DivisionsPage() {
     const matchCat = categoryFilter === "all" || String(d.categoryId) === categoryFilter;
     return matchSearch && matchCat;
   });
+
+  const teamCapError = divTeamCap === "" || !Number.isInteger(Number(divTeamCap)) || Number(divTeamCap) < 2 || Number(divTeamCap) > 64
+    ? "Team Cap must be a whole number from 2 to 64" : "";
+  const qbCapError = divQbCap === "" || !Number.isInteger(Number(divQbCap)) || Number(divQbCap) < 0 || Number(divQbCap) > 10
+    ? "QB Cap must be a whole number from 0 to 10" : "";
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -199,17 +205,19 @@ export default function DivisionsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="div-cap">Team Cap</Label>
-                <Input id="div-cap" type="number" placeholder="475" value={divTeamCap} onChange={e => setDivTeamCap(Number(e.target.value))} />
+                <Input id="div-cap" type="number" placeholder="8" value={divTeamCap} onChange={e => setDivTeamCap(e.target.value === "" ? "" : Number(e.target.value))} />
+                {teamCapError && <p className="text-xs text-destructive">{teamCapError}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="div-qb">QB Cap</Label>
-                <Input id="div-qb" type="number" placeholder="85" value={divQbCap} onChange={e => setDivQbCap(Number(e.target.value))} />
+                <Input id="div-qb" type="number" placeholder="2" value={divQbCap} onChange={e => setDivQbCap(e.target.value === "" ? "" : Number(e.target.value))} />
+                {qbCapError && <p className="text-xs text-destructive">{qbCapError}</p>}
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDivOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editingId !== null ? "Save Changes" : "Add Division"}</Button>
+            <Button onClick={handleSave} disabled={!!teamCapError || !!qbCapError}>{editingId !== null ? "Save Changes" : "Add Division"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
