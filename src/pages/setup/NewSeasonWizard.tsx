@@ -131,7 +131,7 @@ export default function NewSeasonWizard() {
     setUserTouchedPhases(false);
   };
 
-  const eventNameError = !eventName.trim() ? "Season name is required" : "";
+  const eventNameError = !eventName.trim() ? "Event name is required" : "";
   const startDateError = !startDate ? "Start date is required" : "";
   const endDateError = !endDate ? "End date is required" : (startDate && endDate <= startDate) ? "End date must be after start date" : "";
   const step2Valid = !eventNameError && !startDateError && !endDateError;
