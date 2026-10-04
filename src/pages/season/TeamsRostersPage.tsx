@@ -23,7 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft, Mail } from "lucide-react";
 
-import CsvImportDialog from "@/components/shared/CsvImportDialog";
+import TeamRosterImportDialog from "@/components/teams/TeamRosterImportDialog";
 import BulkMessageDialog from "@/components/shared/BulkMessageDialog";
 
 interface Team {
@@ -582,32 +582,50 @@ export default function TeamsRostersPage() {
         </Dialog>
 
         {/* CSV Import */}
-        <CsvImportDialog
+        <TeamRosterImportDialog
           open={importOpen}
           onOpenChange={setImportOpen}
-          title="Import Teams & Rosters"
-          description="Upload a CSV to bulk-import teams and roster assignments."
-          expectedColumns={["team_name", "division", "captain", "captain_email", "coach"]}
-          sampleRows={[
-            ["Eagles", "Division A", "John Smith", "john.smith@example.com", "N/A"],
-            ["Tigers", "Division A", "Emily Brown", "emily.brown@example.com", "Sarah Johnson"],
-          ]}
+          existingTeams={teams}
           onImport={(rows) => {
+            const lc = (s: string) => s.trim().toLowerCase();
             const newTeams: Team[] = [];
+            const matched = new Set<string>();
+            const added: Record<string, RosterEntry[]> = {};
+            let seq = Date.now();
             rows.forEach(r => {
-              if (!r.team_name) return;
-              if (!teams.some(t => t.name === r.team_name)) {
-                newTeams.push({
-                  id: String(Date.now()) + r.team_name,
-                  name: r.team_name,
-                  division: r.division || "Division A",
-                  captain: r.captain || "",
-                  captainEmail: r.captain_email || "",
+              const key = `${lc(r.team_name)}|${lc(r.division)}`;
+              let team = teams.find(t => `${lc(t.name)}|${lc(t.division)}` === key)
+                ?? newTeams.find(t => `${lc(t.name)}|${lc(t.division)}` === key);
+              if (team && teams.includes(team)) matched.add(team.id);
+              if (!team) {
+                team = {
+                  id: `${seq++}-${r.team_name}`,
+                  name: r.team_name.trim(),
+                  division: r.division.trim(),
+                  captain: r.captain,
+                  captainEmail: r.captain_email,
                   coach: r.coach || "N/A",
-                });
+                };
+                newTeams.push(team);
               }
+              const role = lc(r.role);
+              const id = seq++;
+              (added[team.name] ??= []).push({
+                player_id: id,
+                member_id: id,
+                player_name: `${r.first_name} ${r.last_name}`.trim(),
+                jersey: r.jersey_number,
+                label: role && role !== "player" && role !== "coach" ? r.role.toUpperCase().slice(0, 5) : "",
+                role: role === "coach" ? "coach" : "player",
+              });
             });
             if (newTeams.length) setTeams(prev => [...prev, ...newTeams]);
+            setRosters(prev => {
+              const next = { ...prev };
+              Object.entries(added).forEach(([name, list]) => { next[name] = [...(next[name] ?? []), ...list]; });
+              return next;
+            });
+            return { teamsCreated: newTeams.length, teamsMatched: matched.size, playersAdded: rows.length };
           }}
         />
       </div>
