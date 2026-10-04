@@ -9,6 +9,8 @@ import { exportToExcel } from '@/utils/exportToExcel';
 import { mockMembers, mockPlayers } from '@/data/mockMembers';
 import { mockSchedule } from '@/data/mockSchedule';
 import { toast } from 'sonner';
+import { Upload } from 'lucide-react';
+import RatingsImportDialog from '@/components/ratings/RatingsImportDialog';
 
 interface ReportDefinition {
   id: string;
@@ -17,11 +19,13 @@ interface ReportDefinition {
   category: 'members' | 'season' | 'operations' | 'compliance';
   icon: React.ReactNode;
   generate: () => void;
+  isImport?: boolean;
 }
 
 const ReportsPage = () => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [ratingsImportOpen, setRatingsImportOpen] = useState(false);
 
   const reports: ReportDefinition[] = [
     {
@@ -82,6 +86,15 @@ const ReportsPage = () => {
         exportToExcel(data, 'player-ratings', 'Ratings');
         toast.success('Player Ratings exported');
       },
+    },
+    {
+      id: 'member-ratings-import',
+      title: 'Import Player Ratings',
+      description: 'Upload a CSV of OFF/DEF/QB ratings by player and season.',
+      category: 'season',
+      icon: <Upload className="h-5 w-5" />,
+      isImport: true,
+      generate: () => setRatingsImportOpen(true),
     },
     {
       id: 'game-schedule',
@@ -345,8 +358,8 @@ const ReportsPage = () => {
             </CardHeader>
             <CardContent className="pt-0">
               <Button variant="outline" size="sm" className="w-full gap-2" onClick={report.generate}>
-                <FileSpreadsheet className="h-4 w-4" />
-                Export to Excel
+                {report.isImport ? <Upload className="h-4 w-4" /> : <FileSpreadsheet className="h-4 w-4" />}
+                {report.isImport ? 'Upload CSV' : 'Export to Excel'}
               </Button>
             </CardContent>
           </Card>
@@ -359,6 +372,7 @@ const ReportsPage = () => {
           <p>No reports match your search.</p>
         </div>
       )}
+      <RatingsImportDialog open={ratingsImportOpen} onOpenChange={setRatingsImportOpen} />
     </div>
   );
 };

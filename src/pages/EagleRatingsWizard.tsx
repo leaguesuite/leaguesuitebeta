@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, Bird } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Bird, Upload } from 'lucide-react';
+import RatingsImportDialog from '@/components/ratings/RatingsImportDialog';
+import CurrentRatingsCard from '@/components/ratings/CurrentRatingsCard';
 import { EagleRatingsConfig, defaultEagleConfig } from '@/types/eagleRatings';
 import { mockSeasons, mockDivisions } from '@/data/eagleMockData';
 import { EagleSeasonTypeStep } from '@/pages/eagle-steps/EagleSeasonTypeStep';
@@ -22,6 +24,7 @@ const steps = [
 export default function EagleRatingsWizard() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [config, setConfig] = useState<EagleRatingsConfig>(() => ({
     ...defaultEagleConfig,
     divisions: mockDivisions.map((d, i) => ({
@@ -88,7 +91,7 @@ export default function EagleRatingsWizard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 max-w-3xl">
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -101,6 +104,9 @@ export default function EagleRatingsWizard() {
             <p className="text-sm text-muted-foreground">Configure player rating parameters</p>
           </div>
         </div>
+        <Button variant="outline" className="ml-auto gap-2" onClick={() => setUploadOpen(true)}>
+          <Upload className="h-4 w-4" /> Upload Ratings (CSV)
+        </Button>
       </div>
 
       {/* Progress Bar */}
@@ -186,6 +192,9 @@ export default function EagleRatingsWizard() {
           {currentStep < steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
         </Button>
       </div>
+
+      <CurrentRatingsCard />
+      <RatingsImportDialog open={uploadOpen} onOpenChange={setUploadOpen} />
     </div>
   );
 }
