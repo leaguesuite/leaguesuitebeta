@@ -315,7 +315,7 @@ export default function AIContentPage() {
       {/* Pricing Breakdown */}
       {pricedEnabledCount > 0 && (
         <div className="section-card">
-          <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+          <div className="section-card-header flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Pricing Estimate</h2>
           </div>
@@ -374,7 +374,7 @@ export default function AIContentPage() {
 
       {/* Recent AI Content */}
       <div className="section-card">
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div className="section-card-header flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Newspaper className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Recently Generated</h2>
