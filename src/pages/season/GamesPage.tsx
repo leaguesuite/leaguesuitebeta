@@ -419,7 +419,7 @@ export default function GamesPage() {
 
   const SortHeader = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => (
     <th
-      className="table-header text-left px-5 py-3 cursor-pointer select-none hover:text-foreground transition-colors"
+      className="table-header text-left px-4 py-3 whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors"
       onClick={() => handleSort(column)}
     >
       <div className="flex items-center gap-1.5">
