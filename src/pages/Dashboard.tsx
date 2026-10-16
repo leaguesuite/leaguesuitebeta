@@ -144,7 +144,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Today's Games */}
         <div className="lg:col-span-2 section-card">
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+          <div className="section-card-header flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Today's Games</h2>
             <a href="/season/games" className="text-xs text-primary font-medium flex items-center gap-1 hover:underline">
               View all <ArrowRight className="h-3 w-3" />
@@ -170,7 +170,7 @@ export default function Dashboard() {
 
         {/* Alerts */}
         <div className="section-card">
-          <div className="px-5 py-4 border-b border-border">
+          <div className="section-card-header">
             <h2 className="text-sm font-semibold text-foreground">Alerts & Tasks</h2>
           </div>
           <div className="p-4 space-y-3">
@@ -194,7 +194,7 @@ export default function Dashboard() {
 
       {/* ─── Website Traffic Section ──────────────────────────────────────── */}
       <div className="section-card">
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div className="section-card-header flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Globe className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Website Traffic</h2>
@@ -326,7 +326,7 @@ export default function Dashboard() {
 
       {/* ─── SEO Overview Section ─────────────────────────────────────────── */}
       <div className="section-card">
-        <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+        <div className="section-card-header flex items-center gap-2">
           <Search className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold text-foreground">SEO Overview</h2>
         </div>
@@ -427,7 +427,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Registrations */}
         <div className="section-card">
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+          <div className="section-card-header flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Recent Registrations</h2>
             <a href="/members/all" className="text-xs text-primary font-medium flex items-center gap-1 hover:underline">
               View all <ArrowRight className="h-3 w-3" />
@@ -448,7 +448,7 @@ export default function Dashboard() {
 
         {/* Quick Links */}
         <div className="section-card">
-          <div className="px-5 py-4 border-b border-border">
+          <div className="section-card-header">
             <h2 className="text-sm font-semibold text-foreground">Quick Actions</h2>
           </div>
           <div className="p-4 grid grid-cols-2 gap-3">

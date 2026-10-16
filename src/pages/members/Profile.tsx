@@ -32,7 +32,7 @@ function HeaderSkeleton() {
 function TableSkeleton() {
   return (
     <div className="section-card">
-      <div className="px-5 py-4 border-b border-border">
+      <div className="section-card-header">
         <Skeleton className="h-5 w-32" />
       </div>
       <div className="divide-y divide-border">
@@ -181,7 +181,7 @@ export default function MemberProfile() {
         <TableSkeleton />
       ) : (
         <div className="section-card">
-          <div className="px-5 py-4 border-b border-border">
+          <div className="section-card-header">
             <h2 className="text-sm font-semibold text-foreground">Season History</h2>
           </div>
 

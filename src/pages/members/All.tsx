@@ -199,7 +199,7 @@ export default function MembersAll() {
       {/* Card */}
       <div className="section-card">
         {/* Toolbar */}
-        <div className="px-5 py-4 border-b border-border flex flex-wrap items-center gap-3">
+        <div className="section-card-header flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

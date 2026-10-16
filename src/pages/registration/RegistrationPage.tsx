@@ -519,7 +519,7 @@ export default function RegistrationPage() {
         {/* Submissions table */}
         {isTeamForm ? (
           <div className="section-card overflow-hidden">
-            <div className="px-5 py-4 border-b border-border">
+            <div className="section-card-header">
               <h2 className="text-sm font-semibold text-foreground">Team Submissions</h2>
             </div>
             <div className="overflow-x-auto">
@@ -570,7 +570,7 @@ export default function RegistrationPage() {
           </div>
         ) : (
           <div className="section-card overflow-hidden">
-            <div className="px-5 py-4 border-b border-border">
+            <div className="section-card-header">
               <h2 className="text-sm font-semibold text-foreground">Individual Submissions</h2>
             </div>
             <div className="overflow-x-auto">
@@ -778,7 +778,7 @@ export default function RegistrationPage() {
 
               {/* Roster */}
               <div className="section-card overflow-hidden">
-                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                <div className="section-card-header flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-foreground">Submitted Roster</h3>
                   <Badge variant="secondary" className="text-xs">{viewingTeamSub.roster.length} players</Badge>
                 </div>

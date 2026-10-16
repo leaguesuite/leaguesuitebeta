@@ -595,7 +595,7 @@ export default function NavigationMenusPage() {
 
   const ColorsCard = ({ title, bgKey, textKey }: { title: string; bgKey: keyof NavConfig; textKey: keyof NavConfig }) => (
     <div className="section-card">
-      <div className="px-5 py-4 border-b border-border">
+      <div className="section-card-header">
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         <p className="text-xs text-muted-foreground mt-0.5">Customize background and text color. Tip: pick a contrasting text color so labels stay readable.</p>
       </div>
@@ -654,7 +654,7 @@ export default function NavigationMenusPage() {
       {activeBar === "main" && (
         <>
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="section-card-header flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">Main Menu Items</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Locked items (Home, Calendar, Accolades, Roster Verification) can be hidden and reordered but not removed. Add custom pages and dropdowns below.</p>
@@ -669,7 +669,7 @@ export default function NavigationMenusPage() {
           </div>
 
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border">
+            <div className="section-card-header">
               <h2 className="text-sm font-semibold text-foreground">Header Tools & Style</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Toggle utilities locked to the main header bar and adjust its appearance.</p>
             </div>
@@ -704,7 +704,7 @@ export default function NavigationMenusPage() {
         <>
           <ColorsCard title="Top Bar Colors" bgKey="topBarBg" textKey="topBarText" />
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border">
+            <div className="section-card-header">
               <h2 className="text-sm font-semibold text-foreground">Locked Top Bar Tools</h2>
               <p className="text-xs text-muted-foreground mt-0.5">These utilities live in the top bar permanently. Toggle them on or off.</p>
             </div>
@@ -728,7 +728,7 @@ export default function NavigationMenusPage() {
           {/* Logo upload */}
           {config.showLogo && (
             <div className="section-card">
-              <div className="px-5 py-4 border-b border-border">
+              <div className="section-card-header">
                 <h2 className="text-sm font-semibold text-foreground">League Logo</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Manage your league logo from <a href="/settings/branding" className="text-primary hover:underline">Settings → Branding</a>. The same logo is used here in the top bar.
@@ -751,7 +751,7 @@ export default function NavigationMenusPage() {
 
           {/* Social links */}
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="section-card-header flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">Social Media Icons</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Shown on the right of the top bar.</p>
@@ -789,7 +789,7 @@ export default function NavigationMenusPage() {
           {/* Languages */}
           {config.showLanguagePicker && (
             <div className="section-card">
-              <div className="px-5 py-4 border-b border-border">
+              <div className="section-card-header">
                 <h2 className="text-sm font-semibold text-foreground">Languages</h2>
               </div>
               <div className="p-5 space-y-2">
@@ -809,7 +809,7 @@ export default function NavigationMenusPage() {
 
           {/* Custom links */}
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="section-card-header flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">Top Bar Links</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Custom page links and dropdowns. Move them to the Main Menu or Footer at any time.</p>
@@ -836,7 +836,7 @@ export default function NavigationMenusPage() {
         <>
           <ColorsCard title="Footer Colors" bgKey="footerBg" textKey="footerText" />
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="section-card-header flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-foreground flex items-center gap-2"><Columns3 className="h-4 w-4" /> Footer Columns</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Group footer links into up to 4 columns. Add a column for a site map.</p>
@@ -880,7 +880,7 @@ export default function NavigationMenusPage() {
           </div>
 
           <div className="section-card">
-            <div className="px-5 py-4 border-b border-border">
+            <div className="section-card-header">
               <h2 className="text-sm font-semibold text-foreground">Footer Settings</h2>
             </div>
             <div className="p-5 space-y-4">
