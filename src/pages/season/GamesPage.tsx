@@ -635,8 +635,8 @@ export default function GamesPage() {
       </div>
 
       {/* Filters */}
-      <div className="section-card p-4">
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className="section-card p-2.5 bg-card/90">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search teams..."
