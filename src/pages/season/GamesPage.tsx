@@ -696,7 +696,7 @@ export default function GamesPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border bg-secondary/50">
+              <tr className="border-b border-border bg-secondary/60 sticky top-0 z-10 backdrop-blur">
                 <th className="table-header px-5 py-3 w-10">
                   <Checkbox
                     checked={displayedGames.length > 0 && displayedGames.every(g => selectedIds.has(g.id))}
@@ -723,11 +723,11 @@ export default function GamesPage() {
                 <th className="table-header text-right px-5 py-3">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/70">
               {displayedGames.map(game => {
                 const { location, fieldNumber } = parseField(game.field);
                 return (
-                  <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
+                  <tr key={game.id} className={`hover:bg-primary/[0.03] transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
                     <td className="px-5 py-3.5">
                       <Checkbox
                         checked={selectedIds.has(game.id)}
@@ -736,14 +736,14 @@ export default function GamesPage() {
                       />
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="text-sm font-medium text-foreground">{game.date}</div>
+                      <div className="text-sm font-medium text-foreground tabular">{game.date}</div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {game.time}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> <span className="font-mono">{game.time}</span></div>
                     </td>
                     <td className="px-5 py-3.5">
                       <span className="font-semibold text-foreground text-sm">{game.home}</span>
-                      <span className="mx-2 text-xs text-muted-foreground font-bold">VS</span>
+                      <span className="mx-2 text-[10px] text-muted-foreground font-mono uppercase">vs</span>
                       <span className="font-semibold text-foreground text-sm">{game.away}</span>
                     </td>
                     <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
@@ -751,7 +751,7 @@ export default function GamesPage() {
                     <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {location}</div></td>
                     <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground">{fieldNumber || "—"}</div></td>
                     <td className="px-5 py-3.5">
-                      <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
+                      <span className={`font-mono text-sm font-semibold tabular ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
                     </td>
                     <td className="px-5 py-3.5"><StatusBadge status={game.status} /></td>
                     <td className="px-5 py-3.5 text-right">

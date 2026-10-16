@@ -7,20 +7,18 @@ interface LeaguePageTitleProps {
 }
 
 /**
- * Renders a page title prefixed with the active league name.
- * Example: "Metro Flag League › Tags"
+ * Page title with the active league shown as a small eyebrow label above it.
  */
 export function LeaguePageTitle({ title, className }: LeaguePageTitleProps) {
   const { activeLeague } = useActiveLeague();
   return (
-    <h1 className={cn("text-2xl font-bold text-foreground", className)}>
+    <div>
       {activeLeague?.name && (
-        <>
-          <span className="text-muted-foreground font-medium">{activeLeague.name}</span>{" "}
-          <span className="text-muted-foreground/60 font-normal">›</span>{" "}
-        </>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary mb-1">
+          {activeLeague.name}
+        </div>
       )}
-      {title}
-    </h1>
+      <h1 className={cn("text-2xl font-display font-semibold tracking-tight text-foreground", className)}>{title}</h1>
+    </div>
   );
 }
