@@ -419,7 +419,7 @@ export default function GamesPage() {
 
   const SortHeader = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => (
     <th
-      className="table-header text-left px-5 py-3 cursor-pointer select-none hover:text-foreground transition-colors"
+      className="table-header text-left px-4 py-3 whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors"
       onClick={() => handleSort(column)}
     >
       <div className="flex items-center gap-1.5">
@@ -635,8 +635,8 @@ export default function GamesPage() {
       </div>
 
       {/* Filters */}
-      <div className="section-card p-4">
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className="section-card p-2.5 bg-card/90">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search teams..."
@@ -696,8 +696,8 @@ export default function GamesPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border bg-secondary/50">
-                <th className="table-header px-5 py-3 w-10">
+              <tr className="border-b border-border bg-secondary/60 sticky top-0 z-10 backdrop-blur">
+                <th className="table-header px-4 py-3 whitespace-nowrap w-10">
                   <Checkbox
                     checked={displayedGames.length > 0 && displayedGames.every(g => selectedIds.has(g.id))}
                     onCheckedChange={(checked) => {
@@ -713,48 +713,48 @@ export default function GamesPage() {
                 </th>
                 <SortHeader column="date">Date</SortHeader>
                 <SortHeader column="time">Time</SortHeader>
-                <th className="table-header text-left px-5 py-3">Matchup</th>
-                <th className="table-header text-left px-5 py-3">Division</th>
-                <th className="table-header text-left px-5 py-3">Phase</th>
+                <th className="table-header text-left px-4 py-3 whitespace-nowrap">Matchup</th>
+                <th className="table-header text-left px-4 py-3 whitespace-nowrap">Division</th>
+                <th className="table-header text-left px-4 py-3 whitespace-nowrap">Phase</th>
                 <SortHeader column="location">Location</SortHeader>
                 <SortHeader column="field">Field</SortHeader>
-                <th className="table-header text-left px-5 py-3">Score</th>
-                <th className="table-header text-left px-5 py-3">Status</th>
-                <th className="table-header text-right px-5 py-3">Actions</th>
+                <th className="table-header text-left px-4 py-3 whitespace-nowrap">Score</th>
+                <th className="table-header text-left px-4 py-3 whitespace-nowrap">Status</th>
+                <th className="table-header text-right px-4 py-3 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/70">
               {displayedGames.map(game => {
                 const { location, fieldNumber } = parseField(game.field);
                 return (
-                  <tr key={game.id} className={`hover:bg-secondary/30 transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
-                    <td className="px-5 py-3.5">
+                  <tr key={game.id} className={`hover:bg-primary/[0.03] transition-colors ${selectedIds.has(game.id) ? "bg-primary/5" : ""}`}>
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <Checkbox
                         checked={selectedIds.has(game.id)}
                         onCheckedChange={() => toggleSelect(game.id)}
                         aria-label={`Select ${game.home} vs ${game.away}`}
                       />
                     </td>
-                    <td className="px-5 py-3.5">
-                      <div className="text-sm font-medium text-foreground">{game.date}</div>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm font-medium text-foreground tabular">{game.date}</div>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {game.time}</div>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> <span className="font-mono">{game.time}</span></div>
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span className="font-semibold text-foreground text-sm">{game.home}</span>
-                      <span className="mx-2 text-xs text-muted-foreground font-bold">VS</span>
+                      <span className="mx-2 text-[10px] text-muted-foreground font-mono uppercase">vs</span>
                       <span className="font-semibold text-foreground text-sm">{game.away}</span>
                     </td>
-                    <td className="px-5 py-3.5"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
-                    <td className="px-5 py-3.5"><Badge variant={game.phase === "Playoffs" ? "default" : "outline"} className="text-xs">{game.phase}</Badge></td>
-                    <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {location}</div></td>
-                    <td className="px-5 py-3.5"><div className="text-sm text-muted-foreground">{fieldNumber || "—"}</div></td>
-                    <td className="px-5 py-3.5">
-                      <span className={`text-sm font-semibold ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
+                    <td className="px-4 py-3 whitespace-nowrap"><Badge variant="secondary" className="text-xs">{game.division}</Badge></td>
+                    <td className="px-4 py-3 whitespace-nowrap"><Badge variant={game.phase === "Playoffs" ? "default" : "outline"} className="text-xs">{game.phase}</Badge></td>
+                    <td className="px-4 py-3 whitespace-nowrap"><div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {location}</div></td>
+                    <td className="px-4 py-3 whitespace-nowrap"><div className="text-sm text-muted-foreground">{fieldNumber || "—"}</div></td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`font-mono text-sm font-semibold tabular ${formatScore(game) === "-" ? "text-muted-foreground" : "text-foreground"}`}>{formatScore(game)}</span>
                     </td>
-                    <td className="px-5 py-3.5"><StatusBadge status={game.status} /></td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-4 py-3 whitespace-nowrap"><StatusBadge status={game.status} /></td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openEditGame(game)}><Edit className="h-3 w-3" /> Edit</Button>
                         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => openStats(game)}><BarChart3 className="h-3 w-3" /> Stats</Button>

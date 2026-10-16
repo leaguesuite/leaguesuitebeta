@@ -204,10 +204,10 @@ export default function AppSidebar() {
     <aside className="w-60 bg-sidebar border-r border-sidebar-border flex flex-col shrink-0 overflow-hidden">
       <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sidebar-primary to-accent shadow-lg flex items-center justify-center">
             <Trophy className="h-4 w-4 text-sidebar-primary-foreground" />
           </div>
-          <span className="font-bold text-sm text-sidebar-accent-foreground tracking-tight">League Suite</span>
+          <span className="font-display font-semibold text-[15px] text-sidebar-accent-foreground tracking-tight">League Suite</span>
         </div>
         <button onClick={() => setCollapsed(true)} className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-foreground">
           <MenuIcon className="h-4 w-4" />
@@ -235,9 +235,9 @@ export default function AppSidebar() {
                 {item.path ? (
                   <Link
                     to={item.path}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+                    className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
                       isActive(item.path)
-                        ? "bg-sidebar-accent text-sidebar-primary"
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_2px_0_0_hsl(var(--sidebar-primary))]"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     }`}
                   >
@@ -248,9 +248,9 @@ export default function AppSidebar() {
                   <>
                     <button
                       onClick={() => toggle(item.label)}
-                      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+                      className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
                         item.children?.some(c => isActive(c.path))
-                          ? "text-sidebar-primary"
+                          ? "text-sidebar-accent-foreground"
                           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       }`}
                     >
@@ -266,7 +266,7 @@ export default function AppSidebar() {
                             to={child.path}
                             className={`block px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${
                               isActive(child.path)
-                                ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-[inset_2px_0_0_hsl(var(--sidebar-primary))]"
                                 : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                             }`}
                           >
@@ -286,9 +286,9 @@ export default function AppSidebar() {
       <div className="px-2 py-2 border-t border-sidebar-border">
         <Link
           to="/support"
-          className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+          className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
             isActive("/support")
-              ? "bg-sidebar-accent text-sidebar-primary"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_2px_0_0_hsl(var(--sidebar-primary))]"
               : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           }`}
         >
