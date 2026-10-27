@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Search, Upload, Users, Edit, ArrowRightLeft, Layers, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, MoreHorizontal, Plus, Search, Upload, Users, Edit, ArrowRightLeft, Layers, Trash2 } from "lucide-react";
 import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import TeamRosterImportDialog from "@/components/teams/TeamRosterImportDialog";
 import MoveTeamDialog, { MoveResult } from "@/components/teams/MoveTeamDialog";
@@ -37,8 +37,6 @@ export default function TeamsRostersPage() {
   const [deleteIds, setDeleteIds] = useState<string[] | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   const q = search.toLowerCase();
   const visible = teams.filter(t => (divFilter === "all" || t.division === divFilter) && (t.name.toLowerCase().includes(q) || t.captain.toLowerCase().includes(q)));
@@ -52,14 +50,6 @@ export default function TeamsRostersPage() {
     const where = conference ? (subdivision ? `${conference} › ${subdivision}` : conference) : "Unassigned";
     updateTeam({ ...t, conference, subdivision, history: [...t.history, { date: today(), text: `Assigned to ${where}` }] });
     toast({ title: `${t.name} → ${where}` });
-  };
-
-  const onDrop = (division: string, conference?: string, subdivision?: string) => {
-    const id = dragId; setDragId(null); setDropTarget(null);
-    if (!id) return;
-    const t = teams.find(x => x.id === id)!;
-    if (t.division !== division) { setMoveIds([id]); toast({ title: "Moving to another division", description: "Confirm how games should be handled." }); return; }
-    assign(id, conference, subdivision);
   };
 
   const confirmMove = (r: MoveResult) => {
