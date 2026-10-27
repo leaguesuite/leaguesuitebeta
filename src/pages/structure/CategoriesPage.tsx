@@ -208,7 +208,20 @@ export default function CategoriesPage() {
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Game Rules</h3>
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-2"><Label htmlFor="r-field">Field Length (yds)</Label><Input id="r-field" type="number" min={10} value={rules.fieldLength} onChange={e => setR("fieldLength", Number(e.target.value))} /></div>
-                <div className="space-y-2"><Label htmlFor="r-downs">Downs</Label><Input id="r-downs" type="number" min={1} max={10} value={rules.downs} onChange={e => setR("downs", Number(e.target.value))} /></div>
+                <div className="space-y-2">
+                  <Label>Downs</Label>
+                  <Select value={isCustomDowns(rules.downs) ? "custom" : String(rules.downs)} onValueChange={v => setR("downs", v === "3" ? 3 : v === "4" ? 4 : (isCustomDowns(rules.downs) ? rules.downs : 5))}>
+                    <SelectTrigger aria-label="Downs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {isCustomDowns(rules.downs) && (
+                    <Input type="number" min={1} max={20} value={rules.downs} onChange={e => setR("downs", Number(e.target.value))} aria-label="Custom number of downs" />
+                  )}
+                </div>
                 <div className="space-y-2">
                   <Label>To Gain</Label>
                   <Select value={rules.toGain} onValueChange={v => setR("toGain", v as ToGain)}>
