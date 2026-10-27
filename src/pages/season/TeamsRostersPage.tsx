@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Search, Upload, Users, Edit, ArrowRightLeft, Layers, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, MoreHorizontal, Plus, Search, Upload, Users, Edit, ArrowRightLeft, Layers, Trash2 } from "lucide-react";
 import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import TeamRosterImportDialog from "@/components/teams/TeamRosterImportDialog";
 import MoveTeamDialog, { MoveResult } from "@/components/teams/MoveTeamDialog";
@@ -37,8 +37,6 @@ export default function TeamsRostersPage() {
   const [deleteIds, setDeleteIds] = useState<string[] | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   const q = search.toLowerCase();
   const visible = teams.filter(t => (divFilter === "all" || t.division === divFilter) && (t.name.toLowerCase().includes(q) || t.captain.toLowerCase().includes(q)));
@@ -52,14 +50,6 @@ export default function TeamsRostersPage() {
     const where = conference ? (subdivision ? `${conference} › ${subdivision}` : conference) : "Unassigned";
     updateTeam({ ...t, conference, subdivision, history: [...t.history, { date: today(), text: `Assigned to ${where}` }] });
     toast({ title: `${t.name} → ${where}` });
-  };
-
-  const onDrop = (division: string, conference?: string, subdivision?: string) => {
-    const id = dragId; setDragId(null); setDropTarget(null);
-    if (!id) return;
-    const t = teams.find(x => x.id === id)!;
-    if (t.division !== division) { setMoveIds([id]); toast({ title: "Moving to another division", description: "Confirm how games should be handled." }); return; }
-    assign(id, conference, subdivision);
   };
 
   const confirmMove = (r: MoveResult) => {
@@ -94,9 +84,7 @@ export default function TeamsRostersPage() {
     const roster = rosters[t.id] ?? [];
     const confs = CONFERENCES[t.division] ?? [];
     return (
-      <div key={t.id} draggable onDragStart={e => { setDragId(t.id); e.dataTransfer.effectAllowed = "move"; }} onDragEnd={() => { setDragId(null); setDropTarget(null); }}
-        className={`group flex items-center gap-3 px-3 py-2 border-t border-border bg-card hover:bg-secondary/30 ${dragId === t.id ? "opacity-40" : ""}`}>
-        <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab shrink-0" />
+      <div key={t.id} className="group flex items-center gap-3 px-3 py-2 border-t border-border bg-card hover:bg-secondary/30">
         <Checkbox checked={selected.includes(t.id)} onCheckedChange={c => toggleSel(t.id, !!c)} aria-label={`Select ${t.name}`} />
         <TeamLogo team={t} />
         <button className="flex-1 min-w-0 text-left" onClick={() => setPanel({ id: t.id, tab: "roster" })}>
@@ -106,11 +94,9 @@ export default function TeamsRostersPage() {
           <span className="block text-xs text-muted-foreground truncate">{t.captain} · {t.captainEmail}</span>
         </button>
         <span className="hidden md:block w-20 text-xs text-muted-foreground"><span className="tabular text-foreground">{roster.length}</span> {roster.length === 1 ? "player" : "players"}</span>
-        <span className="w-12 text-sm tabular text-right">{t.wins}-{t.losses}</span>
-        <span className="w-16 hidden sm:block"><Badge variant={PAY[t.payment].variant}>{PAY[t.payment].label}</Badge></span>
         <Select value={groupKey(t) || "__none"} disabled={!confs.length}
           onValueChange={v => { if (v === "__none") assign(t.id); else { const [c, s] = v.split("/"); assign(t.id, c, s); } }}>
-          <SelectTrigger className="h-8 w-36 text-xs" aria-label={`Conference for ${t.name}`}><SelectValue placeholder="No conferences" /></SelectTrigger>
+          <SelectTrigger className="h-8 w-40 text-xs" aria-label={`Conference for ${t.name}`}><SelectValue placeholder="No conferences" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="__none">Unassigned</SelectItem>
             {confs.flatMap(c => [
@@ -119,11 +105,11 @@ export default function TeamsRostersPage() {
             ])}
           </SelectContent>
         </Select>
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Roster" aria-label={`Roster for ${t.name}`} onClick={() => setPanel({ id: t.id, tab: "roster" })}><Users className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit team" aria-label={`Edit ${t.name}`} onClick={() => setPanel({ id: t.id, tab: "identity" })}><Edit className="h-4 w-4" /></Button>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions for ${t.name}`}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="More" aria-label={`More actions for ${t.name}`}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
-            <DropdownMenuItem onClick={() => setPanel({ id: t.id, tab: "roster" })}><Users className="h-4 w-4 mr-2" /> Roster</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPanel({ id: t.id, tab: "identity" })}><Edit className="h-4 w-4 mr-2" /> Edit team</DropdownMenuItem>
             {confs.length > 0 && (
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger><Layers className="h-4 w-4 mr-2" /> Change conference</DropdownMenuSubTrigger>
@@ -131,7 +117,7 @@ export default function TeamsRostersPage() {
                   <DropdownMenuItem onClick={() => assign(t.id)}>Unassigned</DropdownMenuItem>
                   {confs.flatMap(c => [
                     <DropdownMenuItem key={c.name} onClick={() => assign(t.id, c.name)}>{c.name}</DropdownMenuItem>,
-                    ...c.subdivisions.map(s => <DropdownMenuItem key={s} className="pl-6" onClick={() => assign(t.id, c.name, s)}>{s}</DropdownMenuItem>),
+                    ...c.subdivisions.map(s => <DropdownMenuItem key={s} onClick={() => assign(t.id, c.name, s)}>{c.name} › {s}</DropdownMenuItem>),
                   ])}
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
@@ -145,28 +131,12 @@ export default function TeamsRostersPage() {
     );
   };
 
-  const Group = ({ division, title, conference, subdivision, list, indent }: { division: string; title: string; conference?: string; subdivision?: string; list: Team[]; indent?: boolean }) => {
-    const key = `${division}|${conference ?? ""}|${subdivision ?? ""}`;
-    return (
-      <div onDragOver={e => { if (dragId) { e.preventDefault(); setDropTarget(key); } }} onDragLeave={() => setDropTarget(d => d === key ? null : d)}
-        onDrop={e => { e.preventDefault(); onDrop(division, conference, subdivision); }}
-        className={`${indent ? "ml-6 border-l border-border" : ""} ${dropTarget === key ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""}`}>
-        <div className="px-3 py-1.5 flex items-center gap-2 bg-secondary/40 border-t border-border">
-          <span className={`table-header ${!conference ? "text-warning" : ""}`}>{title}</span>
-          <span className="text-xs text-muted-foreground tabular">{list.length}</span>
-        </div>
-        {list.map(renderRow)}
-        {list.length === 0 && <div className="px-3 py-2 border-t border-border text-xs text-muted-foreground italic">Drop a team here</div>}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-5 max-w-7xl">
       <div className="flex items-start justify-between gap-4">
         <div>
           <LeaguePageTitle title="Teams & Rosters" />
-          <p className="text-sm text-muted-foreground mt-1">Drag teams into conferences, move them between divisions, and open a team to manage its roster.</p>
+          <p className="text-sm text-muted-foreground mt-1">Pick each team's conference from the dropdown, move teams between divisions, and open a team to manage its roster.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setImportOpen(true)}><Upload className="h-4 w-4" /> Import CSV</Button>
@@ -206,9 +176,7 @@ export default function TeamsRostersPage() {
         const allSel = ids.length > 0 && ids.every(id => selected.includes(id));
         return (
           <section key={d.name} className="section-card overflow-hidden">
-            <div className="section-card-header flex items-center !justify-start gap-3"
-              onDragOver={e => { if (dragId && teams.find(t => t.id === dragId)?.division !== d.name) { e.preventDefault(); setDropTarget(d.name); } }}
-              onDrop={e => { e.preventDefault(); onDrop(d.name); }}>
+            <div className="section-card-header flex items-center !justify-start gap-3">
               <button onClick={() => setCollapsed(c => isCollapsed ? c.filter(x => x !== d.name) : [...c, d.name])} className="flex items-center gap-2" aria-expanded={!isCollapsed}>
                 {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 <h2 className="font-display font-semibold">{d.name}</h2>
@@ -217,25 +185,12 @@ export default function TeamsRostersPage() {
               <span className={`text-xs tabular ${count > d.cap ? "text-warning font-medium" : "text-muted-foreground"}`}>{count}/{d.cap} teams</span>
               <Badge variant={d.status === "active" ? "success" : "secondary"}>{d.status === "active" ? "Active" : "Setup"}</Badge>
               {confs.length === 0 && <span className="text-xs text-muted-foreground">No conferences</span>}
-              {dropTarget === d.name && <span className="ml-auto text-xs text-primary">Drop to move to {d.name}</span>}
             </div>
             {!isCollapsed && (
-              confs.length === 0 ? (
-                <div onDragOver={e => { if (dragId) e.preventDefault(); }} onDrop={e => { e.preventDefault(); onDrop(d.name); }}>
-                  {list.map(renderRow)}
-                  {list.length === 0 && <p className="px-5 py-6 text-center text-sm text-muted-foreground border-t border-border">No teams in this division.</p>}
-                </div>
-              ) : (
-                <>
-                  <Group division={d.name} title="Unassigned" list={list.filter(t => !t.conference)} />
-                  {confs.map(c => (
-                    <div key={c.name}>
-                      <Group division={d.name} title={`${c.name} Conference`} conference={c.name} list={list.filter(t => t.conference === c.name && !t.subdivision)} />
-                      {c.subdivisions.map(s => <Group key={s} indent division={d.name} title={`${s} subdivision`} conference={c.name} subdivision={s} list={list.filter(t => t.conference === c.name && t.subdivision === s)} />)}
-                    </div>
-                  ))}
-                </>
-              )
+              <>
+                {[...list].sort((a, b) => groupKey(a).localeCompare(groupKey(b)) || a.name.localeCompare(b.name)).map(renderRow)}
+                {list.length === 0 && <p className="px-5 py-6 text-center text-sm text-muted-foreground border-t border-border">No teams in this division.</p>}
+              </>
             )}
           </section>
         );
