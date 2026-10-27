@@ -71,7 +71,7 @@ export default function TeamsRostersPage() {
         wins: r.played === "move" ? t.wins : 0, losses: r.played === "move" ? t.losses : 0,
         history: [...t.history, { date: today(), text }] };
     }));
-    toast({ title: `Moved to ${r.division}`, description: "Recorded in the Activity Log." });
+    toast({ title: `Moved to ${r.division}`, description: "Added to the team history." });
     setSelected([]);
   };
 
@@ -105,7 +105,7 @@ export default function TeamsRostersPage() {
           {t.nameRequest && <Badge variant="warning" className="ml-2">Name request</Badge>}
           <span className="block text-xs text-muted-foreground truncate">{t.captain} · {t.captainEmail}</span>
         </button>
-        <span className="hidden md:block w-20 text-xs text-muted-foreground"><span className="tabular text-foreground">{roster.length}</span> players</span>
+        <span className="hidden md:block w-20 text-xs text-muted-foreground"><span className="tabular text-foreground">{roster.length}</span> {roster.length === 1 ? "player" : "players"}</span>
         <span className="w-12 text-sm tabular text-right">{t.wins}-{t.losses}</span>
         <span className="w-16 hidden sm:block"><Badge variant={PAY[t.payment].variant}>{PAY[t.payment].label}</Badge></span>
         <Select value={groupKey(t) || "__none"} disabled={!confs.length}
@@ -206,7 +206,7 @@ export default function TeamsRostersPage() {
         const allSel = ids.length > 0 && ids.every(id => selected.includes(id));
         return (
           <section key={d.name} className="section-card overflow-hidden">
-            <div className="section-card-header flex items-center gap-3"
+            <div className="section-card-header flex items-center justify-start gap-3"
               onDragOver={e => { if (dragId && teams.find(t => t.id === dragId)?.division !== d.name) { e.preventDefault(); setDropTarget(d.name); } }}
               onDrop={e => { e.preventDefault(); onDrop(d.name); }}>
               <button onClick={() => setCollapsed(c => isCollapsed ? c.filter(x => x !== d.name) : [...c, d.name])} className="flex items-center gap-2" aria-expanded={!isCollapsed}>

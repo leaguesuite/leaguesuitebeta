@@ -110,7 +110,7 @@ export default function MoveTeamDialog({ open, onOpenChange, teams, allTeams, on
             <Label>Reason</Label>
             <Textarea rows={2} value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Moved up after a 6-0 start" />
             {tried && !reason.trim() && <p className="text-xs text-destructive">A reason is required</p>}
-            <p className="text-xs text-muted-foreground">This move is recorded in the Activity Log and the team's history.</p>
+            <p className="text-xs text-muted-foreground">This move is recorded in the team history.</p>
           </div>
         </div>
 
