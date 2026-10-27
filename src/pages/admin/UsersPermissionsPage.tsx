@@ -193,7 +193,7 @@ export default function UsersPermissionsPage() {
                 {filteredUsers.map(user => {
                   const role = roleById(user.roleId);
                   const team = TEAMS.find(t => t.id === user.teamId);
-                  const isLastOwner = user.roleId === "owner" && ownerCount <= 1;
+                  const isLastOwner = user.roleId === "owner";
                   return (
                     <tr key={user.id} className="hover:bg-secondary/30 transition-colors">
                       <td className="px-5 py-3.5">
@@ -220,7 +220,7 @@ export default function UsersPermissionsPage() {
                               className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"><Send className="h-3.5 w-3.5" /></button>
                           )}
                           <button title="Edit" onClick={() => setEditingUser(user)} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"><Edit className="h-3.5 w-3.5" /></button>
-                          <button title={isLastOwner ? "The only owner can't be removed" : user.status === "pending" ? "Revoke invite" : "Remove user"}
+                          <button title={isLastOwner ? "The owner is managed by LeagueSuite and can't be removed" : user.status === "pending" ? "Revoke invite" : "Remove user"}
                             disabled={isLastOwner} onClick={() => setDeleteUser(user)}
                             className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:pointer-events-none">
                             {isLastOwner ? <Lock className="h-3.5 w-3.5" /> : <Trash2 className="h-3.5 w-3.5" />}
@@ -249,8 +249,8 @@ export default function UsersPermissionsPage() {
                 <div className="flex items-start justify-between mb-3">
                   <div className={`p-2 rounded-lg ${role.color}`}>{role.portal === "mobile" ? <Smartphone className="h-4 w-4" /> : <Shield className="h-4 w-4" />}</div>
                   <div className="flex gap-1">
-                    <button title="Duplicate" onClick={() => setRoleDialog({ open: true, role: { ...role, id: "", name: `${role.name} copy`, system: false } })}
-                      className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><Copy className="h-3.5 w-3.5" /></button>
+                    {role.id !== "owner" && <button title="Duplicate" onClick={() => setRoleDialog({ open: true, role: { ...role, id: "", name: `${role.name} copy`, system: false } })}
+                      className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><Copy className="h-3.5 w-3.5" /></button>}
                     <button title="Edit" onClick={() => setRoleDialog({ open: true, role })} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><Edit className="h-3.5 w-3.5" /></button>
                     {!role.system && (
                       <button title={count ? "Reassign users first" : "Delete role"} disabled={count > 0}
@@ -386,8 +386,11 @@ function UserDialog({ open, user, roles, users, onClose, onSave, ownerCount }: {
 
           <div className="space-y-1.5">
             <Label>Role</Label>
+            {user?.roleId === "owner" ? (
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5 rounded-lg border border-border p-2.5"><Lock className="h-3.5 w-3.5" /> Owner — set up by LeagueSuite. Each organization has exactly one owner.</p>
+            ) : (
             <div className="grid grid-cols-2 gap-2">
-              {roles.map(r => (
+              {roles.filter(r => r.id !== "owner").map(r => (
                 <button key={r.id} type="button" onClick={() => setRoleId(r.id)}
                   className={`text-left rounded-lg border p-2.5 transition-colors ${roleId === r.id ? "border-primary bg-primary/5 ring-1 ring-primary/30" : "border-border hover:bg-secondary/40"}`}>
                   <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
@@ -398,6 +401,7 @@ function UserDialog({ open, user, roles, users, onClose, onSave, ownerCount }: {
                 </button>
               ))}
             </div>
+            )}
             {touched && errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
           </div>
 
@@ -434,9 +438,6 @@ function UserDialog({ open, user, roles, users, onClose, onSave, ownerCount }: {
             </div>
           )}
 
-          {roleId === "owner" && !user && (
-            <p className="text-xs text-warning flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5" /> Owners have full access, including billing and removing other users.</p>
-          )}
 
           {!user && (
             <div className="space-y-1.5">
@@ -572,7 +573,7 @@ function RoleDialog({ open, role, existingNames, onClose, onSave }: {
                   </div>
                 )}
               </div>
-              {isOwner && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Lock className="h-3 w-3" /> Owner always has full access and can't be changed.</p>}
+              {isOwner && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Lock className="h-3 w-3" /> Owner is created by LeagueSuite, always has full access, and there is only one per organization.</p>}
 
               <div className="rounded-lg border border-border divide-y divide-border">
                 {PERMISSION_GROUPS.map(g => (
