@@ -11,13 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
-  initialCategories, initialDivisions, defaultRules, defaultConfig, periodLabel,
+  initialCategories, initialDivisions, defaultRules, defaultConfig, periodLabel, isCustomDowns,
   type Category, type CategoryRules, type CategoryConfig, type ToGain, type PeriodType,
 } from "@/data/structureData";
 
 type View = "cards" | "list";
 const VIEW_KEY = "categories:view";
-const TO_GAIN: ToGain[] = ["10 yards", "15 yards", "Midfield", "Midfield & Goal"];
+const TO_GAIN: ToGain[] = ["10 yards", "15 yards", "Midfield & Goal Line", "Goal Line"];
 
 function specialTags(c: CategoryConfig): string[] {
   const t: string[] = [];
