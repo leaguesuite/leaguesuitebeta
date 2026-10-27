@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Shield, Edit, Trash2, Smartphone, Lock, Send, X, AlertTriangle } from "lucide-react";
+import ActivityLog from "@/components/admin/ActivityLog";
 
 type Access = "full" | "view" | "none";
 type PortalType = "admin" | "mobile" | "captain";
@@ -105,7 +106,9 @@ const PORTAL_LABEL: Record<PortalType, string> = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const initials = (n: string) => n.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
-type Tab = "users" | "roles";
+type Tab = "users" | "roles" | "activity";
+const CURRENT_USER_ID = 1;
+export const ACTIVITY_ROLES = ["owner", "manager"];
 
 export default function UsersPermissionsPage() {
   const { toast } = useToast();
@@ -120,6 +123,9 @@ export default function UsersPermissionsPage() {
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
 
   const roleById = (id: string) => roles.find(r => r.id === id);
+  // Signed-in user (demo): only Owner and Manager may see the Activity Log.
+  const currentUser = users.find(u => u.id === CURRENT_USER_ID);
+  const canSeeActivity = !!currentUser && ACTIVITY_ROLES.includes(currentUser.roleId);
   const ownerCount = users.filter(u => u.roleId === "owner" && u.status === "active").length;
 
   const filteredUsers = users.filter(u =>
@@ -156,13 +162,15 @@ export default function UsersPermissionsPage() {
       </div>
 
       <div className="flex gap-1 border-b border-border">
-        {(["users", "roles"] as Tab[]).map(t => (
+        {((canSeeActivity ? ["users", "roles", "activity"] : ["users", "roles"]) as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-            {t === "users" ? `Users (${users.length})` : `Roles (${roles.length})`}
+            {t === "users" ? `Users (${users.length})` : t === "roles" ? `Roles (${roles.length})` : "Activity Log"}
           </button>
         ))}
       </div>
+
+      {tab === "activity" && canSeeActivity && <ActivityLog />}
 
       {tab === "users" && (
         <>
