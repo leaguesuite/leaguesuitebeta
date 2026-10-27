@@ -80,7 +80,6 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
         ],
       },
       { label: "Locations & Fields", icon: MapPin, path: "/structure/locations" },
-      { label: "Scorekeeper Categories", icon: ScrollText, path: "/scorekeeper/categories" },
     ],
   },
   {
