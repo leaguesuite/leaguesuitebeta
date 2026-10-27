@@ -1,822 +1,337 @@
-import { useState, useMemo, useRef } from "react";
-import { mockMembers, mockPlayers } from "@/data/mockMembers";
-import { Badge } from "@/components/ui/badge";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Edit, Plus, Trash2, Upload, UserPlus, ArrowUpDown, Camera, X, ImageIcon, Filter, ArrowRightLeft, Mail } from "lucide-react";
-
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Search, Upload, Users, Edit, ArrowRightLeft, Layers, Trash2 } from "lucide-react";
+import LeaguePageTitle from "@/components/layout/LeaguePageTitle";
 import TeamRosterImportDialog from "@/components/teams/TeamRosterImportDialog";
-import BulkMessageDialog from "@/components/shared/BulkMessageDialog";
+import MoveTeamDialog, { MoveResult } from "@/components/teams/MoveTeamDialog";
+import TeamSidePanel, { TeamLogo } from "@/components/teams/TeamSidePanel";
+import { CONFERENCES, DIVISIONS, INITIAL_TEAMS, PaymentStatus, RosterEntry, Team, buildInitialRosters, today } from "@/components/teams/teamsData";
 
-interface Team {
-  id: string;
-  name: string;
-  division: string;
-  captain: string;
-  captainEmail: string;
-  coach: string;
-  logoUrl?: string;
-  teamPhotoUrl?: string;
-  primaryColor?: string;
-  secondaryColor?: string;
-}
-
-const INITIAL_TEAMS: Team[] = [
-  { id: "1", name: "Eagles", division: "Division A", captain: "John Smith", captainEmail: "john.smith@example.com", coach: "N/A", primaryColor: "#1e40af", secondaryColor: "#fbbf24" },
-  { id: "2", name: "Tigers", division: "Division A", captain: "Emily Brown", captainEmail: "emily.brown@example.com", coach: "Sarah Johnson", primaryColor: "#ea580c", secondaryColor: "#000000" },
-  { id: "3", name: "Hawks", division: "Division B", captain: "Jessica Thomas", captainEmail: "jessica.thomas@example.com", coach: "N/A", primaryColor: "#059669", secondaryColor: "#ffffff" },
-  { id: "4", name: "Lions", division: "Division B", captain: "Kevin Garcia", captainEmail: "kevin.garcia@example.com", coach: "N/A", primaryColor: "#7c3aed", secondaryColor: "#fde047" },
-];
-
-const DIVISIONS = ["Division A", "Division B"];
-
-const ROSTER_ROLES = ["player", "coach"] as const;
-type RosterRole = typeof ROSTER_ROLES[number];
-
-interface RosterEntry {
-  player_id: number;
-  member_id: number;
-  player_name: string;
-  jersey: string;
-  label: string;
-  role: RosterRole;
-}
-
-const buildInitialRosters = (): Record<string, RosterEntry[]> => {
-  const map: Record<string, RosterEntry[]> = {};
-  mockPlayers.forEach((p, i) => {
-    const list = map[p.team_name] ?? (map[p.team_name] = []);
-    list.push({
-      player_id: p.player_id,
-      member_id: p.member_id,
-      player_name: p.player_name,
-      jersey: String(((i * 7) % 89) + 1),
-      label: "",
-      role: "player",
-    });
-  });
-  return map;
+const PAY: Record<PaymentStatus, { label: string; variant: "success" | "warning" | "destructive" }> = {
+  paid: { label: "Paid", variant: "success" }, partial: { label: "Partial", variant: "warning" }, unpaid: { label: "Unpaid", variant: "destructive" },
 };
+const SCHEDULED_TEXT = { cancel: "remaining games cancelled", cross: "remaining games kept as cross-division", flag: "remaining games flagged for rescheduling" };
 
-type SortKey = "name" | "division" | "captain";
-type SortDir = "asc" | "desc";
-
+/** Group key encodes where a team sits inside a division: "" | "Conf" | "Conf/Sub". */
+const groupKey = (t: Team) => t.conference ? (t.subdivision ? `${t.conference}/${t.subdivision}` : t.conference) : "";
 
 export default function TeamsRostersPage() {
+  const { toast } = useToast();
   const [teams, setTeams] = useState<Team[]>(INITIAL_TEAMS);
-  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([...DIVISIONS]);
-  const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
-  const [editTeamOpen, setEditTeamOpen] = useState(false);
-  const [rosterOpen, setRosterOpen] = useState(false);
-  const [addPlayerOpen, setAddPlayerOpen] = useState(false);
-  const [editForm, setEditForm] = useState<Team | null>(null);
+  const [rosters, setRosters] = useState<Record<string, RosterEntry[]>>(() => buildInitialRosters(INITIAL_TEAMS));
+  const [search, setSearch] = useState("");
+  const [divFilter, setDivFilter] = useState("all");
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [panel, setPanel] = useState<{ id: string; tab: string } | null>(null);
+  const [moveIds, setMoveIds] = useState<string[] | null>(null);
+  const [deleteIds, setDeleteIds] = useState<string[] | null>(null);
   const [importOpen, setImportOpen] = useState(false);
-  const [rosters, setRosters] = useState<Record<string, RosterEntry[]>>(() => buildInitialRosters());
+  const [addOpen, setAddOpen] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
+  const q = search.toLowerCase();
+  const visible = teams.filter(t => (divFilter === "all" || t.division === divFilter) && (t.name.toLowerCase().includes(q) || t.captain.toLowerCase().includes(q)));
+  const panelTeam = panel ? teams.find(t => t.id === panel.id) ?? null : null;
 
-  // Bulk selection state
-  const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
-  const [bulkMoveTarget, setBulkMoveTarget] = useState<string>(DIVISIONS[0]);
-  const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
+  const updateTeam = (next: Team) => setTeams(prev => prev.map(t => t.id === next.id ? next : t));
 
-  const allDivisionsSelected = selectedDivisions.length === DIVISIONS.length;
-
-  const filteredTeams = useMemo(() => {
-    const list = teams.filter(t => selectedDivisions.includes(t.division));
-    return [...list].sort((a, b) => {
-      const av = (a[sortKey] || "").toString().toLowerCase();
-      const bv = (b[sortKey] || "").toString().toLowerCase();
-      if (av < bv) return sortDir === "asc" ? -1 : 1;
-      if (av > bv) return sortDir === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [teams, selectedDivisions, sortKey, sortDir]);
-
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
-    else { setSortKey(key); setSortDir("asc"); }
+  const assign = (id: string, conference?: string, subdivision?: string) => {
+    const t = teams.find(x => x.id === id)!;
+    if (t.conference === conference && t.subdivision === subdivision) return;
+    const where = conference ? (subdivision ? `${conference} › ${subdivision}` : conference) : "Unassigned";
+    updateTeam({ ...t, conference, subdivision, history: [...t.history, { date: today(), text: `Assigned to ${where}` }] });
+    toast({ title: `${t.name} → ${where}` });
   };
 
-  const toggleDivision = (d: string) => {
-    setSelectedDivisions(prev =>
-      prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]
+  const onDrop = (division: string, conference?: string, subdivision?: string) => {
+    const id = dragId; setDragId(null); setDropTarget(null);
+    if (!id) return;
+    const t = teams.find(x => x.id === id)!;
+    if (t.division !== division) { setMoveIds([id]); toast({ title: "Moving to another division", description: "Confirm how games should be handled." }); return; }
+    assign(id, conference, subdivision);
+  };
+
+  const confirmMove = (r: MoveResult) => {
+    const ids = moveIds ?? [];
+    setTeams(prev => prev.map(t => {
+      if (!ids.includes(t.id) || t.division === r.division) return t;
+      const text = `Moved from ${t.division} to ${r.division} · played games ${r.played === "keep" ? "kept in old division" : "moved"}, ${SCHEDULED_TEXT[r.scheduled]}. Reason: ${r.reason}`;
+      return { ...t, division: r.division, conference: r.conference, subdivision: undefined,
+        wins: r.played === "move" ? t.wins : 0, losses: r.played === "move" ? t.losses : 0,
+        history: [...t.history, { date: today(), text }] };
+    }));
+    toast({ title: `Moved to ${r.division}`, description: "Recorded in the Activity Log." });
+    setSelected([]);
+  };
+
+  const confirmDelete = () => {
+    const ids = deleteIds ?? [];
+    setTeams(prev => prev.filter(t => !ids.includes(t.id)));
+    setSelected(s => s.filter(x => !ids.includes(x)));
+    toast({ title: `${ids.length} team${ids.length > 1 ? "s" : ""} deleted` });
+    setDeleteIds(null);
+  };
+
+  const movePlayers = (fromId: string, ids: number[], toId: string) => setRosters(prev => {
+    const moving = (prev[fromId] ?? []).filter(p => ids.includes(p.player_id));
+    return { ...prev, [fromId]: (prev[fromId] ?? []).filter(p => !ids.includes(p.player_id)), [toId]: [...(prev[toId] ?? []), ...moving] };
+  });
+
+  const toggleSel = (id: string, on: boolean) => setSelected(s => on ? [...s, id] : s.filter(x => x !== id));
+
+  const renderRow = (t: Team) => {
+    const roster = rosters[t.id] ?? [];
+    const confs = CONFERENCES[t.division] ?? [];
+    return (
+      <div key={t.id} draggable onDragStart={e => { setDragId(t.id); e.dataTransfer.effectAllowed = "move"; }} onDragEnd={() => { setDragId(null); setDropTarget(null); }}
+        className={`group flex items-center gap-3 px-3 py-2 border-t border-border bg-card hover:bg-secondary/30 ${dragId === t.id ? "opacity-40" : ""}`}>
+        <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab shrink-0" />
+        <Checkbox checked={selected.includes(t.id)} onCheckedChange={c => toggleSel(t.id, !!c)} aria-label={`Select ${t.name}`} />
+        <TeamLogo team={t} />
+        <button className="flex-1 min-w-0 text-left" onClick={() => setPanel({ id: t.id, tab: "roster" })}>
+          <span className="font-medium text-sm hover:text-primary">{t.name}</span>
+          <span className="ml-2 text-xs text-muted-foreground tabular">{t.abbr}</span>
+          {t.nameRequest && <Badge variant="warning" className="ml-2">Name request</Badge>}
+          <span className="block text-xs text-muted-foreground truncate">{t.captain} · {t.captainEmail}</span>
+        </button>
+        <span className="hidden md:block w-20 text-xs text-muted-foreground"><span className="tabular text-foreground">{roster.length}</span> players</span>
+        <span className="w-12 text-sm tabular text-right">{t.wins}-{t.losses}</span>
+        <span className="w-16 hidden sm:block"><Badge variant={PAY[t.payment].variant}>{PAY[t.payment].label}</Badge></span>
+        <Select value={groupKey(t) || "__none"} disabled={!confs.length}
+          onValueChange={v => { if (v === "__none") assign(t.id); else { const [c, s] = v.split("/"); assign(t.id, c, s); } }}>
+          <SelectTrigger className="h-8 w-36 text-xs" aria-label={`Conference for ${t.name}`}><SelectValue placeholder="No conferences" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none">Unassigned</SelectItem>
+            {confs.flatMap(c => [
+              <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>,
+              ...c.subdivisions.map(s => <SelectItem key={`${c.name}/${s}`} value={`${c.name}/${s}`}>{c.name} › {s}</SelectItem>),
+            ])}
+          </SelectContent>
+        </Select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions for ${t.name}`}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuItem onClick={() => setPanel({ id: t.id, tab: "roster" })}><Users className="h-4 w-4 mr-2" /> Roster</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPanel({ id: t.id, tab: "identity" })}><Edit className="h-4 w-4 mr-2" /> Edit team</DropdownMenuItem>
+            {confs.length > 0 && (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger><Layers className="h-4 w-4 mr-2" /> Change conference</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => assign(t.id)}>Unassigned</DropdownMenuItem>
+                  {confs.flatMap(c => [
+                    <DropdownMenuItem key={c.name} onClick={() => assign(t.id, c.name)}>{c.name}</DropdownMenuItem>,
+                    ...c.subdivisions.map(s => <DropdownMenuItem key={s} className="pl-6" onClick={() => assign(t.id, c.name, s)}>{s}</DropdownMenuItem>),
+                  ])}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            )}
+            <DropdownMenuItem onClick={() => setMoveIds([t.id])}><ArrowRightLeft className="h-4 w-4 mr-2" /> Move to division</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteIds([t.id])}><Trash2 className="h-4 w-4 mr-2" /> Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   };
 
-  const toggleAllDivisions = () => {
-    setSelectedDivisions(allDivisionsSelected ? [] : [...DIVISIONS]);
-  };
-
-  const visibleIds = filteredTeams.map(t => t.id);
-  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedTeamIds.includes(id));
-  const someVisibleSelected = visibleIds.some(id => selectedTeamIds.includes(id));
-
-  const toggleSelectAllVisible = () => {
-    if (allVisibleSelected) {
-      setSelectedTeamIds(prev => prev.filter(id => !visibleIds.includes(id)));
-    } else {
-      setSelectedTeamIds(prev => Array.from(new Set([...prev, ...visibleIds])));
-    }
-  };
-
-  const toggleSelectTeam = (id: string) => {
-    setSelectedTeamIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const confirmBulkDelete = () => {
-    setTeams(prev => prev.filter(t => !selectedTeamIds.includes(t.id)));
-    setSelectedTeamIds([]);
-    setBulkDeleteOpen(false);
-  };
-
-  const confirmBulkMove = () => {
-    setTeams(prev => prev.map(t => selectedTeamIds.includes(t.id) ? { ...t, division: bulkMoveTarget } : t));
-    setSelectedTeamIds([]);
-    setBulkMoveOpen(false);
-  };
-
-  const getTeamRoster = (teamName: string) =>
-    (rosters[teamName] ?? []).map(p => {
-      const member = mockMembers.find(m => m.member_id === p.member_id);
-      return { ...p, status: member?.status || "active" };
-    });
-
-  const updateEntry = (teamName: string, playerId: number, patch: Partial<RosterEntry>) => {
-    setRosters(prev => ({
-      ...prev,
-      [teamName]: (prev[teamName] ?? []).map(p => p.player_id === playerId ? { ...p, ...patch } : p),
-    }));
-  };
-
-  const removeEntry = (teamName: string, playerId: number) => {
-    setRosters(prev => ({
-      ...prev,
-      [teamName]: (prev[teamName] ?? []).filter(p => p.player_id !== playerId),
-    }));
-  };
-
-  const addEntry = (teamName: string, member: { member_id: number; first_name: string; last_name: string }) => {
-    setRosters(prev => ({
-      ...prev,
-      [teamName]: [
-        ...(prev[teamName] ?? []),
-        {
-          player_id: Date.now(),
-          member_id: member.member_id,
-          player_name: `${member.first_name} ${member.last_name}`,
-          jersey: "",
-          label: "",
-          role: "player" as RosterRole,
-        },
-      ],
-    }));
-  };
-
-  const openEditTeam = (team: Team) => { setEditForm({ ...team }); setEditTeamOpen(true); };
-  const saveTeamEdit = () => {
-    if (!editForm) return;
-    setTeams(prev => prev.map(t => t.id === editForm.id ? editForm : t));
-    setEditTeamOpen(false);
-  };
-  const openRoster = (team: Team) => { setSelectedTeam(team); setRosterOpen(true); };
-
-  const unrosteredMembers = mockMembers.filter(m =>
-    m.status === "active" &&
-    !(rosters[selectedTeam?.name ?? ""] ?? []).some(p => p.member_id === m.member_id)
-  );
-
-
-  const SortHeader = ({ k, label }: { k: SortKey; label: string }) => (
-    <button
-      onClick={() => toggleSort(k)}
-      className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground"
-    >
-      {label}
-      <ArrowUpDown className="h-3 w-3 opacity-60" />
-    </button>
-  );
-
-  const divisionLabel = allDivisionsSelected
-    ? "All Divisions"
-    : selectedDivisions.length === 0
-      ? "No divisions"
-      : selectedDivisions.length === 1
-        ? selectedDivisions[0]
-        : `${selectedDivisions.length} divisions`;
-
-  return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Teams & Rosters</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage teams and rosters for the active season.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}>
-              <Upload className="h-4 w-4" /> Import CSV
-            </Button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 min-w-44 justify-between">
-                  <span className="inline-flex items-center gap-2">
-                    <Filter className="h-4 w-4" /> {divisionLabel}
-                  </span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-56 p-2">
-                <div className="space-y-1">
-                  <button
-                    onClick={toggleAllDivisions}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-sm"
-                  >
-                    <Checkbox checked={allDivisionsSelected} />
-                    <span className="font-medium">All Divisions</span>
-                  </button>
-                  <div className="h-px bg-border my-1" />
-                  {DIVISIONS.map(d => (
-                    <button
-                      key={d}
-                      onClick={() => toggleDivision(d)}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-sm"
-                    >
-                      <Checkbox checked={selectedDivisions.includes(d)} />
-                      <span>{d}</span>
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+  const Group = ({ division, title, conference, subdivision, list, indent }: { division: string; title: string; conference?: string; subdivision?: string; list: Team[]; indent?: boolean }) => {
+    const key = `${division}|${conference ?? ""}|${subdivision ?? ""}`;
+    return (
+      <div onDragOver={e => { if (dragId) { e.preventDefault(); setDropTarget(key); } }} onDragLeave={() => setDropTarget(d => d === key ? null : d)}
+        onDrop={e => { e.preventDefault(); onDrop(division, conference, subdivision); }}
+        className={`${indent ? "ml-6 border-l border-border" : ""} ${dropTarget === key ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""}`}>
+        <div className="px-3 py-1.5 flex items-center gap-2 bg-secondary/40 border-t border-border">
+          <span className={`table-header ${!conference ? "text-warning" : ""}`}>{title}</span>
+          <span className="text-xs text-muted-foreground tabular">{list.length}</span>
         </div>
-
-        {/* Bulk actions bar */}
-        {selectedTeamIds.length > 0 && (
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-2">
-            <span className="text-sm text-foreground">
-              {selectedTeamIds.length} team{selectedTeamIds.length === 1 ? "" : "s"} selected
-            </span>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMessageOpen(true)}>
-                <Mail className="h-4 w-4" /> Message
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkMoveOpen(true)}>
-                <ArrowRightLeft className="h-4 w-4" /> Move to division
-              </Button>
-              <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBulkDeleteOpen(true)}>
-                <Trash2 className="h-4 w-4" /> Delete
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedTeamIds([])}>Clear</Button>
-            </div>
-          </div>
-        )}
-
-        {/* Teams Table */}
-        <div className="section-card overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/40">
-                <TableHead className="w-10">
-                  <Checkbox
-                    checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
-                    onCheckedChange={toggleSelectAllVisible}
-                    aria-label="Select all"
-                  />
-                </TableHead>
-                <TableHead><SortHeader k="name" label="Team Name" /></TableHead>
-                <TableHead><SortHeader k="division" label="Division" /></TableHead>
-                <TableHead><SortHeader k="captain" label="Captain" /></TableHead>
-                <TableHead>Captain Email</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTeams.map(team => (
-                <TableRow key={team.id} data-state={selectedTeamIds.includes(team.id) ? "selected" : undefined}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedTeamIds.includes(team.id)}
-                      onCheckedChange={() => toggleSelectTeam(team.id)}
-                      aria-label={`Select ${team.name}`}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium text-foreground">{team.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="text-xs">{team.division}</Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground">{team.captain || "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {team.captainEmail ? (
-                      <a href={`mailto:${team.captainEmail}`} className="hover:text-foreground hover:underline">
-                        {team.captainEmail}
-                      </a>
-                    ) : "—"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="inline-flex items-center gap-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditTeam(team)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Edit team info</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openRoster(team)}>
-                            <Users className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>View roster</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredTeams.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No teams found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Bulk Message Dialog */}
-        <BulkMessageDialog
-          open={bulkMessageOpen}
-          onOpenChange={setBulkMessageOpen}
-          title="Message Team Captains"
-          description="Compose a message that will be sent to the captain of each selected team."
-          recipients={teams
-            .filter(t => selectedTeamIds.includes(t.id))
-            .map(t => ({
-              id: t.id,
-              name: t.captain || t.name,
-              email: t.captainEmail || "",
-              context: t.division,
-            }))}
-        />
-
-        {/* Bulk Delete Confirm */}
-        <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete {selectedTeamIds.length} team{selectedTeamIds.length === 1 ? "" : "s"}?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently remove the selected teams from this season. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmBulkDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Bulk Move Dialog */}
-        <Dialog open={bulkMoveOpen} onOpenChange={setBulkMoveOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Move teams to division</DialogTitle>
-              <DialogDescription>
-                Move {selectedTeamIds.length} selected team{selectedTeamIds.length === 1 ? "" : "s"} to a different division.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 py-2">
-              <Label>Target Division</Label>
-              <Select value={bulkMoveTarget} onValueChange={setBulkMoveTarget}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {DIVISIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setBulkMoveOpen(false)}>Cancel</Button>
-              <Button onClick={confirmBulkMove}>Move teams</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Team Dialog */}
-        <Dialog open={editTeamOpen} onOpenChange={setEditTeamOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Edit Team</DialogTitle>
-            </DialogHeader>
-            {editForm && <EditTeamBody form={editForm} setForm={setEditForm} />}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditTeamOpen(false)}>Cancel</Button>
-              <Button onClick={saveTeamEdit}>Save Changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Roster Dialog */}
-        <Dialog open={rosterOpen} onOpenChange={setRosterOpen}>
-          <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{selectedTeam?.name} — Roster</DialogTitle>
-              <DialogDescription>Set each player's jersey number, short label and role.</DialogDescription>
-            </DialogHeader>
-            {selectedTeam && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {getTeamRoster(selectedTeam.name).length} players on roster
-                  </span>
-                  <Button size="sm" onClick={() => setAddPlayerOpen(true)}>
-                    <UserPlus className="h-4 w-4 mr-1.5" /> Add Player
-                  </Button>
-                </div>
-
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/50">
-                        <TableHead>Player</TableHead>
-                        <TableHead className="w-24">Jersey #</TableHead>
-                        <TableHead className="w-28">Label</TableHead>
-                        <TableHead className="w-32">Role</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getTeamRoster(selectedTeam.name).map(p => (
-                        <TableRow key={p.player_id}>
-                          <TableCell>
-                            <span className="font-medium text-sm text-foreground">{p.player_name}</span>
-                            <span className="block text-xs text-muted-foreground">ID: {p.member_id}</span>
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={p.jersey}
-                              inputMode="numeric"
-                              maxLength={3}
-                              placeholder="—"
-                              className="h-8 w-16 text-sm"
-                              onChange={e =>
-                                updateEntry(selectedTeam.name, p.player_id, {
-                                  jersey: e.target.value.replace(/\D/g, "").slice(0, 3),
-                                })
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={p.label}
-                              maxLength={5}
-                              placeholder="e.g. SUB"
-                              className="h-8 w-20 text-sm"
-                              onChange={e =>
-                                updateEntry(selectedTeam.name, p.player_id, { label: e.target.value.slice(0, 5) })
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Select
-                              value={p.role}
-                              onValueChange={v => updateEntry(selectedTeam.name, p.player_id, { role: v as RosterRole })}
-                            >
-                              <SelectTrigger className="h-8 w-28 text-sm capitalize"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                {ROSTER_ROLES.map(r => (
-                                  <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={p.status === "active" ? "default" : "secondary"} className="text-xs">
-                              {p.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-destructive hover:text-destructive"
-                              onClick={() => removeEntry(selectedTeam.name, p.player_id)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {getTeamRoster(selectedTeam.name).length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                            No players on this roster yet. Click "Add Player" to get started.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Add Player Dialog */}
-        <Dialog open={addPlayerOpen} onOpenChange={setAddPlayerOpen}>
-          <DialogContent className="sm:max-w-md max-h-[70vh]">
-            <DialogHeader>
-              <DialogTitle>Add Player to {selectedTeam?.name}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3">
-              <Input placeholder="Search members..." className="w-full" />
-              <div className="max-h-64 overflow-y-auto space-y-1 rounded-lg border border-border p-1">
-                {unrosteredMembers.map(m => (
-                  <button
-                    key={m.member_id}
-                    onClick={() => {
-                      if (!selectedTeam) return;
-                      addEntry(selectedTeam.name, m);
-                      setAddPlayerOpen(false);
-                    }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted transition-colors text-left"
-                  >
-
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-medium text-foreground">{m.first_name} {m.last_name}</span>
-                      <span className="block text-xs text-muted-foreground">{m.email}</span>
-                    </div>
-                    <Plus className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* CSV Import */}
-        <TeamRosterImportDialog
-          open={importOpen}
-          onOpenChange={setImportOpen}
-          existingTeams={teams}
-          onImport={(rows) => {
-            const lc = (s: string) => s.trim().toLowerCase();
-            const newTeams: Team[] = [];
-            const matched = new Set<string>();
-            const added: Record<string, RosterEntry[]> = {};
-            let seq = Date.now();
-            rows.forEach(r => {
-              const key = `${lc(r.team_name)}|${lc(r.division)}`;
-              let team = teams.find(t => `${lc(t.name)}|${lc(t.division)}` === key)
-                ?? newTeams.find(t => `${lc(t.name)}|${lc(t.division)}` === key);
-              if (team && teams.includes(team)) matched.add(team.id);
-              if (!team) {
-                team = {
-                  id: `${seq++}-${r.team_name}`,
-                  name: r.team_name.trim(),
-                  division: r.division.trim(),
-                  captain: r.captain,
-                  captainEmail: r.captain_email,
-                  coach: r.coach || "N/A",
-                };
-                newTeams.push(team);
-              }
-              const role = lc(r.role);
-              const id = seq++;
-              (added[team.name] ??= []).push({
-                player_id: id,
-                member_id: id,
-                player_name: `${r.first_name} ${r.last_name}`.trim(),
-                jersey: r.jersey_number,
-                label: role && role !== "player" && role !== "coach" ? r.role.toUpperCase().slice(0, 5) : "",
-                role: role === "coach" ? "coach" : "player",
-              });
-            });
-            if (newTeams.length) setTeams(prev => [...prev, ...newTeams]);
-            setRosters(prev => {
-              const next = { ...prev };
-              Object.entries(added).forEach(([name, list]) => { next[name] = [...(next[name] ?? []), ...list]; });
-              return next;
-            });
-            return { teamsCreated: newTeams.length, teamsMatched: matched.size, playersAdded: rows.length };
-          }}
-        />
+        {list.map(renderRow)}
+        {list.length === 0 && <div className="px-3 py-2 border-t border-border text-xs text-muted-foreground italic">Drop a team here</div>}
       </div>
-    </TooltipProvider>
+    );
+  };
+
+  return (
+    <div className="space-y-5 max-w-7xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <LeaguePageTitle title="Teams & Rosters" />
+          <p className="text-sm text-muted-foreground mt-1">Drag teams into conferences, move them between divisions, and open a team to manage its roster.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}><Upload className="h-4 w-4" /> Import CSV</Button>
+          <Button onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> Add team</Button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search teams or captains..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-64" />
+        </div>
+        <Select value={divFilter} onValueChange={setDivFilter}>
+          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All divisions</SelectItem>{DIVISIONS.map(d => <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
+        </Select>
+        <Button variant="ghost" size="sm" onClick={() => setCollapsed(c => c.length ? [] : DIVISIONS.map(d => d.name))}>{collapsed.length ? "Expand all" : "Collapse all"}</Button>
+      </div>
+
+      {selected.length > 0 && (
+        <div className="section-card p-3 flex items-center justify-between bg-primary/5 border-primary/30">
+          <span className="text-sm font-medium">{selected.length} team{selected.length > 1 ? "s" : ""} selected</span>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setSelected([])}>Cancel</Button>
+            <Button variant="outline" size="sm" onClick={() => setMoveIds(selected)}><ArrowRightLeft className="h-3.5 w-3.5" /> Move to division</Button>
+            <Button variant="destructive" size="sm" onClick={() => setDeleteIds(selected)}><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+          </div>
+        </div>
+      )}
+
+      {DIVISIONS.filter(d => divFilter === "all" || d.name === divFilter).map(d => {
+        const list = visible.filter(t => t.division === d.name);
+        const count = teams.filter(t => t.division === d.name).length;
+        const isCollapsed = collapsed.includes(d.name);
+        const confs = CONFERENCES[d.name] ?? [];
+        const ids = list.map(t => t.id);
+        const allSel = ids.length > 0 && ids.every(id => selected.includes(id));
+        return (
+          <section key={d.name} className="section-card overflow-hidden">
+            <div className="section-card-header flex items-center gap-3"
+              onDragOver={e => { if (dragId && teams.find(t => t.id === dragId)?.division !== d.name) { e.preventDefault(); setDropTarget(d.name); } }}
+              onDrop={e => { e.preventDefault(); onDrop(d.name); }}>
+              <button onClick={() => setCollapsed(c => isCollapsed ? c.filter(x => x !== d.name) : [...c, d.name])} className="flex items-center gap-2" aria-expanded={!isCollapsed}>
+                {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                <h2 className="font-display font-semibold">{d.name}</h2>
+              </button>
+              <Checkbox checked={allSel} onCheckedChange={c => setSelected(s => c ? Array.from(new Set([...s, ...ids])) : s.filter(x => !ids.includes(x)))} aria-label={`Select all in ${d.name}`} />
+              <span className={`text-xs tabular ${count > d.cap ? "text-warning font-medium" : "text-muted-foreground"}`}>{count}/{d.cap} teams</span>
+              <Badge variant={d.status === "active" ? "success" : "secondary"}>{d.status === "active" ? "Active" : "Setup"}</Badge>
+              {confs.length === 0 && <span className="text-xs text-muted-foreground">No conferences</span>}
+              {dropTarget === d.name && <span className="ml-auto text-xs text-primary">Drop to move to {d.name}</span>}
+            </div>
+            {!isCollapsed && (
+              confs.length === 0 ? (
+                <div onDragOver={e => { if (dragId) e.preventDefault(); }} onDrop={e => { e.preventDefault(); onDrop(d.name); }}>
+                  {list.map(renderRow)}
+                  {list.length === 0 && <p className="px-5 py-6 text-center text-sm text-muted-foreground border-t border-border">No teams in this division.</p>}
+                </div>
+              ) : (
+                <>
+                  <Group division={d.name} title="Unassigned" list={list.filter(t => !t.conference)} />
+                  {confs.map(c => (
+                    <div key={c.name}>
+                      <Group division={d.name} title={`${c.name} Conference`} conference={c.name} list={list.filter(t => t.conference === c.name && !t.subdivision)} />
+                      {c.subdivisions.map(s => <Group key={s} indent division={d.name} title={`${s} subdivision`} conference={c.name} subdivision={s} list={list.filter(t => t.conference === c.name && t.subdivision === s)} />)}
+                    </div>
+                  ))}
+                </>
+              )
+            )}
+          </section>
+        );
+      })}
+
+      <TeamSidePanel team={panelTeam} roster={panelTeam ? rosters[panelTeam.id] ?? [] : []} allTeams={teams} initialTab={panel?.tab}
+        onClose={() => setPanel(null)} onUpdateTeam={updateTeam}
+        onUpdateRoster={list => panelTeam && setRosters(prev => ({ ...prev, [panelTeam.id]: list }))}
+        onMovePlayers={(ids, to) => panelTeam && movePlayers(panelTeam.id, ids, to)}
+        onImport={() => setImportOpen(true)} onMoveDivision={() => panelTeam && setMoveIds([panelTeam.id])} />
+
+      <MoveTeamDialog open={!!moveIds} onOpenChange={o => !o && setMoveIds(null)} teams={teams.filter(t => moveIds?.includes(t.id))} allTeams={teams} onConfirm={confirmMove} />
+
+      <AlertDialog open={!!deleteIds} onOpenChange={o => !o && setDeleteIds(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteIds?.length === 1 ? teams.find(t => t.id === deleteIds[0])?.name : `${deleteIds?.length} teams`}?</AlertDialogTitle>
+            <AlertDialogDescription>This removes the team and its roster from this event. It can't be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AddTeamDialog open={addOpen} onOpenChange={setAddOpen} existing={teams} onAdd={t => { setTeams(prev => [...prev, t]); toast({ title: `${t.name} added to ${t.division}` }); }} />
+
+      <TeamRosterImportDialog open={importOpen} onOpenChange={setImportOpen} existingTeams={teams}
+        onImport={rows => {
+          const lc = (s: string) => s.trim().toLowerCase();
+          const created: Team[] = [];
+          const matched = new Set<string>();
+          const added: Record<string, RosterEntry[]> = {};
+          let seq = Date.now();
+          rows.forEach(r => {
+            const key = `${lc(r.team_name)}|${lc(r.division)}`;
+            let team = teams.find(t => `${lc(t.name)}|${lc(t.division)}` === key) ?? created.find(t => `${lc(t.name)}|${lc(t.division)}` === key);
+            if (team && teams.includes(team)) matched.add(team.id);
+            if (!team) {
+              const name = r.team_name.trim();
+              team = { id: `${seq++}`, name, abbr: name.replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase().padEnd(3, "X"), division: r.division.trim(),
+                captain: r.captain, captainEmail: r.captain_email, coach: r.coach || "N/A", primaryColor: "#334155", secondaryColor: "#f1f5f9",
+                wins: 0, losses: 0, payment: "unpaid", rosterLockOverride: false, history: [{ date: today(), text: "Created by CSV import" }] };
+              created.push(team);
+            }
+            const role = lc(r.role);
+            const id = seq++;
+            (added[team.id] ??= []).push({ player_id: id, member_id: id, player_name: `${r.first_name} ${r.last_name}`.trim(), jersey: r.jersey_number,
+              label: role && role !== "player" && role !== "coach" ? r.role.toUpperCase().slice(0, 5) : "", role: role === "coach" ? "coach" : "player", gp: 0, status: "active" });
+          });
+          if (created.length) setTeams(prev => [...prev, ...created]);
+          setRosters(prev => { const next = { ...prev }; Object.entries(added).forEach(([id, l]) => { next[id] = [...(next[id] ?? []), ...l]; }); return next; });
+          return { teamsCreated: created.length, teamsMatched: matched.size, playersAdded: rows.length };
+        }} />
+    </div>
   );
 }
 
-interface EditTeamBodyProps {
-  form: Team;
-  setForm: (t: Team) => void;
-}
-
-function EditTeamBody({ form, setForm }: EditTeamBodyProps) {
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = (file: File | undefined, key: "logoUrl" | "teamPhotoUrl") => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setForm({ ...form, [key]: reader.result as string });
-    reader.readAsDataURL(file);
-  };
-
-  const primary = form.primaryColor || "#3b82f6";
-  const secondary = form.secondaryColor || "#ffffff";
-
+function AddTeamDialog({ open, onOpenChange, existing, onAdd }: { open: boolean; onOpenChange: (o: boolean) => void; existing: Team[]; onAdd: (t: Team) => void }) {
+  const blank = { name: "", abbr: "", division: DIVISIONS[0].name, captain: "", captainEmail: "" };
+  const [f, setF] = useState(blank);
+  const [tried, setTried] = useState(false);
+  const dup = existing.some(t => t.division === f.division && t.name.trim().toLowerCase() === f.name.trim().toLowerCase());
+  const errs = useMemo(() => ({
+    name: !f.name.trim() ? "Team name is required" : dup ? "A team with this name already exists in this division" : "",
+    abbr: !/^[A-Z0-9]{3}$/.test(f.abbr) ? "Use exactly 3 letters or numbers" : "",
+    captainEmail: f.captainEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.captainEmail) ? "Enter a valid email" : "",
+  }), [f, dup]);
+  const valid = !errs.name && !errs.abbr && !errs.captainEmail;
+  const close = (o: boolean) => { if (!o) { setF(blank); setTried(false); } onOpenChange(o); };
   return (
-    <div className="py-2">
-      <Tabs defaultValue="details">
-        <TabsList className="w-full">
-          <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
-          <TabsTrigger value="branding" className="flex-1">Branding</TabsTrigger>
-          <TabsTrigger value="media" className="flex-1">Media</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="details" className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label>Team Name</Label>
-            <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+    <Dialog open={open} onOpenChange={close}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Add team</DialogTitle><DialogDescription>You can set colours, logo and roster after creating it.</DialogDescription></DialogHeader>
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2 space-y-1"><Label>Team name</Label><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value, abbr: f.abbr || "" })} />{tried && errs.name && <p className="text-xs text-destructive">{errs.name}</p>}</div>
+            <div className="space-y-1"><Label>Short name</Label><Input value={f.abbr} maxLength={3} onChange={e => setF({ ...f, abbr: e.target.value.toUpperCase() })} />{tried && errs.abbr && <p className="text-xs text-destructive">{errs.abbr}</p>}</div>
           </div>
-          <div className="space-y-2">
-            <Label>Division</Label>
-            <Select value={form.division} onValueChange={v => setForm({ ...form, division: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {DIVISIONS.map(d => (
-                  <SelectItem key={d} value={d}>{d}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-1"><Label>Division</Label>
+            <Select value={f.division} onValueChange={v => setF({ ...f, division: v })}><SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{DIVISIONS.map(d => <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1"><Label>Captain name</Label><Input value={f.captain} onChange={e => setF({ ...f, captain: e.target.value })} /></div>
+            <div className="space-y-1"><Label>Captain email</Label><Input value={f.captainEmail} onChange={e => setF({ ...f, captainEmail: e.target.value })} />{tried && errs.captainEmail && <p className="text-xs text-destructive">{errs.captainEmail}</p>}</div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Captain</Label>
-              <Input value={form.captain} onChange={e => setForm({ ...form, captain: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Captain Email</Label>
-              <Input type="email" value={form.captainEmail} onChange={e => setForm({ ...form, captainEmail: e.target.value })} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Coach</Label>
-            <Input value={form.coach} onChange={e => setForm({ ...form, coach: e.target.value })} />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="branding" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Primary Color</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={primary}
-                  onChange={e => setForm({ ...form, primaryColor: e.target.value })}
-                  className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
-                />
-                <Input
-                  value={primary}
-                  onChange={e => setForm({ ...form, primaryColor: e.target.value })}
-                  className="flex-1 font-mono text-sm"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Secondary Color</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={secondary}
-                  onChange={e => setForm({ ...form, secondaryColor: e.target.value })}
-                  className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
-                />
-                <Input
-                  value={secondary}
-                  onChange={e => setForm({ ...form, secondaryColor: e.target.value })}
-                  className="flex-1 font-mono text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl border border-border p-4">
-            <Label className="text-xs text-muted-foreground mb-2 block">Preview</Label>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold shadow"
-                style={{ backgroundColor: primary, color: secondary }}
-              >
-                {form.name.charAt(0)}
-              </div>
-              <div>
-                <div className="font-semibold text-foreground">{form.name}</div>
-                <div className="h-1.5 w-24 rounded-full mt-1" style={{ background: `linear-gradient(90deg, ${primary}, ${secondary})` }} />
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="media" className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label>Team Logo</Label>
-            <input
-              ref={logoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={e => handleFile(e.target.files?.[0], "logoUrl")}
-            />
-            <div
-              onClick={() => logoInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
-            >
-              {form.logoUrl ? (
-                <div className="flex flex-col items-center gap-2">
-                  <img src={form.logoUrl} alt="Logo" className="w-20 h-20 object-contain rounded-lg" />
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); logoInputRef.current?.click(); }}>
-                      <ImageIcon className="h-3.5 w-3.5 mr-1" /> Change
-                    </Button>
-                    <Button variant="ghost" size="sm" type="button" onClick={(e) => { e.stopPropagation(); setForm({ ...form, logoUrl: "" }); }}>
-                      <X className="h-3.5 w-3.5 mr-1" /> Remove
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                  <Upload className="h-8 w-8" />
-                  <span className="text-sm">Click to upload logo</span>
-                  <span className="text-xs">PNG, SVG, or JPG (max 2MB)</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Team Photo</Label>
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={e => handleFile(e.target.files?.[0], "teamPhotoUrl")}
-            />
-            <div
-              onClick={() => photoInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
-            >
-              {form.teamPhotoUrl ? (
-                <div className="flex flex-col items-center gap-2">
-                  <img src={form.teamPhotoUrl} alt="Team" className="w-full h-32 object-cover rounded-lg" />
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); photoInputRef.current?.click(); }}>
-                      <ImageIcon className="h-3.5 w-3.5 mr-1" /> Change
-                    </Button>
-                    <Button variant="ghost" size="sm" type="button" onClick={(e) => { e.stopPropagation(); setForm({ ...form, teamPhotoUrl: "" }); }}>
-                      <X className="h-3.5 w-3.5 mr-1" /> Remove
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                  <Camera className="h-8 w-8" />
-                  <span className="text-sm">Click to upload team photo</span>
-                  <span className="text-xs">JPG or PNG (max 5MB)</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => close(false)}>Cancel</Button>
+          <Button onClick={() => { setTried(true); if (!valid) return;
+            onAdd({ id: `${Date.now()}`, name: f.name.trim(), abbr: f.abbr, division: f.division, captain: f.captain || "TBD", captainEmail: f.captainEmail, coach: "N/A",
+              primaryColor: "#334155", secondaryColor: "#f1f5f9", wins: 0, losses: 0, payment: "unpaid", rosterLockOverride: false, history: [{ date: today(), text: `Created in ${f.division}` }] });
+            close(false); }}>Add team</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
