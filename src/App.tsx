@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,7 +15,6 @@ import ReportsPage from "@/pages/season/ReportsPage";
 import StatsPage from "@/pages/season/StatsPage";
 import CategoriesPage from "@/pages/structure/CategoriesPage";
 import DivisionsPage from "@/pages/structure/DivisionsPage";
-import ScorekeeperCategoriesPage from "@/pages/scorekeeper/ScorekeeperCategoriesPage";
 import NewSeasonWizard from "@/pages/setup/NewSeasonWizard";
 import UsersPermissionsPage from "@/pages/admin/UsersPermissionsPage";
 import LocationsPage from "@/pages/structure/LocationsPage";
@@ -138,7 +137,7 @@ const App = () => (
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/:tab" element={<SettingsPage />} />
             <Route path="/features/brackets" element={<BracketManagerPage />} />
-            <Route path="/scorekeeper/categories" element={<ScorekeeperCategoriesPage />} />
+            <Route path="/scorekeeper/categories" element={<Navigate to="/structure/categories" replace />} />
             <Route path="/support" element={<SupportPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
