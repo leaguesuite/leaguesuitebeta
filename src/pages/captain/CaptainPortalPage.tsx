@@ -159,7 +159,9 @@ export default function CaptainPortalPage() {
                         <Trash2 className="h-4 w-4" /> Remove
                       </Button>
                     ) : p.status === "active" ? (
-                      <Button variant="ghost" size="sm" disabled={locked} onClick={() => update(p.id, { status: "inactive" })}><UserX className="h-4 w-4" /> Set inactive</Button>
+                      p.email === CAPTAIN.email
+                        ? <Badge variant="soft">Captain</Badge>
+                        : <Button variant="ghost" size="sm" disabled={locked} onClick={() => update(p.id, { status: "inactive" })}><UserX className="h-4 w-4" /> Set inactive</Button>
                     ) : (
                       <Button variant="ghost" size="sm" disabled={locked || activeCount >= ROSTER_CAP} onClick={() => update(p.id, { status: "active" })}><UserCheck className="h-4 w-4" /> Reactivate</Button>
                     )}
