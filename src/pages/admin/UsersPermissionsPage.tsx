@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Shield, Edit, Trash2, Smartphone, Lock, Send, X, AlertTriangle, Copy } from "lucide-react";
+import { Plus, Search, Shield, Edit, Trash2, Smartphone, Lock, Send, X, AlertTriangle } from "lucide-react";
 
 type Access = "full" | "view" | "none";
 type PortalType = "admin" | "mobile" | "captain";
@@ -249,8 +249,6 @@ export default function UsersPermissionsPage() {
                 <div className="flex items-start justify-between mb-3">
                   <div className={`p-2 rounded-lg ${role.color}`}>{role.portal === "mobile" ? <Smartphone className="h-4 w-4" /> : <Shield className="h-4 w-4" />}</div>
                   <div className="flex gap-1">
-                    {role.id !== "owner" && <button title="Duplicate" onClick={() => setRoleDialog({ open: true, role: { ...role, id: "", name: `${role.name} copy`, system: false } })}
-                      className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><Copy className="h-3.5 w-3.5" /></button>}
                     <button title="Edit" onClick={() => setRoleDialog({ open: true, role })} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground"><Edit className="h-3.5 w-3.5" /></button>
                     {!role.system && (
                       <button title={count ? "Reassign users first" : "Delete role"} disabled={count > 0}
