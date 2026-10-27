@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Search, Upload, Users, Edit, ArrowRightLeft, Layers, Trash2 } from "lucide-react";
-import LeaguePageTitle from "@/components/layout/LeaguePageTitle";
+import { LeaguePageTitle } from "@/components/layout/LeaguePageTitle";
 import TeamRosterImportDialog from "@/components/teams/TeamRosterImportDialog";
 import MoveTeamDialog, { MoveResult } from "@/components/teams/MoveTeamDialog";
 import TeamSidePanel, { TeamLogo } from "@/components/teams/TeamSidePanel";
