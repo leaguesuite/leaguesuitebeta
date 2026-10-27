@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppLayout from "@/components/layout/AppLayout";
+import CaptainPortalPage from "@/pages/captain/CaptainPortalPage";
 import PublicLayout from "@/components/public/PublicLayout";
 import Dashboard from "@/pages/Dashboard";
 import GamesPage from "@/pages/season/GamesPage";
@@ -78,6 +79,7 @@ const App = () => (
           </Route>
 
           {/* Admin */}
+          <Route path="/captain" element={<CaptainPortalPage />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/season/overview" element={<PlaceholderPage title="Season Overview" description="Current season summary and key metrics." />} />
