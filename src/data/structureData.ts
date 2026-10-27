@@ -28,6 +28,11 @@ export type CategoryRules = {
 
 export type CategoryConfig = {
   allowKickoffs: boolean;
+  allowPunts: boolean;
+  allowFieldGoals: boolean;
+  allowRouge: boolean;
+  allowOnsideFlag: boolean;
+  allowPuntFlag: boolean;
   possessionStart: number;
   allowFumbles: boolean;
   allowLaterals: boolean;
@@ -53,7 +58,9 @@ export const defaultRules: CategoryRules = {
 };
 
 export const defaultConfig: CategoryConfig = {
-  allowKickoffs: false, possessionStart: 5, allowFumbles: false, allowLaterals: true, redZoneYards: 10,
+  allowKickoffs: false, allowPunts: false, allowFieldGoals: false, allowRouge: false,
+  allowOnsideFlag: false, allowPuntFlag: false,
+  possessionStart: 5, allowFumbles: false, allowLaterals: true, redZoneYards: 10,
   touchdownPoints: 6, specialScoring: [], allowLiveScoring: true,
   trackAirYards: false, trackYAC: false, trackPassDirection: false,
 };

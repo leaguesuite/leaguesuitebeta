@@ -22,6 +22,11 @@ const TO_GAIN: ToGain[] = ["10 yards", "15 yards", "Midfield & Goal Line", "Goal
 function specialTags(c: CategoryConfig): string[] {
   const t: string[] = [];
   if (c.allowKickoffs) t.push("Kickoffs");
+  if (c.allowPunts) t.push("Punts");
+  if (c.allowFieldGoals) t.push("Field Goals");
+  if (c.allowRouge) t.push("Rouge (single)");
+  if (c.allowOnsideFlag) t.push("Onside (flag)");
+  if (c.allowPuntFlag) t.push("Punt (flag)");
   if (c.allowFumbles) t.push("Fumbles");
   if (c.allowLaterals) t.push("Laterals");
   c.specialScoring.forEach(s => t.push(`+${s.points} ${s.label}`));
@@ -248,7 +253,7 @@ export default function CategoriesPage() {
             <section className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Special Configs</h3>
               <div className="grid grid-cols-2 gap-3">
-                {([["allowKickoffs", "Allow kickoffs"], ["allowFumbles", "Allow fumbles"], ["allowLaterals", "Allow laterals"], ["allowLiveScoring", "Live scoring"]] as const).map(([k, l]) => (
+                {([["allowKickoffs", "Allow kickoffs"], ["allowPunts", "Allow punts"], ["allowFieldGoals", "Allow field goals"], ["allowRouge", "Allow rouge (single)"], ["allowOnsideFlag", "Allow onside attempt (flag)"], ["allowPuntFlag", "Allow punt (flag)"], ["allowFumbles", "Allow fumbles"], ["allowLaterals", "Allow laterals"], ["allowLiveScoring", "Live scoring"]] as const).map(([k, l]) => (
                   <label key={k} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm">
                     {l}<Switch checked={config[k]} onCheckedChange={v => setC(k, v)} />
                   </label>
