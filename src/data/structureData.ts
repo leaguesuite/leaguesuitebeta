@@ -8,8 +8,12 @@ export type Division = {
   status: "active" | "draft";
 };
 
-export type ToGain = "10 yards" | "15 yards" | "Midfield" | "Midfield & Goal";
+export type ToGain = "10 yards" | "15 yards" | "Midfield & Goal Line" | "Goal Line";
 export type PeriodType = "halves" | "quarters" | "none";
+
+/** Downs are offered as 3 or 4; anything else is a custom value. */
+export const DOWNS_CHOICES = [3, 4];
+export const isCustomDowns = (d: number) => !DOWNS_CHOICES.includes(d);
 
 export type SpecialScoringRule = { id: string; label: string; points: number };
 
@@ -45,7 +49,7 @@ export type Category = {
 };
 
 export const defaultRules: CategoryRules = {
-  fieldLength: 80, downs: 4, toGain: "Midfield & Goal", playersPerSide: 7, periods: "halves", periodLength: 20,
+  fieldLength: 80, downs: 4, toGain: "Midfield & Goal Line", playersPerSide: 7, periods: "halves", periodLength: 20,
 };
 
 export const defaultConfig: CategoryConfig = {
@@ -63,7 +67,7 @@ export const initialCategories: Category[] = [
     rules: { ...defaultRules, playersPerSide: 8 },
     config: { ...defaultConfig, specialScoring: [{ id: "f-td", label: "Female TD", points: 2 }] } },
   { id: 4, name: "Youth", description: "Youth flag football under 18",
-    rules: { ...defaultRules, fieldLength: 60, playersPerSide: 5, toGain: "Midfield", periods: "none", periodLength: 40 },
+    rules: { ...defaultRules, fieldLength: 60, playersPerSide: 5, toGain: "Goal Line", periods: "none", periodLength: 40 },
     config: { ...defaultConfig, allowLaterals: false } },
 ];
 
