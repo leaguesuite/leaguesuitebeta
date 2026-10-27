@@ -206,7 +206,7 @@ export default function TeamsRostersPage() {
         const allSel = ids.length > 0 && ids.every(id => selected.includes(id));
         return (
           <section key={d.name} className="section-card overflow-hidden">
-            <div className="section-card-header flex items-center justify-start gap-3"
+            <div className="section-card-header flex items-center !justify-start gap-3"
               onDragOver={e => { if (dragId && teams.find(t => t.id === dragId)?.division !== d.name) { e.preventDefault(); setDropTarget(d.name); } }}
               onDrop={e => { e.preventDefault(); onDrop(d.name); }}>
               <button onClick={() => setCollapsed(c => isCollapsed ? c.filter(x => x !== d.name) : [...c, d.name])} className="flex items-center gap-2" aria-expanded={!isCollapsed}>
