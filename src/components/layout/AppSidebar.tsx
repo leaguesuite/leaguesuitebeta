@@ -149,7 +149,15 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
   {
     title: "Features",
     items: [
-      { label: "Player Ratings", icon: Bird, path: "/ratings/eagle-wizard" },
+      {
+        label: "Ratings", icon: Bird,
+        children: [
+          { label: "Dashboard", path: "/ratings" },
+          { label: "League Folders", path: "/ratings/leagues" },
+          { label: "Rating Wizard", path: "/ratings/wizard" },
+          { label: "Eagle Ratings", path: "/ratings/eagle" },
+        ],
+      },
       { label: "Accolades Hub", icon: Trophy, path: "/accolades" },
       { label: "Bracket Manager", icon: GitBranch, path: "/features/brackets" },
     ],
