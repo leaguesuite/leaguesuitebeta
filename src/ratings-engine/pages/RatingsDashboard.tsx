@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Plus, Calculator, Users, Calendar, TrendingUp, Bird } from 'lucide-react';
+import { Plus, Calculator, Users, Calendar, TrendingUp } from 'lucide-react';
 
 export default function RatingsDashboard() {
   const navigate = useNavigate();
@@ -96,14 +96,6 @@ export default function RatingsDashboard() {
               </p>
             </div>
             <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/ratings/eagle')} 
-                className="gap-2 border-amber-500/50 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
-              >
-                <Bird className="h-4 w-4" />
-                Eagle Ratings
-              </Button>
               <Button onClick={() => navigate('/ratings/wizard')} className="gap-2">
                 <Plus className="h-4 w-4" />
                 New Rating Run
