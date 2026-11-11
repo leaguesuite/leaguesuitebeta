@@ -1,104 +1,115 @@
+import { useState } from 'react';
 import { DivisionMultiplier } from '@/ratings-engine/types/ratings';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DivisionMultipliersStepProps {
   multipliers: DivisionMultiplier[];
   onMultipliersChange: (multipliers: DivisionMultiplier[]) => void;
 }
 
-const DEFAULT_MULTIPLIERS: Record<string, number> = {
-  'Elite': 1.15,
-  'Intermediate': 1.05,
-  'Recreational': 0.95,
-};
+/** How far below the division above. Values are the drop in multiplier. */
+const GAPS = [
+  { id: 'same', label: 'Same level', drop: 0 },
+  { id: 'small', label: 'Small gap', drop: 0.03 },
+  { id: 'medium', label: 'Medium gap', drop: 0.07 },
+  { id: 'big', label: 'Big gap', drop: 0.12 },
+  { id: 'huge', label: 'Huge gap', drop: 0.2 },
+] as const;
+type GapId = typeof GAPS[number]['id'];
+const dropOf = (g: GapId) => GAPS.find(x => x.id === g)!.drop;
+const nearestGap = (d: number): GapId =>
+  GAPS.reduce((best, g) => (Math.abs(g.drop - d) < Math.abs(dropOf(best) - d) ? g.id : best), 'medium' as GapId);
+
+function SortableDivision({ m, index, total, onMove }: { m: DivisionMultiplier; index: number; total: number; onMove: (d: -1 | 1) => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: m.division_id });
+  const pct = Math.round((m.multiplier - 1) * 100);
+  return (
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`flex items-center gap-3 rounded-lg border bg-card p-3 ${isDragging ? 'shadow-lg relative z-10' : ''}`}>
+      <button {...attributes} {...listeners} className="cursor-grab touch-none text-muted-foreground" aria-label="Drag to reorder">
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <span className="w-8 font-mono text-sm font-semibold text-primary">#{index + 1}</span>
+      <p className="flex-1 font-medium">{m.division_name}</p>
+      {index === 0
+        ? <Badge variant="soft">Top division · full rating</Badge>
+        : <span className="font-mono text-xs text-muted-foreground">{pct}% vs top</span>}
+      <div className="flex">
+        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={index === 0} onClick={() => onMove(-1)} aria-label="Move up"><ChevronUp className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={index === total - 1} onClick={() => onMove(1)} aria-label="Move down"><ChevronDown className="h-4 w-4" /></Button>
+      </div>
+    </div>
+  );
+}
 
 export function DivisionMultipliersStep({ multipliers, onMultipliersChange }: DivisionMultipliersStepProps) {
-  const handleMultiplierChange = (divisionId: string, value: number) => {
-    onMultipliersChange(
-      multipliers.map(m => 
-        m.division_id === divisionId ? { ...m, multiplier: value } : m
-      )
-    );
+  // Initial order + gaps inferred from existing multipliers (strongest first).
+  const [order, setOrder] = useState<string[]>(() =>
+    [...multipliers].sort((a, b) => b.multiplier - a.multiplier).map(m => m.division_id));
+  const [gaps, setGaps] = useState<Record<string, GapId>>(() => {
+    const sorted = [...multipliers].sort((a, b) => b.multiplier - a.multiplier);
+    const g: Record<string, GapId> = {};
+    sorted.forEach((m, i) => { if (i > 0) g[m.division_id] = nearestGap(sorted[i - 1].multiplier - m.multiplier); });
+    return g;
+  });
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const byId = new Map(multipliers.map(m => [m.division_id, m]));
+  const ids = [...order.filter(id => byId.has(id)), ...multipliers.filter(m => !order.includes(m.division_id)).map(m => m.division_id)];
+
+  const emit = (nextOrder: string[], nextGaps: Record<string, GapId>) => {
+    let value = 1;
+    const out = nextOrder.map((id, i) => {
+      if (i > 0) value = Math.max(0.3, value - dropOf(nextGaps[id] ?? 'medium'));
+      return { ...byId.get(id)!, multiplier: Number(value.toFixed(2)) };
+    });
+    setOrder(nextOrder); setGaps(nextGaps); onMultipliersChange(out);
   };
 
-  const resetToDefaults = () => {
-    onMultipliersChange(
-      multipliers.map(m => ({
-        ...m,
-        multiplier: DEFAULT_MULTIPLIERS[m.division_name] ?? 1.0,
-      }))
-    );
+  const move = (from: number, to: number) => emit(arrayMove(ids, from, to), gaps);
+  const onDragEnd = (e: DragEndEvent) => {
+    if (!e.over || e.active.id === e.over.id) return;
+    move(ids.indexOf(String(e.active.id)), ids.indexOf(String(e.over.id)));
   };
+  const shown = ids.map(id => byId.get(id)!);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Adjust rating multipliers by division to account for varying competition levels.
-          Values &gt;1 boost ratings, values &lt;1 reduce them.
-        </p>
-        <Button variant="outline" size="sm" onClick={resetToDefaults} className="gap-2">
-          <RotateCcw className="h-4 w-4" />
-          Reset Defaults
-        </Button>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        Put divisions in order from strongest to weakest. The top division keeps full ratings. Between each pair, pick how big the
+        skill gap is. Bigger gaps lower the ratings of the divisions below more.
+      </p>
 
-      <div className="space-y-4">
-        {multipliers.map((multiplier) => {
-          const percentage = ((multiplier.multiplier - 1) * 100).toFixed(0);
-          const isPositive = multiplier.multiplier >= 1;
-          
-          return (
-            <div 
-              key={multiplier.division_id}
-              className="flex items-center gap-4 rounded-lg border bg-card p-4"
-            >
-              <div className="flex-1">
-                <p className="font-medium">{multiplier.division_name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {isPositive ? '+' : ''}{percentage}% adjustment
-                </p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          <div>
+            {shown.map((m, i) => (
+              <div key={m.division_id}>
+                {i > 0 && (
+                  <div className="flex items-center gap-3 py-2 pl-12">
+                    <div className="h-6 w-px bg-border" />
+                    <span className="text-xs text-muted-foreground">Gap from {shown[i - 1].division_name}:</span>
+                    <ToggleGroup type="single" size="sm" variant="outline" value={gaps[m.division_id] ?? 'medium'}
+                      onValueChange={v => v && emit(ids, { ...gaps, [m.division_id]: v as GapId })}>
+                      {GAPS.map(g => <ToggleGroupItem key={g.id} value={g.id} className="h-7 px-2 text-xs">{g.label}</ToggleGroupItem>)}
+                    </ToggleGroup>
+                  </div>
+                )}
+                <SortableDivision m={m} index={i} total={shown.length} onMove={d => move(i, i + d)} />
               </div>
-
-              <div className="flex items-center gap-3">
-                {/* Visual slider representation */}
-                <div className="w-32 h-2 rounded-full bg-muted overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all"
-                    style={{ 
-                      width: `${Math.min(100, (multiplier.multiplier / 1.3) * 100)}%`,
-                    }}
-                  />
-                </div>
-
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0.5"
-                  max="1.5"
-                  value={multiplier.multiplier}
-                  onChange={(e) => handleMultiplierChange(
-                    multiplier.division_id, 
-                    parseFloat(e.target.value) || 1
-                  )}
-                  className="w-24"
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Example calculation */}
-      <div className="rounded-lg border bg-muted/30 p-4">
-        <p className="text-sm font-medium mb-2">Example Calculation</p>
-        <p className="text-sm text-muted-foreground">
-          A player with a raw score of 75 in the Elite division (1.15× multiplier) would receive: 
-          <span className="font-mono ml-1">75 × 1.15 = 86.25</span>
-        </p>
-      </div>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
