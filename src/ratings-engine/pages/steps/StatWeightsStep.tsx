@@ -3,6 +3,7 @@ import { StatConfig, RatingCategory } from '@/ratings-engine/types/ratings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Badge } from '@/components/ui/badge';
 import { GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import {
@@ -131,8 +132,45 @@ export function StatWeightsStep({ statConfigs, onStatConfigsChange }: StatWeight
     );
   };
 
+  const RUSH_KEYS = ['rushes', 'rushing_yards', 'rushing_touchdowns'];
+  const offRush = statConfigs.filter(s => s.category === 'offense' && RUSH_KEYS.includes(s.stat_key));
+  const qbRush = statConfigs.filter(s => s.category === 'qb' && s.source_key && RUSH_KEYS.includes(s.source_key));
+  const inOff = offRush.some(s => s.enabled);
+  const inQb = qbRush.some(s => s.enabled);
+  const rushMode = inOff && inQb ? 'both' : inQb ? 'qb' : inOff ? 'offense' : 'none';
+  const setRushMode = (mode: 'offense' | 'qb' | 'both' | 'none') => {
+    const wantOff = mode === 'offense' || mode === 'both';
+    const wantQb = mode === 'qb' || mode === 'both';
+    let next = statConfigs.map(s =>
+      s.category === 'offense' && RUSH_KEYS.includes(s.stat_key) ? { ...s, enabled: wantOff } :
+      s.category === 'qb' && s.source_key && RUSH_KEYS.includes(s.source_key) ? { ...s, enabled: wantQb } : s);
+    if (wantQb && qbRush.length === 0) {
+      next = [...next, ...offRush.map(s => ({
+        ...s, stat_key: `qb_${s.stat_key}`, source_key: s.stat_key, category: 'qb' as RatingCategory,
+        enabled: true, weight: Math.abs(s.weight) || 1, display_name: `${s.display_name} (QB)`,
+      }) as unknown as StatConfig)];
+    }
+    onStatConfigsChange(next);
+  };
+
   const cats: { v: RatingCategory; l: string }[] = [{ v: 'offense', l: 'Offense' }, { v: 'defense', l: 'Defense' }, { v: 'qb', l: 'QB' }];
   return (
+    <div className="space-y-6">
+    {offRush.length > 0 && (
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">
+        <div>
+          <p className="font-medium">Rushing stats count toward</p>
+          <p className="text-xs text-muted-foreground">Choose which ratings use rushes, rushing yards and rushing TDs.</p>
+        </div>
+        <ToggleGroup type="single" variant="outline" size="sm" value={rushMode}
+          onValueChange={v => v && setRushMode(v as 'offense' | 'qb' | 'both' | 'none')}>
+          <ToggleGroupItem value="offense">Offense</ToggleGroupItem>
+          <ToggleGroupItem value="qb">QB</ToggleGroupItem>
+          <ToggleGroupItem value="both">Both</ToggleGroupItem>
+          <ToggleGroupItem value="none">Neither</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+    )}
     <Tabs value={activeTab} onValueChange={v => setActiveTab(v as RatingCategory)}>
       <TabsList className="grid w-full grid-cols-3">
         {cats.map(c => (
@@ -143,5 +181,6 @@ export function StatWeightsStep({ statConfigs, onStatConfigsChange }: StatWeight
       </TabsList>
       {cats.map(c => <TabsContent key={c.v} value={c.v} className="mt-6">{renderList(c.v)}</TabsContent>)}
     </Tabs>
+    </div>
   );
 }

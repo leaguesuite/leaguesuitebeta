@@ -43,7 +43,7 @@ function calculateCategoryScore(
   const contributions: Record<string, number> = {};
 
   for (const config of categoryStats) {
-    const rawValue = (stats as unknown as Record<string, number>)[config.stat_key] || 0;
+    const rawValue = (stats as unknown as Record<string, number>)[config.source_key ?? config.stat_key] || 0;
     const normalizedValue = normalizeStatValue(rawValue, gamesPlayed, touches, config.normalize_mode);
     const contribution = normalizedValue * config.weight;
     
