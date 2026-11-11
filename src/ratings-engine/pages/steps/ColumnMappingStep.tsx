@@ -8,6 +8,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Check, AlertTriangle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+
+const EXCLUDED = '_excluded';
 
 interface ColumnMappingStepProps {
   dataSource: 'internal' | 'csv';
@@ -74,11 +77,34 @@ export function ColumnMappingStep({
 
   const handleMappingChange = (canonicalKey: string, sourceColumn: string) => {
     const newMapping = { ...effectiveMapping };
-    if (sourceColumn === '_unmapped') {
+    if (sourceColumn === '_unmapped' && newMapping[canonicalKey] !== EXCLUDED) {
       delete newMapping[canonicalKey];
     } else {
       newMapping[canonicalKey] = sourceColumn;
     }
+    onMappingChange(newMapping);
+  };
+
+  const setIncluded = (canonicalKey: string, included: boolean) => {
+    const newMapping = { ...effectiveMapping };
+    if (included) {
+      const suggested = suggestedMapping[canonicalKey];
+      if (suggested) newMapping[canonicalKey] = suggested;
+      else delete newMapping[canonicalKey];
+    } else {
+      newMapping[canonicalKey] = EXCLUDED;
+    }
+    onMappingChange(newMapping);
+  };
+
+  const setGroupIncluded = (keys: string[], included: boolean) => {
+    const newMapping = { ...effectiveMapping };
+    keys.forEach(k => {
+      if (included) {
+        if (suggestedMapping[k]) newMapping[k] = suggestedMapping[k];
+        else delete newMapping[k];
+      } else newMapping[k] = EXCLUDED;
+    });
     onMappingChange(newMapping);
   };
 
@@ -110,6 +136,10 @@ export function ColumnMappingStep({
 
   // Use suggested mapping if no mapping exists
   const effectiveMapping = Object.keys(columnMapping).length > 0 ? columnMapping : suggestedMapping;
+
+  const isExcluded = (key: string) => effectiveMapping[key] === EXCLUDED;
+  const yardKeys = CANONICAL_FIELDS.filter(f => !f.required && /yards/.test(f.key)).map(f => f.key);
+  const excludedCount = CANONICAL_FIELDS.filter(f => isExcluded(f.key)).length;
 
   const missingRequired = CANONICAL_FIELDS
     .filter(f => f.required && !effectiveMapping[f.key])
@@ -156,20 +186,57 @@ export function ColumnMappingStep({
         </div>
       )}
 
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3 text-sm">
+        <span className="text-muted-foreground">
+          Turn off any stat your league doesn't track. Excluded: <span className="font-medium text-foreground">{excludedCount}</span>
+        </span>
+        <div className="ml-auto flex gap-2">
+          <button type="button" className="rounded-md border px-2.5 py-1 text-xs hover:bg-secondary"
+            onClick={() => setGroupIncluded(yardKeys, yardKeys.some(k => isExcluded(k)))}>
+            {yardKeys.every(k => isExcluded(k)) ? 'Include all yards' : 'Exclude all yards'}
+          </button>
+        </div>
+      </div>
+
       {Object.entries(groupedFields).map(([category, fields]) => (
         <div key={category} className="space-y-3">
-          <h3 className="text-sm font-medium capitalize">{category === 'qb' ? 'QB' : category} Fields</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium capitalize">{category === 'qb' ? 'QB' : category} Fields</h3>
+            {fields.some(f => !f.required) && (
+              <button type="button" className="text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  const keys = fields.filter(f => !f.required).map(f => f.key);
+                  setGroupIncluded(keys, keys.some(k => isExcluded(k)));
+                }}>
+                {fields.filter(f => !f.required).every(f => isExcluded(f.key)) ? 'Include all' : 'Exclude all'}
+              </button>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {fields.map(field => (
-              <div key={field.key} className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  {field.label}
-                  {field.required && (
-                    <span className="text-xs text-destructive">*</span>
-                  )}
-                </Label>
+              <div key={field.key} className={`space-y-2 ${isExcluded(field.key) ? 'opacity-50' : ''}`}>
+                <div className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2">
+                    {field.label}
+                    {field.required && (
+                      <span className="text-xs text-destructive">*</span>
+                    )}
+                  </Label>
+                  <div className="ml-auto flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {field.required ? 'Required' : isExcluded(field.key) ? 'Not included' : 'Included'}
+                    </span>
+                    <Switch
+                      checked={!isExcluded(field.key)}
+                      disabled={field.required}
+                      onCheckedChange={(v) => setIncluded(field.key, v)}
+                      aria-label={`Include ${field.label}`}
+                    />
+                  </div>
+                </div>
                 <Select
-                  value={effectiveMapping[field.key] || '_unmapped'}
+                  disabled={isExcluded(field.key)}
+                  value={isExcluded(field.key) ? '_unmapped' : effectiveMapping[field.key] || '_unmapped'}
                   onValueChange={(v) => handleMappingChange(field.key, v)}
                 >
                   <SelectTrigger>
