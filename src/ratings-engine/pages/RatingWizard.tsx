@@ -89,13 +89,16 @@ export default function RatingWizard() {
     }
   }, [currentStep, markStepCompleted]);
 
-  const nextStep = useCallback(() => {
-    goToStep(currentStep + 1);
-  }, [currentStep, goToStep]);
+  // Column Mapping only applies to uploaded CSV stats.
+  const visibleIdx = WIZARD_STEPS.map((_, i) => i).filter(
+    i => !(WIZARD_STEPS[i].id === 'column-mapping' && config.data_source !== 'csv')
+  );
+  const visiblePos = Math.max(0, visibleIdx.indexOf(currentStep));
+  const visibleSteps = visibleIdx.map(i => state.steps[i]);
+  const goToVisible = (pos: number) => { if (pos >= 0 && pos < visibleIdx.length) goToStep(visibleIdx[pos]); };
 
-  const prevStep = useCallback(() => {
-    goToStep(currentStep - 1);
-  }, [currentStep, goToStep]);
+  const nextStep = () => goToVisible(visiblePos + 1);
+  const prevStep = () => goToVisible(visiblePos - 1);
 
   const saveDraft = useCallback(() => {
     const activeSeason = mockSeasons.find(s => s.active) || mockSeasons[0];
@@ -204,7 +207,7 @@ export default function RatingWizard() {
       <div className="container py-8">
         {/* Mobile Progress */}
         <div className="mb-6">
-          <WizardProgressMobile steps={state.steps} currentStep={currentStep} />
+          <WizardProgressMobile steps={visibleSteps} currentStep={visiblePos} />
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
@@ -212,9 +215,9 @@ export default function RatingWizard() {
           <aside className="hidden lg:block">
             <div className="sticky top-24">
               <WizardProgress 
-                steps={state.steps} 
-                currentStep={currentStep}
-                onStepClick={goToStep}
+                steps={visibleSteps}
+                currentStep={visiblePos}
+                onStepClick={goToVisible}
               />
             </div>
           </aside>
@@ -236,14 +239,14 @@ export default function RatingWizard() {
               <Button
                 variant="outline"
                 onClick={prevStep}
-                disabled={currentStep === 0}
+                disabled={visiblePos === 0}
                 className="gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Previous
               </Button>
 
-              {currentStep < WIZARD_STEPS.length - 1 ? (
+              {visiblePos < visibleIdx.length - 1 ? (
                 <Button onClick={nextStep} className="gap-2">
                   Next
                   <ArrowRight className="h-4 w-4" />
