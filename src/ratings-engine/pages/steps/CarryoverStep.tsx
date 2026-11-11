@@ -1,7 +1,6 @@
 import { CarryoverConfig } from '@/ratings-engine/types/ratings';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface CarryoverStepProps {
@@ -28,7 +27,7 @@ export function CarryoverStep({ carryover, onCarryoverChange }: CarryoverStepPro
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">
-        Blend previous season ratings with current season performance to smooth out 
+        Blend previous seasons' ratings with current season performance to smooth out 
         rating volatility and reward consistency over time.
       </p>
 
@@ -52,7 +51,7 @@ export function CarryoverStep({ carryover, onCarryoverChange }: CarryoverStepPro
 
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>100% Current Season</span>
-          <span>100% Previous Season</span>
+          <span>100% Previous Seasons</span>
         </div>
       </div>
 
@@ -88,34 +87,6 @@ export function CarryoverStep({ carryover, onCarryoverChange }: CarryoverStepPro
               </span>
             </p>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Games Weight */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-base">Weight Recent Games More</Label>
-              <p className="text-sm text-muted-foreground">
-                Give more weight to games played later in the season. 
-                Requires game-level data.
-              </p>
-            </div>
-            <Switch
-              checked={carryover.weight_recent_games}
-              onCheckedChange={(checked) => updateCarryover({ weight_recent_games: checked })}
-            />
-          </div>
-
-          {carryover.weight_recent_games && (
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-muted-foreground">
-                Games in the second half of the season will be weighted 1.5× compared to 
-                games in the first half.
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
