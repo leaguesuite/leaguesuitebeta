@@ -26,9 +26,7 @@ import { EligibilityStep } from './steps/EligibilityStep';
 import { DivisionMultipliersStep } from './steps/DivisionMultipliersStep';
 import { RatingScaleStep } from './steps/RatingScaleStep';
 import { CarryoverStep } from './steps/CarryoverStep';
-import { VAAConfigStep } from './steps/VAAConfigStep';
-import { ResultsPreviewStep } from './steps/ResultsPreviewStep';
-import { CommitStep } from './steps/CommitStep';
+import { GenerateStep } from './steps/GenerateStep';
 
 const WIZARD_STEPS: WizardStep[] = [
   { id: 'data-source', label: 'Data Source', description: 'Select where to pull player data from', completed: false },
@@ -38,9 +36,7 @@ const WIZARD_STEPS: WizardStep[] = [
   { id: 'division-multipliers', label: 'Division Multipliers', description: 'Adjust ratings by division level', completed: false },
   { id: 'rating-scale', label: 'Rating Scale', description: 'Define min/max ratings and caps', completed: false },
   { id: 'carryover', label: 'Carryover', description: "Blend with previous seasons' ratings", completed: false },
-  { id: 'vaa-config', label: 'Average Players', description: 'Keep average players steady', completed: false },
-  { id: 'results-preview', label: 'Preview', description: 'Review calculated ratings', completed: false },
-  { id: 'commit', label: 'Commit', description: 'Finalize and commit ratings', completed: false },
+  { id: 'generate', label: 'Generate', description: 'Generate ratings and download them to Excel', completed: false },
 ];
 
 export default function RatingWizard() {
@@ -174,38 +170,7 @@ export default function RatingWizard() {
           />
         );
       case 7:
-        return (
-          <VAAConfigStep
-            vaaConfig={config.vaa_config}
-            varConfig={config.var_config}
-            onVAAChange={(v) => updateConfig('vaa_config', v)}
-            onVARChange={(v) => updateConfig('var_config', v)}
-          />
-        );
-      case 8:
-        return (
-          <ResultsPreviewStep
-            config={config}
-            csvData={state.csv_data}
-            isCalculating={state.is_calculating}
-            progress={state.calculation_progress}
-            results={state.preview_results}
-            onCalculate={(results) => setState(prev => ({ ...prev, preview_results: results }))}
-            onProgressUpdate={(progress) => setState(prev => ({ ...prev, calculation_progress: progress }))}
-            onCalculatingChange={(isCalc) => setState(prev => ({ ...prev, is_calculating: isCalc }))}
-          />
-        );
-      case 9:
-        return (
-          <CommitStep
-            config={config}
-            results={state.preview_results}
-            onCommit={() => {
-              toast.success('Ratings committed successfully!');
-              navigate('/ratings');
-            }}
-          />
-        );
+        return <GenerateStep config={config} onDone={() => navigate('/ratings')} />;
       default:
         return null;
     }
