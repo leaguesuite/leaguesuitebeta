@@ -150,10 +150,6 @@ export function StatWeightsStep({ statConfigs, onStatConfigsChange }: StatWeight
         enabled: true, weight: Math.abs(s.weight) || 1, display_name: `${s.display_name} (QB)`,
       }) as unknown as StatConfig)];
     }
-    if (false) {
-      next = [...next, ...[].map(() => ({
-      }))];
-    }
     onStatConfigsChange(next);
   };
 
