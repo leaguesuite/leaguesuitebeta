@@ -131,12 +131,12 @@ function applyCarryover(
 }
 
 // Apply drift cap
-function applyDriftCap(
+export function applyDriftCap(
   newRating: number,
   previousRating: number | undefined,
-  maxDrift: number
+  maxDrift: number | null
 ): number {
-  if (previousRating === undefined || maxDrift <= 0) return newRating;
+  if (previousRating === undefined || maxDrift === null || maxDrift <= 0) return newRating;
   
   const drift = newRating - previousRating;
   if (Math.abs(drift) > maxDrift) {

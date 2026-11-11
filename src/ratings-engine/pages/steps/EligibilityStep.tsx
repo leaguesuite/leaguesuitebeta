@@ -17,7 +17,7 @@ interface EligibilityStepProps {
 }
 
 const BEHAVIOR_OPTIONS: { value: BelowThresholdBehavior; label: string; description: string }[] = [
-  { value: 'keep_last', label: 'Keep Last Rating', description: 'Use their previous season rating' },
+  { value: 'keep_last', label: 'Keep Last Rating', description: "Use their previous seasons' rating" },
   { value: 'division_average', label: 'Division Average', description: 'Assign the division average rating' },
   { value: 'no_rating', label: 'No Rating', description: 'Leave rating blank (null)' },
 ];

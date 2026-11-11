@@ -97,13 +97,12 @@ export interface RatingScaleConfig {
   max_rating: number;
   decimal_places: number;
   use_compression: boolean;
-  max_drift: number; // Max change per season
+  max_drift: number | null; // Max change per season; null = no maximum
 }
 
 export interface CarryoverConfig {
   carryover_weight: number; // 0-1, e.g., 0.3 for 30%
   current_weight: number; // 0-1, e.g., 0.7 for 70%
-  weight_recent_games: boolean;
 }
 
 export interface RatingRunConfig {

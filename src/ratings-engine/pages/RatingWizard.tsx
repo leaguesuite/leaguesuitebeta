@@ -37,7 +37,7 @@ const WIZARD_STEPS: WizardStep[] = [
   { id: 'eligibility', label: 'Eligibility', description: 'Set minimum thresholds for ratings', completed: false },
   { id: 'division-multipliers', label: 'Division Multipliers', description: 'Adjust ratings by division level', completed: false },
   { id: 'rating-scale', label: 'Rating Scale', description: 'Define min/max ratings and caps', completed: false },
-  { id: 'carryover', label: 'Carryover', description: 'Blend with previous season ratings', completed: false },
+  { id: 'carryover', label: 'Carryover', description: "Blend with previous seasons' ratings", completed: false },
   { id: 'vaa-config', label: 'VAA & WAR', description: 'Configure advanced metrics', completed: false },
   { id: 'results-preview', label: 'Preview', description: 'Review calculated ratings', completed: false },
   { id: 'commit', label: 'Commit', description: 'Finalize and commit ratings', completed: false },

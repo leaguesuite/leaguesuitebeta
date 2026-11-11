@@ -97,22 +97,39 @@ export function RatingScaleStep({ scale, onScaleChange }: RatingScaleStepProps) 
       </Card>
 
       {/* Rating Drift Guardrail */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label>Maximum Rating Change Per Season</Label>
-        <div className="flex items-center gap-4">
-          <Input
-            type="number"
-            min={0}
-            max={50}
-            value={scale.max_drift}
-            onChange={(e) => updateScale({ max_drift: parseInt(e.target.value) || 0 })}
-            className="w-24"
-          />
-          <span className="text-sm text-muted-foreground">points</span>
-        </div>
+        <RadioGroup
+          value={scale.max_drift === null ? 'no_max' : 'limited'}
+          onValueChange={(v) => updateScale({ max_drift: v === 'no_max' ? null : (scale.max_drift ?? 10) })}
+          className="gap-3"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="no_max" id="drift-no-max" />
+            <Label htmlFor="drift-no-max" className="font-normal cursor-pointer">
+              No maximum
+            </Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <RadioGroupItem value="limited" id="drift-limited" />
+            <Label htmlFor="drift-limited" className="font-normal cursor-pointer">
+              Limit change to
+            </Label>
+            <Input
+              type="number"
+              min={1}
+              max={50}
+              value={scale.max_drift ?? 10}
+              disabled={scale.max_drift === null}
+              onChange={(e) => updateScale({ max_drift: parseInt(e.target.value) || 1 })}
+              className="w-24"
+            />
+            <span className="text-sm text-muted-foreground">points</span>
+          </div>
+        </RadioGroup>
         <p className="text-xs text-muted-foreground">
           Limits how much a player's rating can change from one season to the next. 
-          Set to 0 for no limit.
+          Choose "No maximum" to let ratings move freely.
         </p>
       </div>
 

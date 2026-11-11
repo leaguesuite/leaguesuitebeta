@@ -118,7 +118,7 @@ export function CommitStep({ config, results, onCommit }: CommitStepProps) {
               <li>• Rating Scale: {config.rating_scale.min_rating} - {config.rating_scale.max_rating}</li>
               <li>• Carryover: {Math.round(config.carryover.carryover_weight * 100)}% previous / {Math.round(config.carryover.current_weight * 100)}% current</li>
               <li>• Compression: {config.rating_scale.use_compression ? 'Enabled' : 'Disabled'}</li>
-              <li>• Max Drift: ±{config.rating_scale.max_drift} points</li>
+              <li>• Max Drift: {config.rating_scale.max_drift === null ? 'No maximum' : `±${config.rating_scale.max_drift} points`}</li>
             </ul>
           </CardContent>
         </Card>
