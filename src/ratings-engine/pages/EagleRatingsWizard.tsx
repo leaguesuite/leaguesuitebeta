@@ -239,7 +239,7 @@ export default function EagleRatingsWizard() {
       </main>
 
       {/* Fixed Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-sm z-10">
+      <div className="sticky bottom-0 -mx-0 mt-8 border-t bg-background/95 backdrop-blur-sm z-10">
         <div className="container py-4">
           <div className="max-w-3xl mx-auto flex justify-between">
             <Button variant="outline" onClick={handleBack}>
