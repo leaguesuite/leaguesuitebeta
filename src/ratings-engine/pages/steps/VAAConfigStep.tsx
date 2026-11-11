@@ -1,17 +1,8 @@
-import { VAAConfig, VARConfig, RatingCategory, VAABaseline, VARMethod } from '@/ratings-engine/types/ratings';
-import { Label } from '@/components/ui/label';
+import { VAAConfig, VARConfig, RatingCategory, VAABaseline } from '@/ratings-engine/types/ratings';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Users } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface VAAConfigStepProps {
   vaaConfig: Record<RatingCategory, VAAConfig>;
@@ -20,174 +11,94 @@ interface VAAConfigStepProps {
   onVARChange: (config: Record<RatingCategory, VARConfig>) => void;
 }
 
-const CATEGORIES: RatingCategory[] = ['offense', 'defense', 'qb'];
+const CATEGORIES: { id: RatingCategory; label: string }[] = [
+  { id: 'offense', label: 'Offense' },
+  { id: 'defense', label: 'Defense' },
+  { id: 'qb', label: 'QB' },
+];
 
-export function VAAConfigStep({ vaaConfig, varConfig, onVAAChange, onVARChange }: VAAConfigStepProps) {
-  const updateVAA = (category: RatingCategory, updates: Partial<VAAConfig>) => {
-    onVAAChange({
-      ...vaaConfig,
-      [category]: { ...vaaConfig[category], ...updates },
-    });
-  };
+const BASELINES: { id: VAABaseline; label: string }[] = [
+  { id: 'division_average', label: 'Their division' },
+  { id: 'position_average', label: 'Their position' },
+];
 
-  const updateVAR = (category: RatingCategory, updates: Partial<VARConfig>) => {
-    onVARChange({
-      ...varConfig,
-      [category]: { ...varConfig[category], ...updates },
-    });
-  };
+export function VAAConfigStep({ vaaConfig, onVAAChange }: VAAConfigStepProps) {
+  const update = (category: RatingCategory, updates: Partial<VAAConfig>) =>
+    onVAAChange({ ...vaaConfig, [category]: { ...vaaConfig[category], ...updates } });
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="vaa">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="vaa" className="gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Value Above Average (VAA)
-          </TabsTrigger>
-          <TabsTrigger value="var" className="gap-2">
-            <Users className="h-4 w-4" />
-            Value Above Replacement (WAR)
-          </TabsTrigger>
-        </TabsList>
+      <div className="space-y-1">
+        <h3 className="text-base font-semibold">Should average players keep their rating?</h3>
+        <p className="text-sm text-muted-foreground">
+          When this is on, players who perform about average stay where they are. Players
+          above average move up, and players below average move down — the further from
+          average, the bigger the move.
+        </p>
+      </div>
 
-        {/* VAA Tab */}
-        <TabsContent value="vaa" className="mt-6 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            VAA measures how much better (or worse) a player performs compared to the average 
-            player in their division or at their position.
-          </p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { icon: ArrowUp, title: 'Above average', text: 'Rating goes up', tone: 'text-success' },
+          { icon: Minus, title: 'About average', text: 'Rating stays the same', tone: 'text-muted-foreground' },
+          { icon: ArrowDown, title: 'Below average', text: 'Rating goes down', tone: 'text-destructive' },
+        ].map(({ icon: Icon, title, text, tone }) => (
+          <div key={title} className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+            <Icon className={cn('h-5 w-5 shrink-0', tone)} />
+            <div>
+              <p className="text-sm font-medium">{title}</p>
+              <p className="text-xs text-muted-foreground">{text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {CATEGORIES.map(category => (
-              <Card key={category}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-base capitalize">
-                    {category}
-                    <Switch
-                      checked={vaaConfig[category].enabled}
-                      onCheckedChange={(enabled) => updateVAA(category, { enabled })}
-                    />
-                  </CardTitle>
-                </CardHeader>
-                {vaaConfig[category].enabled && (
-                  <CardContent className="pt-0">
-                    <div className="space-y-2">
-                      <Label>Baseline</Label>
-                      <Select
-                        value={vaaConfig[category].baseline}
-                        onValueChange={(v) => updateVAA(category, { baseline: v as VAABaseline })}
+      <div className="divide-y rounded-lg border">
+        {CATEGORIES.map(({ id, label }) => {
+          const cfg = vaaConfig[id];
+          return (
+            <div key={id} className="flex flex-wrap items-center justify-between gap-4 p-4">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id={`vaa-${id}`}
+                  checked={cfg.enabled}
+                  onCheckedChange={(enabled) => update(id, { enabled })}
+                />
+                <div>
+                  <Label htmlFor={`vaa-${id}`} className="text-sm font-medium">
+                    {label} ratings
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {cfg.enabled ? 'Average players stay steady' : 'Off — ratings follow raw results'}
+                  </p>
+                </div>
+              </div>
+              {cfg.enabled && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Compare to</span>
+                  <div className="inline-flex rounded-md border p-0.5">
+                    {BASELINES.map((b) => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() => update(id, { baseline: b.id })}
+                        className={cn(
+                          'rounded px-2.5 py-1 text-xs transition-colors',
+                          cfg.baseline === b.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        )}
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="division_average">Division Average</SelectItem>
-                          <SelectItem value="position_average">Position Average</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            ))}
-          </div>
-
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <p className="text-sm font-medium mb-2">How VAA Works</p>
-            <p className="text-sm text-muted-foreground">
-              A player with a rating of 85 in a division where the average is 72 would have 
-              a VAA of <span className="font-mono">+13</span>. Positive VAA indicates 
-              above-average performance.
-            </p>
-          </div>
-        </TabsContent>
-
-        {/* VAR/WAR Tab */}
-        <TabsContent value="var" className="mt-6 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            WAR (Wins Above Replacement) estimates how many "wins" a player contributes 
-            compared to a replacement-level player, factoring in playing time.
-          </p>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {CATEGORIES.map(category => (
-              <Card key={category}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-base capitalize">
-                    {category}
-                    <Switch
-                      checked={varConfig[category].enabled}
-                      onCheckedChange={(enabled) => updateVAR(category, { enabled })}
-                    />
-                  </CardTitle>
-                </CardHeader>
-                {varConfig[category].enabled && (
-                  <CardContent className="pt-0 space-y-4">
-                    <div className="space-y-2">
-                      <Label>Replacement Level</Label>
-                      <Select
-                        value={varConfig[category].method}
-                        onValueChange={(v) => updateVAR(category, { method: v as VARMethod })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bottom_n_percent">Bottom N%</SelectItem>
-                          <SelectItem value="fixed_value">Fixed Rating</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>
-                        {varConfig[category].method === 'bottom_n_percent' 
-                          ? 'Percentile' 
-                          : 'Rating Value'}
-                      </Label>
-                      <Input
-                        type="number"
-                        value={varConfig[category].threshold_value}
-                        onChange={(e) => updateVAR(category, { 
-                          threshold_value: parseFloat(e.target.value) || 0 
-                        })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Playing Time Factor</Label>
-                      <Select
-                        value={varConfig[category].playing_time_factor}
-                        onValueChange={(v) => updateVAR(category, { 
-                          playing_time_factor: v as 'games_played' | 'touches' 
-                        })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="games_played">Games Played</SelectItem>
-                          <SelectItem value="touches">Total Touches</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            ))}
-          </div>
-
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <p className="text-sm font-medium mb-2">How WAR Works</p>
-            <p className="text-sm text-muted-foreground">
-              WAR combines a player's rating above replacement level with their playing time. 
-              A player with a high rating but few games will have lower WAR than a 
-              slightly lower-rated player who played all games.
-            </p>
-          </div>
-        </TabsContent>
-      </Tabs>
+                        {b.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
