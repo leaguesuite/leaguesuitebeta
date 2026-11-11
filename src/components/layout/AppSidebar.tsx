@@ -153,9 +153,7 @@ const navSections: { title: string; scope?: Scope; items: NavItem[] }[] = [
         label: "Ratings", icon: Bird,
         children: [
           { label: "Dashboard", path: "/ratings" },
-          { label: "League Folders", path: "/ratings/leagues" },
           { label: "Rating Wizard", path: "/ratings/wizard" },
-          { label: "Eagle Ratings", path: "/ratings/eagle" },
         ],
       },
       { label: "Accolades Hub", icon: Trophy, path: "/accolades" },

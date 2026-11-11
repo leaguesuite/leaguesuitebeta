@@ -39,12 +39,8 @@ import NewsPage from "@/pages/cms/NewsPage";
 import AIContentPage from "@/pages/content/AIContentPage";
 import DocumentsPage from "@/pages/cms/DocumentsPage";
 import NavigationMenusPage from "@/pages/settings/NavigationMenusPage";
-import EagleRatingsWizard from "@/pages/EagleRatingsWizard";
-import RELeaguesPage from "@/ratings-engine/pages/LeaguesPage";
-import RELeagueDashboard from "@/ratings-engine/pages/LeagueDashboard";
 import RERatingsDashboard from "@/ratings-engine/pages/RatingsDashboard";
 import RERatingWizard from "@/ratings-engine/pages/RatingWizard";
-import REEagleRatingsWizard from "@/ratings-engine/pages/EagleRatingsWizard";
 import DomainsPage from "@/pages/settings/DomainsPage";
 import BracketManagerPage from "@/pages/features/BracketManagerPage";
 import BrandingPage from "@/pages/settings/BrandingPage";
@@ -114,13 +110,9 @@ const App = () => (
             <Route path="/structure/rules" element={<PlaceholderPage title="Rules Settings" description="Configure rule templates." />} />
             <Route path="/structure/stats-tracking" element={<StatsTrackingPage />} />
             <Route path="/structure/standings-rules" element={<StandingsRulesPage />} />
-            <Route path="/ratings/eagle-wizard" element={<EagleRatingsWizard />} />
             <Route path="/ratings" element={<RERatingsDashboard />} />
-            <Route path="/ratings/leagues" element={<RELeaguesPage />} />
-            <Route path="/ratings/leagues/:leagueId" element={<RELeagueDashboard />} />
             <Route path="/ratings/wizard" element={<RERatingWizard />} />
             <Route path="/ratings/wizard/:runId" element={<RERatingWizard />} />
-            <Route path="/ratings/eagle" element={<REEagleRatingsWizard />} />
             <Route path="/registration" element={<RegistrationPage />} />
             <Route path="/accolades" element={<AccoladesPage />} />
             <Route path="/members" element={<MembersAll />} />
