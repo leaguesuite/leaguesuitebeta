@@ -148,6 +148,10 @@ export function StatWeightsStep({ statConfigs, onStatConfigsChange }: StatWeight
       next = [...next, ...offRush.map(s => ({
         ...s, stat_key: `qb_${s.stat_key}`, source_key: s.stat_key, category: 'qb' as RatingCategory,
         enabled: true, weight: Math.abs(s.weight) || 1, display_name: `${s.display_name} (QB)`,
+      }) as unknown as StatConfig)];
+    }
+    if (false) {
+      next = [...next, ...[].map(() => ({
       }))];
     }
     onStatConfigsChange(next);
