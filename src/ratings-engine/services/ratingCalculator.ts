@@ -145,6 +145,15 @@ export function applyDriftCap(
   return newRating;
 }
 
+// Balance increases and decreases: shift ratings so the average player lands
+// on the middle of the scale. Players keep their distance from the average,
+// so those above rise and those below drop by how far they are from it.
+export function balanceOffset(ratings: number[], minRating: number, maxRating: number): number {
+  if (ratings.length === 0) return 0;
+  const mean = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+  return (minRating + maxRating) / 2 - mean;
+}
+
 // Main calculation function
 export function calculateRatings(
   seasonPlayers: SeasonPlayer[],
@@ -200,6 +209,16 @@ export function calculateRatings(
     },
   };
 
+  const offsets: Record<RatingCategory, number> = { offense: 0, defense: 0, qb: 0 };
+  for (const category of ['offense', 'defense', 'qb'] as RatingCategory[]) {
+    const r = scoreRanges[category];
+    offsets[category] = balanceOffset(
+      allScores[category].map(sc => scaleToRating(sc, r.min, r.max, config)),
+      config.rating_scale.min_rating,
+      config.rating_scale.max_rating,
+    );
+  }
+
   // Calculate final ratings
   for (const sp of seasonPlayers) {
     const stats = playerStats.find(s => s.season_player_id === sp.id);
@@ -242,7 +261,7 @@ export function calculateRatings(
       if (!categoryScores) continue;
 
       const range = scoreRanges[category];
-      let rating = scaleToRating(categoryScores.score, range.min, range.max, config);
+      let rating = scaleToRating(categoryScores.score, range.min, range.max, config) + offsets[category];
       
       // Apply division multiplier
       rating = applyDivisionMultiplier(rating, sp.division_id, config);
