@@ -201,7 +201,6 @@ export const defaultRatingScale: RatingScaleConfig = {
 export const defaultCarryoverConfig: CarryoverConfig = {
   carryover_weight: 0.3,
   current_weight: 0.7,
-  weight_recent_games: false,
 };
 
 // Default VAA config
