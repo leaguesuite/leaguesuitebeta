@@ -131,7 +131,7 @@ function applyCarryover(
 }
 
 // Apply drift cap
-function applyDriftCap(
+export function applyDriftCap(
   newRating: number,
   previousRating: number | undefined,
   maxDrift: number | null
