@@ -62,6 +62,8 @@ export interface StatConfig {
   weight: number;
   normalize_mode: NormalizeMode;
   category: RatingCategory;
+  /** Read the value from this stat instead of stat_key (used to reuse rushing stats in QB ratings) */
+  source_key?: string;
   display_name: string;
 }
 
