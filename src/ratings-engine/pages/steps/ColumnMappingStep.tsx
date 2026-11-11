@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Check, AlertTriangle } from 'lucide-react';
 
 interface ColumnMappingStepProps {
@@ -27,6 +26,9 @@ const CANONICAL_FIELDS = [
   { key: 'receiving_yards', label: 'Receiving Yards', required: false, category: 'offense' },
   { key: 'receiving_touchdowns', label: 'Receiving TDs', required: false, category: 'offense' },
   { key: 'targets', label: 'Targets', required: false, category: 'offense' },
+  { key: 'catch_rate', label: 'Catch Rate %', required: false, category: 'offense' },
+  { key: 'drops', label: 'Drops', required: false, category: 'offense' },
+  { key: 'yards_after_catch', label: 'Yards After Catch', required: false, category: 'offense' },
   { key: 'rushes', label: 'Rushes', required: false, category: 'offense' },
   { key: 'rushing_yards', label: 'Rushing Yards', required: false, category: 'offense' },
   { key: 'rushing_touchdowns', label: 'Rushing TDs', required: false, category: 'offense' },
@@ -42,6 +44,15 @@ const CANONICAL_FIELDS = [
   { key: 'passing_yards', label: 'Passing Yards', required: false, category: 'qb' },
   { key: 'passing_touchdowns', label: 'Passing TDs', required: false, category: 'qb' },
   { key: 'interceptions_thrown', label: 'INTs Thrown', required: false, category: 'qb' },
+  { key: 'completion_pct', label: 'Completion %', required: false, category: 'qb' },
+  // Team
+  { key: 'team_wins', label: 'Team Wins', required: false, category: 'team' },
+  { key: 'team_losses', label: 'Team Losses', required: false, category: 'team' },
+  { key: 'team_ties', label: 'Team Ties', required: false, category: 'team' },
+  { key: 'team_win_pct', label: 'Team Win %', required: false, category: 'team' },
+  { key: 'points_for', label: 'Points For', required: false, category: 'team' },
+  { key: 'points_against', label: 'Points Against', required: false, category: 'team' },
+  { key: 'point_differential', label: 'Point Differential', required: false, category: 'team' },
 ];
 
 export function ColumnMappingStep({ 
@@ -62,7 +73,7 @@ export function ColumnMappingStep({
   }, [dataSource, csvData]);
 
   const handleMappingChange = (canonicalKey: string, sourceColumn: string) => {
-    const newMapping = { ...columnMapping };
+    const newMapping = { ...effectiveMapping };
     if (sourceColumn === '_unmapped') {
       delete newMapping[canonicalKey];
     } else {
@@ -104,49 +115,16 @@ export function ColumnMappingStep({
     .filter(f => f.required && !effectiveMapping[f.key])
     .map(f => f.label);
 
-  if (dataSource === 'internal') {
-    return (
-      <div className="space-y-6">
-        <div className="rounded-lg border border-success/20 bg-success/5 p-4">
-          <div className="flex items-start gap-3">
-            <Check className="h-5 w-5 text-success mt-0.5" />
-            <div>
-              <p className="font-medium text-success">Auto-mapped to internal schema</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Using League Suite's internal data structure. All fields are automatically mapped.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Mapped Fields</h3>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {CANONICAL_FIELDS.map(field => (
-              <div 
-                key={field.key}
-                className="flex items-center gap-2 rounded-lg border bg-card p-3"
-              >
-                <Check className="h-4 w-4 text-success shrink-0" />
-                <span className="text-sm">{field.label}</span>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  {field.category}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const groupedFields = {
     identity: CANONICAL_FIELDS.filter(f => f.category === 'identity'),
     general: CANONICAL_FIELDS.filter(f => f.category === 'general'),
     offense: CANONICAL_FIELDS.filter(f => f.category === 'offense'),
     defense: CANONICAL_FIELDS.filter(f => f.category === 'defense'),
     qb: CANONICAL_FIELDS.filter(f => f.category === 'qb'),
+    team: CANONICAL_FIELDS.filter(f => f.category === 'team'),
   };
+  const labelFor = (col: string) =>
+    dataSource === 'internal' ? CANONICAL_FIELDS.find(f => f.key === col)?.label ?? col : col;
 
   return (
     <div className="space-y-6">
@@ -164,9 +142,23 @@ export function ColumnMappingStep({
         </div>
       )}
 
+      {dataSource === 'internal' && (
+        <div className="rounded-lg border border-success/20 bg-success/5 p-4">
+          <div className="flex items-start gap-3">
+            <Check className="h-5 w-5 text-success mt-0.5" />
+            <div>
+              <p className="font-medium text-success">Auto-mapped to internal schema</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Fields are pre-mapped to League Suite data. Change or unmap any field below.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {Object.entries(groupedFields).map(([category, fields]) => (
         <div key={category} className="space-y-3">
-          <h3 className="text-sm font-medium capitalize">{category} Fields</h3>
+          <h3 className="text-sm font-medium capitalize">{category === 'qb' ? 'QB' : category} Fields</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             {fields.map(field => (
               <div key={field.key} className="space-y-2">
@@ -187,7 +179,7 @@ export function ColumnMappingStep({
                     <SelectItem value="_unmapped">— Not mapped —</SelectItem>
                     {availableColumns.map(col => (
                       <SelectItem key={col} value={col}>
-                        {col}
+                        {labelFor(col)}
                       </SelectItem>
                     ))}
                   </SelectContent>
